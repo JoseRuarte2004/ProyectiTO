@@ -257,13 +257,43 @@ export type Database = {
           },
         ]
       }
+      exercise_categories: {
+        Row: {
+          category: Database["public"]["Enums"]["exercise_category"]
+          created_at: string
+          exercise_id: string
+          id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["exercise_category"]
+          created_at?: string
+          exercise_id: string
+          id?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["exercise_category"]
+          created_at?: string
+          exercise_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_categories_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_library: {
         Row: {
           body_region: string | null
-          category: Database["public"]["Enums"]["exercise_category"]
           created_at: string
+          default_duration: string | null
           default_frequency: string | null
           default_repetitions: number | null
+          default_sets: number | null
           description: string | null
           id: string
           instructions: string | null
@@ -271,13 +301,15 @@ export type Database = {
           name: string
           professional_id: string | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           body_region?: string | null
-          category?: Database["public"]["Enums"]["exercise_category"]
           created_at?: string
+          default_duration?: string | null
           default_frequency?: string | null
           default_repetitions?: number | null
+          default_sets?: number | null
           description?: string | null
           id?: string
           instructions?: string | null
@@ -285,13 +317,15 @@ export type Database = {
           name: string
           professional_id?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           body_region?: string | null
-          category?: Database["public"]["Enums"]["exercise_category"]
           created_at?: string
+          default_duration?: string | null
           default_frequency?: string | null
           default_repetitions?: number | null
+          default_sets?: number | null
           description?: string | null
           id?: string
           instructions?: string | null
@@ -299,6 +333,7 @@ export type Database = {
           name?: string
           professional_id?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
