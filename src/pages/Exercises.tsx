@@ -1,0 +1,146 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Plus, Loader2, Dumbbell } from "lucide-react";
+
+const categoryMap: Record<string, string> = {
+  general: "General",
+  occupation: "Ocupación",
+  sport: "Deporte",
+  joint_protection: "Protección articular",
+  skin_care: "Cuidado de piel",
+};
+
+export default function Exercises() {
+  const { user } = useAuth();
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showNew, setShowNew] = useState(false);
+
+  const fetchExercises = async () => {
+    const { data } = await supabase
+      .from("exercise_library")
+      .select("*")
+      .order("name");
+    setExercises(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchExercises(); }, []);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-foreground">Biblioteca de Ejercicios</h1>
+        <Button onClick={() => setShowNew(true)}><Plus className="h-4 w-4 mr-2" />Nuevo Ejercicio</Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-32"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : exercises.length === 0 ? (
+        <p className="text-muted-foreground text-center py-12">No hay ejercicios en la biblioteca.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {exercises.map((ex) => (
+            <Card key={ex.id} className="border-border/50">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Dumbbell className="h-4 w-4 text-primary" />
+                    <p className="font-semibold text-sm text-foreground">{ex.name}</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs bg-secondary text-secondary-foreground">
+                    {categoryMap[ex.category] || ex.category}
+                  </Badge>
+                </div>
+                {ex.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{ex.description}</p>}
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  {ex.body_region && <p>Región: {ex.body_region}</p>}
+                  {ex.default_repetitions && <p>Repeticiones: {ex.default_repetitions}</p>}
+                  {ex.default_frequency && <p>Frecuencia: {ex.default_frequency}</p>}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <NewExerciseDialog open={showNew} onClose={() => setShowNew(false)} userId={user!.id} onSaved={fetchExercises} />
+    </div>
+  );
+}
+
+function NewExerciseDialog({ open, onClose, userId, onSaved }: { open: boolean; onClose: () => void; userId: string; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    instructions: "",
+    category: "general" as string,
+    body_region: "",
+    default_repetitions: "",
+    default_frequency: "",
+  });
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast.error("El nombre es obligatorio"); return; }
+    setSaving(true);
+    const { error } = await supabase.from("exercise_library").insert({
+      name: form.name,
+      description: form.description || null,
+      instructions: form.instructions || null,
+      category: form.category as any,
+      body_region: form.body_region || null,
+      default_repetitions: form.default_repetitions ? parseInt(form.default_repetitions) : null,
+      default_frequency: form.default_frequency || null,
+      professional_id: userId,
+    });
+    setSaving(false);
+    if (error) { toast.error("Error al crear ejercicio"); return; }
+    toast.success("Ejercicio creado");
+    setForm({ name: "", description: "", instructions: "", category: "general", body_region: "", default_repetitions: "", default_frequency: "" });
+    onSaved();
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Nuevo Ejercicio</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2"><Label>Nombre *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+          <div className="space-y-2"><Label>Descripción</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
+          <div className="space-y-2"><Label>Instrucciones</Label><Textarea value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} rows={3} /></div>
+          <div className="space-y-2"><Label>Categoría</Label>
+            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="general">General</SelectItem>
+                <SelectItem value="occupation">Ocupación</SelectItem>
+                <SelectItem value="sport">Deporte</SelectItem>
+                <SelectItem value="joint_protection">Protección articular</SelectItem>
+                <SelectItem value="skin_care">Cuidado de piel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2"><Label>Región corporal</Label><Input value={form.body_region} onChange={(e) => setForm({ ...form, body_region: e.target.value })} /></div>
+          <div className="space-y-2"><Label>Repeticiones por defecto</Label><Input type="number" value={form.default_repetitions} onChange={(e) => setForm({ ...form, default_repetitions: e.target.value })} /></div>
+          <div className="space-y-2"><Label>Frecuencia por defecto</Label><Input value={form.default_frequency} onChange={(e) => setForm({ ...form, default_frequency: e.target.value })} /></div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
