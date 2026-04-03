@@ -1,0 +1,1027 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
+  public: {
+    Tables: {
+      analytical_evaluations: {
+        Row: {
+          arom: string | null
+          created_at: string
+          edema: string | null
+          emotional_state: string | null
+          evaluation_date: string
+          id: string
+          kapandji: string | null
+          muscle_strength: string | null
+          notes: string | null
+          pain: string | null
+          pain_score: number | null
+          patient_id: string
+          posture: string | null
+          professional_id: string
+          prom: string | null
+          scar: string | null
+          sensitivity: string | null
+          session_id: string | null
+          trophic_state: string | null
+          updated_at: string
+        }
+        Insert: {
+          arom?: string | null
+          created_at?: string
+          edema?: string | null
+          emotional_state?: string | null
+          evaluation_date?: string
+          id?: string
+          kapandji?: string | null
+          muscle_strength?: string | null
+          notes?: string | null
+          pain?: string | null
+          pain_score?: number | null
+          patient_id: string
+          posture?: string | null
+          professional_id: string
+          prom?: string | null
+          scar?: string | null
+          sensitivity?: string | null
+          session_id?: string | null
+          trophic_state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arom?: string | null
+          created_at?: string
+          edema?: string | null
+          emotional_state?: string | null
+          evaluation_date?: string
+          id?: string
+          kapandji?: string | null
+          muscle_strength?: string | null
+          notes?: string | null
+          pain?: string | null
+          pain_score?: number | null
+          patient_id?: string
+          posture?: string | null
+          professional_id?: string
+          prom?: string | null
+          scar?: string | null
+          sensitivity?: string | null
+          session_id?: string | null
+          trophic_state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytical_evaluations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytical_evaluations_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytical_evaluations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "therapy_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string
+          id: string
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          type: Database["public"]["Enums"]["appointment_type"]
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          type?: Database["public"]["Enums"]["appointment_type"]
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          type?: Database["public"]["Enums"]["appointment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          action_context: Database["public"]["Enums"]["audit_context"]
+          created_at: string
+          description: string | null
+          id: string
+          performed_by: string | null
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          action_context?: Database["public"]["Enums"]["audit_context"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          performed_by?: string | null
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          action_context?: Database["public"]["Enums"]["audit_context"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          performed_by?: string | null
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinical_files: {
+        Row: {
+          category: Database["public"]["Enums"]["clinical_file_category"]
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          is_deleted: boolean
+          patient_id: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["clinical_file_category"]
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          is_deleted?: boolean
+          patient_id: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["clinical_file_category"]
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          is_deleted?: boolean
+          patient_id?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_files_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_library: {
+        Row: {
+          body_region: string | null
+          category: Database["public"]["Enums"]["exercise_category"]
+          created_at: string
+          default_frequency: string | null
+          default_repetitions: number | null
+          description: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          name: string
+          professional_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_region?: string | null
+          category?: Database["public"]["Enums"]["exercise_category"]
+          created_at?: string
+          default_frequency?: string | null
+          default_repetitions?: number | null
+          description?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name: string
+          professional_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_region?: string | null
+          category?: Database["public"]["Enums"]["exercise_category"]
+          created_at?: string
+          default_frequency?: string | null
+          default_repetitions?: number | null
+          description?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name?: string
+          professional_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_library_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      functional_evaluations: {
+        Row: {
+          aivd: string | null
+          avd: string | null
+          barthel_score: number | null
+          created_at: string
+          dominance: Database["public"]["Enums"]["dominance_type"] | null
+          evaluation_date: string
+          id: string
+          notes: string | null
+          patient_id: string
+          physical_activity: string | null
+          professional_id: string
+          session_id: string | null
+          sleep_rest: string | null
+          updated_at: string
+        }
+        Insert: {
+          aivd?: string | null
+          avd?: string | null
+          barthel_score?: number | null
+          created_at?: string
+          dominance?: Database["public"]["Enums"]["dominance_type"] | null
+          evaluation_date?: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          physical_activity?: string | null
+          professional_id: string
+          session_id?: string | null
+          sleep_rest?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aivd?: string | null
+          avd?: string | null
+          barthel_score?: number | null
+          created_at?: string
+          dominance?: Database["public"]["Enums"]["dominance_type"] | null
+          evaluation_date?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          physical_activity?: string | null
+          professional_id?: string
+          session_id?: string | null
+          sleep_rest?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "functional_evaluations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "functional_evaluations_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "functional_evaluations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "therapy_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_clinical_records: {
+        Row: {
+          created_at: string
+          current_treatment: string | null
+          doctor_name: string | null
+          id: string
+          injury_date: string | null
+          injury_mechanism: string | null
+          medical_history: string | null
+          next_oyt_appointment: string | null
+          notes: string | null
+          patient_id: string
+          pharmacological_treatment: string | null
+          studies: string | null
+          symptom_start_date: string | null
+          updated_at: string
+          weeks_post_injury: number | null
+          weeks_post_surgery: number | null
+        }
+        Insert: {
+          created_at?: string
+          current_treatment?: string | null
+          doctor_name?: string | null
+          id?: string
+          injury_date?: string | null
+          injury_mechanism?: string | null
+          medical_history?: string | null
+          next_oyt_appointment?: string | null
+          notes?: string | null
+          patient_id: string
+          pharmacological_treatment?: string | null
+          studies?: string | null
+          symptom_start_date?: string | null
+          updated_at?: string
+          weeks_post_injury?: number | null
+          weeks_post_surgery?: number | null
+        }
+        Update: {
+          created_at?: string
+          current_treatment?: string | null
+          doctor_name?: string | null
+          id?: string
+          injury_date?: string | null
+          injury_mechanism?: string | null
+          medical_history?: string | null
+          next_oyt_appointment?: string | null
+          notes?: string | null
+          patient_id?: string
+          pharmacological_treatment?: string | null
+          studies?: string | null
+          symptom_start_date?: string | null
+          updated_at?: string
+          weeks_post_injury?: number | null
+          weeks_post_surgery?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_clinical_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_occupational_profiles: {
+        Row: {
+          created_at: string
+          education: string | null
+          id: string
+          job: string | null
+          leisure: string | null
+          notes: string | null
+          patient_id: string
+          physical_activity: string | null
+          sleep_rest: string | null
+          support_network: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          education?: string | null
+          id?: string
+          job?: string | null
+          leisure?: string | null
+          notes?: string | null
+          patient_id: string
+          physical_activity?: string | null
+          sleep_rest?: string | null
+          support_network?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          education?: string | null
+          id?: string
+          job?: string | null
+          leisure?: string | null
+          notes?: string | null
+          patient_id?: string
+          physical_activity?: string | null
+          sleep_rest?: string | null
+          support_network?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_occupational_profiles_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          address: string | null
+          admission_date: string
+          birth_date: string | null
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          discharged_at: string | null
+          dni: string
+          first_name: string
+          id: string
+          insurance: string | null
+          is_deleted: boolean
+          last_name: string
+          phone: string | null
+          professional_id: string
+          status: Database["public"]["Enums"]["patient_status"]
+          updated_at: string
+          user_profile_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admission_date?: string
+          birth_date?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          discharged_at?: string | null
+          dni: string
+          first_name: string
+          id?: string
+          insurance?: string | null
+          is_deleted?: boolean
+          last_name: string
+          phone?: string | null
+          professional_id: string
+          status?: Database["public"]["Enums"]["patient_status"]
+          updated_at?: string
+          user_profile_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admission_date?: string
+          birth_date?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          discharged_at?: string | null
+          dni?: string
+          first_name?: string
+          id?: string
+          insurance?: string | null
+          is_deleted?: boolean
+          last_name?: string
+          phone?: string | null
+          professional_id?: string
+          status?: Database["public"]["Enums"]["patient_status"]
+          updated_at?: string
+          user_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patients_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patients_user_profile_id_fkey"
+            columns: ["user_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          deactivated_at: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          license_number: string | null
+          role: Database["public"]["Enums"]["profile_role"]
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deactivated_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active?: boolean
+          license_number?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deactivated_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          license_number?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      therapy_sessions: {
+        Row: {
+          clinical_changes: string | null
+          created_at: string
+          deleted_at: string | null
+          evolution: string | null
+          general_observations: string | null
+          id: string
+          is_deleted: boolean
+          next_appointment: string | null
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          session_date: string
+          symptom_changes: string | null
+          treatment_adjustments: string | null
+          updated_at: string
+        }
+        Insert: {
+          clinical_changes?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          evolution?: string | null
+          general_observations?: string | null
+          id?: string
+          is_deleted?: boolean
+          next_appointment?: string | null
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          session_date?: string
+          symptom_changes?: string | null
+          treatment_adjustments?: string | null
+          updated_at?: string
+        }
+        Update: {
+          clinical_changes?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          evolution?: string | null
+          general_observations?: string | null
+          id?: string
+          is_deleted?: boolean
+          next_appointment?: string | null
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          session_date?: string
+          symptom_changes?: string | null
+          treatment_adjustments?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapy_sessions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "therapy_sessions_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatment_plan_exercises: {
+        Row: {
+          created_at: string
+          custom_description: string | null
+          custom_name: string | null
+          duration: string | null
+          exercise_id: string
+          frequency: string | null
+          id: string
+          notes: string | null
+          order_index: number
+          repetitions: number | null
+          sets: number | null
+          treatment_plan_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_description?: string | null
+          custom_name?: string | null
+          duration?: string | null
+          exercise_id: string
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number
+          repetitions?: number | null
+          sets?: number | null
+          treatment_plan_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_description?: string | null
+          custom_name?: string | null
+          duration?: string | null
+          exercise_id?: string
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number
+          repetitions?: number | null
+          sets?: number | null
+          treatment_plan_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_plan_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_plan_exercises_treatment_plan_id_fkey"
+            columns: ["treatment_plan_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatment_plans: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          end_date: string | null
+          home_item_recommendations: string | null
+          id: string
+          indications: string | null
+          is_deleted: boolean
+          joint_protection_guidelines: string | null
+          notes: string | null
+          objective: string | null
+          patient_id: string
+          professional_id: string
+          skin_care: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["treatment_plan_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          end_date?: string | null
+          home_item_recommendations?: string | null
+          id?: string
+          indications?: string | null
+          is_deleted?: boolean
+          joint_protection_guidelines?: string | null
+          notes?: string | null
+          objective?: string | null
+          patient_id: string
+          professional_id: string
+          skin_care?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["treatment_plan_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          end_date?: string | null
+          home_item_recommendations?: string | null
+          id?: string
+          indications?: string | null
+          is_deleted?: boolean
+          joint_protection_guidelines?: string | null
+          notes?: string | null
+          objective?: string | null
+          patient_id?: string
+          professional_id?: string
+          skin_care?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["treatment_plan_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_plans_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["profile_role"]
+      }
+      insert_audit_log: {
+        Args: {
+          p_action: Database["public"]["Enums"]["audit_action"]
+          p_description?: string
+          p_record_id: string
+          p_table_name: string
+        }
+        Returns: undefined
+      }
+      is_active_professional: { Args: never; Returns: boolean }
+      is_my_patient: { Args: { p_patient_id: string }; Returns: boolean }
+    }
+    Enums: {
+      appointment_status: "scheduled" | "completed" | "cancelled"
+      appointment_type: "consultation" | "follow_up" | "evaluation"
+      audit_action:
+        | "insert"
+        | "update"
+        | "delete"
+        | "soft_delete"
+        | "restore"
+        | "deactivate"
+      audit_context: "user" | "system"
+      clinical_file_category: "study" | "photo" | "document"
+      dominance_type: "right" | "left" | "ambidextrous"
+      exercise_category:
+        | "general"
+        | "occupation"
+        | "sport"
+        | "joint_protection"
+        | "skin_care"
+      patient_status: "active" | "discharged" | "paused"
+      profile_role: "professional" | "admin" | "patient"
+      treatment_plan_status: "active" | "completed" | "archived"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      appointment_status: ["scheduled", "completed", "cancelled"],
+      appointment_type: ["consultation", "follow_up", "evaluation"],
+      audit_action: [
+        "insert",
+        "update",
+        "delete",
+        "soft_delete",
+        "restore",
+        "deactivate",
+      ],
+      audit_context: ["user", "system"],
+      clinical_file_category: ["study", "photo", "document"],
+      dominance_type: ["right", "left", "ambidextrous"],
+      exercise_category: [
+        "general",
+        "occupation",
+        "sport",
+        "joint_protection",
+        "skin_care",
+      ],
+      patient_status: ["active", "discharged", "paused"],
+      profile_role: ["professional", "admin", "patient"],
+      treatment_plan_status: ["active", "completed", "archived"],
+    },
+  },
+} as const
