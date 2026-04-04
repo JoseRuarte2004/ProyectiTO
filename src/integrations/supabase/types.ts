@@ -108,6 +108,7 @@ export type Database = {
       appointments: {
         Row: {
           appointment_date: string
+          appointment_end: string | null
           created_at: string
           id: string
           notes: string | null
@@ -119,6 +120,7 @@ export type Database = {
         }
         Insert: {
           appointment_date: string
+          appointment_end?: string | null
           created_at?: string
           id?: string
           notes?: string | null
@@ -130,6 +132,7 @@ export type Database = {
         }
         Update: {
           appointment_date?: string
+          appointment_end?: string | null
           created_at?: string
           id?: string
           notes?: string | null
