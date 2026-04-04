@@ -69,6 +69,15 @@ export default function Appointments() {
 
   const typeMap: Record<string, string> = { consultation: "Consulta", follow_up: "Seguimiento", evaluation: "Evaluación" };
 
+  const formatApptTime = (a: any) => {
+    const start = format(new Date(a.appointment_date), "EEE d MMM yyyy, HH:mm", { locale: es });
+    if (a.appointment_end) {
+      const end = format(new Date(a.appointment_end), "HH:mm");
+      return `${start} — ${end}`;
+    }
+    return start;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -99,7 +108,7 @@ export default function Appointments() {
                       {a.patients?.last_name}, {a.patients?.first_name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(a.appointment_date), "EEE d MMM yyyy, HH:mm", { locale: es })} · {typeMap[a.type] || a.type}
+                      {formatApptTime(a)} · {typeMap[a.type] || a.type}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -142,7 +151,6 @@ export default function Appointments() {
 
       <NewAppointmentDialog open={showNew} onClose={() => setShowNew(false)} userId={user!.id} onSaved={fetchAppointments} />
 
-      {/* Cancel confirmation */}
       <AlertDialog open={!!cancelId} onOpenChange={(open) => { if (!open) setCancelId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -156,7 +164,6 @@ export default function Appointments() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reschedule dialog */}
       {rescheduleAppt && (
         <RescheduleDialog appt={rescheduleAppt} onClose={() => setRescheduleAppt(null)} onSaved={fetchAppointments} />
       )}
@@ -211,6 +218,7 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedEndSlot, setSelectedEndSlot] = useState<string | null>(null);
   const [existingAppts, setExistingAppts] = useState<any[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [form, setForm] = useState({
@@ -219,12 +227,20 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
     notes: "",
   });
 
-  // Generate 30-min slots from 07:00 to 20:30
-  const slots: string[] = [];
+  // Generate 30-min slots from 07:00 to 21:00
+  const allSlots: string[] = [];
   for (let h = 7; h <= 20; h++) {
-    slots.push(`${String(h).padStart(2, "0")}:00`);
-    if (h < 21) slots.push(`${String(h).padStart(2, "0")}:30`);
+    allSlots.push(`${String(h).padStart(2, "0")}:00`);
+    allSlots.push(`${String(h).padStart(2, "0")}:30`);
   }
+  allSlots.push("21:00");
+
+  const startSlots = allSlots.filter((s) => s !== "21:00"); // can't start at 21:00
+
+  const slotToMinutes = (slot: string) => {
+    const [h, m] = slot.split(":").map(Number);
+    return h * 60 + m;
+  };
 
   const fetchExistingAppointments = async (date: Date) => {
     setLoadingSlots(true);
@@ -242,19 +258,46 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedSlot(null);
+    setSelectedEndSlot(null);
     if (date) fetchExistingAppointments(date);
   };
 
-  const getSlotStatus = (slot: string): { occupied: boolean; patientName?: string } => {
-    const appt = existingAppts.find((a) => {
-      const t = format(new Date(a.appointment_date), "HH:mm");
-      return t === slot;
-    });
-    if (appt) {
-      return { occupied: true, patientName: `${appt.patients?.last_name}, ${appt.patients?.first_name}` };
+  // Check if a slot overlaps with any existing appointment
+  const isSlotOccupied = (slotTime: string): { occupied: boolean; patientName?: string } => {
+    const slotMin = slotToMinutes(slotTime);
+    for (const a of existingAppts) {
+      const startMin = slotToMinutes(format(new Date(a.appointment_date), "HH:mm"));
+      const endMin = a.appointment_end
+        ? slotToMinutes(format(new Date(a.appointment_end), "HH:mm"))
+        : startMin + 30; // assume 30 min if no end
+      if (slotMin >= startMin && slotMin < endMin) {
+        return { occupied: true, patientName: `${a.patients?.last_name}, ${a.patients?.first_name}` };
+      }
     }
     return { occupied: false };
   };
+
+  // For end time grid: check if a range [selectedSlot, endSlot) conflicts
+  const isEndSlotConflicting = (endSlotTime: string): { conflicting: boolean; patientName?: string } => {
+    if (!selectedSlot) return { conflicting: false };
+    const selStart = slotToMinutes(selectedSlot);
+    const selEnd = slotToMinutes(endSlotTime);
+    for (const a of existingAppts) {
+      const aStart = slotToMinutes(format(new Date(a.appointment_date), "HH:mm"));
+      const aEnd = a.appointment_end
+        ? slotToMinutes(format(new Date(a.appointment_end), "HH:mm"))
+        : aStart + 30;
+      // overlap: aStart < selEnd AND aEnd > selStart
+      if (aStart < selEnd && aEnd > selStart) {
+        return { conflicting: true, patientName: `${a.patients?.last_name}, ${a.patients?.first_name}` };
+      }
+    }
+    return { conflicting: false };
+  };
+
+  const endSlots = selectedSlot
+    ? allSlots.filter((s) => slotToMinutes(s) >= slotToMinutes(selectedSlot) + 30)
+    : [];
 
   const searchPatients = async (term: string) => {
     setSearchTerm(term);
@@ -268,17 +311,19 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
   };
 
   const handleSave = async () => {
-    if (!selectedPatient || !selectedDate || !selectedSlot) {
-      toast.error("Seleccioná un paciente, fecha y horario.");
+    if (!selectedPatient || !selectedDate || !selectedSlot || !selectedEndSlot) {
+      toast.error("Seleccioná un paciente, fecha, horario de inicio y fin.");
       return;
     }
     setSaving(true);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     const appointmentDate = new Date(`${dateStr}T${selectedSlot}:00`).toISOString();
+    const appointmentEnd = new Date(`${dateStr}T${selectedEndSlot}:00`).toISOString();
     const { error } = await supabase.from("appointments").insert({
       patient_id: selectedPatient.id,
       professional_id: userId,
       appointment_date: appointmentDate,
+      appointment_end: appointmentEnd,
       type: form.type,
       status: form.status,
       notes: form.notes || null,
@@ -290,12 +335,51 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
     setSearchTerm("");
     setSelectedDate(undefined);
     setSelectedSlot(null);
+    setSelectedEndSlot(null);
     setForm({ type: "consultation", status: "scheduled", notes: "" });
     onSaved();
     onClose();
   };
 
-  const canSave = !!selectedPatient && !!selectedDate && !!selectedSlot;
+  const canSave = !!selectedPatient && !!selectedDate && !!selectedSlot && !!selectedEndSlot;
+
+  const renderSlotGrid = (
+    slots: string[],
+    selected: string | null,
+    onSelect: (s: string) => void,
+    checkOccupied: (s: string) => { occupied: boolean; patientName?: string },
+  ) => (
+    <TooltipProvider>
+      <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
+        {slots.map((slot) => {
+          const { occupied, patientName } = checkOccupied(slot);
+          const isSelected = selected === slot;
+          if (occupied) {
+            return (
+              <Tooltip key={slot}>
+                <TooltipTrigger asChild>
+                  <button type="button" onClick={() => toast.warning(`Este horario ya está ocupado por ${patientName}`)}
+                    className="rounded-md px-2 py-1.5 text-xs font-medium bg-red-100 text-red-400 cursor-not-allowed border border-red-200">
+                    {slot}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{patientName}</TooltipContent>
+              </Tooltip>
+            );
+          }
+          return (
+            <button key={slot} type="button" onClick={() => onSelect(slot)}
+              className={cn(
+                "rounded-md px-2 py-1.5 text-xs font-medium border transition-colors",
+                isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:bg-accent"
+              )}>
+              {slot}
+            </button>
+          );
+        })}
+      </div>
+    </TooltipProvider>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -340,67 +424,31 @@ function NewAppointmentDialog({ open, onClose, userId, onSaved }: { open: boolea
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  className={cn("p-3 pointer-events-auto")}
-                  locale={es}
-                />
+                <Calendar mode="single" selected={selectedDate} onSelect={handleDateSelect} disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} className="p-3 pointer-events-auto" locale={es} />
               </PopoverContent>
             </Popover>
           </div>
 
-          {/* Time grid */}
+          {/* Start time grid */}
           {selectedDate && (
             <div className="space-y-2">
-              <Label>Horario *</Label>
+              <Label>Hora de inicio *</Label>
               {loadingSlots ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
               ) : (
-                <TooltipProvider>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
-                    {slots.map((slot) => {
-                      const { occupied, patientName } = getSlotStatus(slot);
-                      const isSelected = selectedSlot === slot;
-
-                      if (occupied) {
-                        return (
-                          <Tooltip key={slot}>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={() => toast.warning(`Este horario ya está ocupado por ${patientName}`)}
-                                className="rounded-md px-2 py-1.5 text-xs font-medium bg-red-100 text-red-400 cursor-not-allowed border border-red-200"
-                              >
-                                {slot}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>{patientName}</TooltipContent>
-                          </Tooltip>
-                        );
-                      }
-
-                      return (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setSelectedSlot(slot)}
-                          className={cn(
-                            "rounded-md px-2 py-1.5 text-xs font-medium border transition-colors",
-                            isSelected
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-foreground border-border hover:bg-accent"
-                          )}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </TooltipProvider>
+                renderSlotGrid(startSlots, selectedSlot, (s) => { setSelectedSlot(s); setSelectedEndSlot(null); }, isSlotOccupied)
               )}
+            </div>
+          )}
+
+          {/* End time grid */}
+          {selectedSlot && endSlots.length > 0 && (
+            <div className="space-y-2">
+              <Label>Hora de finalización *</Label>
+              {renderSlotGrid(endSlots, selectedEndSlot, setSelectedEndSlot, (slot) => {
+                const { conflicting, patientName } = isEndSlotConflicting(slot);
+                return { occupied: conflicting, patientName };
+              })}
             </div>
           )}
 
