@@ -216,6 +216,11 @@ export default function Exercises() {
                           {categoryMap[c] || c}
                         </Badge>
                       ))}
+                      {customCatNames.map((name) => (
+                        <Badge key={name} variant="outline" className="text-xs bg-accent text-accent-foreground">
+                          {name}
+                        </Badge>
+                      ))}
                     </div>
                   )}
 
