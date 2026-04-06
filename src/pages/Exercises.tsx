@@ -385,7 +385,13 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
     );
   };
 
-  const canSave = form.name.trim() !== "" && selectedCategories.length > 0;
+  const toggleCustomCat = (id: string) => {
+    setSelectedCustomCats((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const canSave = form.name.trim() !== "" && (selectedCategories.length > 0 || selectedCustomCats.length > 0);
 
   const handleSave = async () => {
     if (!canSave) { toast.error("Completá el nombre y seleccioná al menos una categoría"); return; }
