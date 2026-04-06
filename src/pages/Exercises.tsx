@@ -410,10 +410,8 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
       if (catError) { toast.error("Ejercicio guardado pero hubo un error con las categorías"); setSaving(false); onSaved(); onClose(); return; }
     }
+    toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente");
     setSaving(false);
-
-    if (catError) { toast.error(isEdit ? "Ejercicio actualizado pero hubo un error con las categorías" : "Ejercicio creado pero hubo un error con las categorías"); }
-    else { toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente"); }
 
     onSaved();
     onClose();
