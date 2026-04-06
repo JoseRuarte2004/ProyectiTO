@@ -25,7 +25,7 @@ export default function Appointments() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterStatus>("all");
+  const [filter, setFilter] = useState<FilterStatus>("scheduled");
   const [showNew, setShowNew] = useState(false);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [rescheduleAppt, setRescheduleAppt] = useState<any | null>(null);
