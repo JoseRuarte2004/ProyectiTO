@@ -23,6 +23,8 @@ const systemCategoryOptions = [
   { value: "skin_care", label: "Cuidado de piel" },
 ] as const;
 
+const systemEnumValues = new Set(systemCategoryOptions.map((c) => c.value));
+
 const categoryMap: Record<string, string> = Object.fromEntries(
   systemCategoryOptions.map((c) => [c.value, c.label])
 );
