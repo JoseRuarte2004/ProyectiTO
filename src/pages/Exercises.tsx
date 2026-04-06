@@ -50,7 +50,7 @@ export default function Exercises() {
   const fetchExercises = async () => {
     const { data } = await supabase
       .from("exercise_library")
-      .select("*, exercise_categories(category)")
+      .select("*, exercise_categories(category), exercise_custom_category_assignments(custom_category_id)")
       .order("name");
     setExercises(data || []);
     setLoading(false);
