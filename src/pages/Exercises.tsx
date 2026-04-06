@@ -80,9 +80,19 @@ export default function Exercises() {
       );
     }
     if (catFilter !== "all") {
-      list = list.filter((ex) =>
-        ex.exercise_categories?.some((c: any) => c.category === catFilter)
-      );
+      if (systemEnumValues.has(catFilter)) {
+        list = list.filter((ex) =>
+          ex.exercise_categories?.some((c: any) => c.category === catFilter)
+        );
+      } else {
+        // Custom category filter: match by custom_category_id
+        const customCat = customCategories.find((c) => c.name === catFilter);
+        if (customCat) {
+          list = list.filter((ex) =>
+            ex.exercise_custom_category_assignments?.some((a: any) => a.custom_category_id === customCat.id)
+          );
+        }
+      }
     }
     return list;
   }, [exercises, search, catFilter]);
