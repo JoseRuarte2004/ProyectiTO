@@ -599,3 +599,279 @@ function NewPatientApptDialog({ open, onClose, patientId, userId, onSaved }: { o
     </Dialog>
   );
 }
+
+interface SelectedExercise {
+  id: string;
+  name: string;
+  body_region: string | null;
+  repetitions: number | null;
+  sets: number | null;
+  frequency: string;
+  duration: string;
+  notes: string;
+}
+
+function NewPlanDialog({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    title: "", objective: "", indications: "", skin_care: "",
+    joint_protection_guidelines: "", home_item_recommendations: "",
+    start_date: new Date().toISOString().split("T")[0], end_date: "", notes: "",
+  });
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [searchEx, setSearchEx] = useState("");
+  const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
+  const [loadingEx, setLoadingEx] = useState(false);
+
+  useEffect(() => {
+    if (step === 2 && exercises.length === 0) {
+      setLoadingEx(true);
+      supabase.from("exercise_library")
+        .select("id, name, body_region, default_repetitions, default_sets, default_frequency, default_duration")
+        .eq("is_active", true)
+        .then(({ data }) => { setExercises(data || []); setLoadingEx(false); });
+    }
+  }, [step]);
+
+  const resetAndClose = () => {
+    setStep(1);
+    setForm({ title: "", objective: "", indications: "", skin_care: "", joint_protection_guidelines: "", home_item_recommendations: "", start_date: new Date().toISOString().split("T")[0], end_date: "", notes: "" });
+    setSelectedExercises([]);
+    setSearchEx("");
+    onClose();
+  };
+
+  const toggleExercise = (ex: any) => {
+    const exists = selectedExercises.find(s => s.id === ex.id);
+    if (exists) {
+      setSelectedExercises(selectedExercises.filter(s => s.id !== ex.id));
+    } else {
+      setSelectedExercises([...selectedExercises, {
+        id: ex.id, name: ex.name, body_region: ex.body_region,
+        repetitions: ex.default_repetitions, sets: ex.default_sets,
+        frequency: ex.default_frequency || "", duration: ex.default_duration || "", notes: "",
+      }]);
+    }
+  };
+
+  const updateSelected = (id: string, field: string, value: any) => {
+    setSelectedExercises(selectedExercises.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { data: plan, error } = await supabase.from("treatment_plans").insert({
+      patient_id: patientId, professional_id: userId,
+      title: form.title, objective: form.objective || null,
+      indications: form.indications || null, skin_care: form.skin_care || null,
+      joint_protection_guidelines: form.joint_protection_guidelines || null,
+      home_item_recommendations: form.home_item_recommendations || null,
+      start_date: form.start_date, end_date: form.end_date || null,
+      notes: form.notes || null, status: "active" as const,
+    }).select().single();
+
+    if (error || !plan) {
+      setSaving(false);
+      toast.error("Error al crear el plan de tratamiento");
+      return;
+    }
+
+    if (selectedExercises.length > 0) {
+      const { error: exError } = await supabase.from("treatment_plan_exercises").insert(
+        selectedExercises.map((ex, i) => ({
+          treatment_plan_id: plan.id, exercise_id: ex.id,
+          repetitions: ex.repetitions, sets: ex.sets,
+          frequency: ex.frequency || null, duration: ex.duration || null,
+          notes: ex.notes || null, order_index: i,
+        }))
+      );
+      if (exError) console.error("Error inserting exercises:", exError);
+    }
+
+    setSaving(false);
+    toast.success("Plan de tratamiento creado correctamente");
+    onSaved();
+    resetAndClose();
+  };
+
+  const filteredExercises = exercises.filter(e =>
+    e.name.toLowerCase().includes(searchEx.toLowerCase())
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={resetAndClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Nuevo Plan de Tratamiento — Paso {step} de 2</DialogTitle>
+          <DialogDescription className="sr-only">Formulario para crear un nuevo plan de tratamiento</DialogDescription>
+        </DialogHeader>
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <div className="space-y-2"><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ej: Plan de rehabilitación mano derecha" /></div>
+            <div className="space-y-2"><Label>Objetivo terapéutico</Label><Textarea value={form.objective} onChange={(e) => setForm({ ...form, objective: e.target.value })} rows={2} /></div>
+            <div className="space-y-2"><Label>Indicaciones generales</Label><Textarea value={form.indications} onChange={(e) => setForm({ ...form, indications: e.target.value })} rows={2} /></div>
+            <div className="space-y-2"><Label>Cuidado de piel</Label><Textarea value={form.skin_care} onChange={(e) => setForm({ ...form, skin_care: e.target.value })} rows={2} /></div>
+            <div className="space-y-2"><Label>Pautas de protección articular</Label><Textarea value={form.joint_protection_guidelines} onChange={(e) => setForm({ ...form, joint_protection_guidelines: e.target.value })} rows={2} /></div>
+            <div className="space-y-2"><Label>Recomendaciones para el hogar</Label><Textarea value={form.home_item_recommendations} onChange={(e) => setForm({ ...form, home_item_recommendations: e.target.value })} rows={2} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Fecha inicio</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Fecha fin (opcional)</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>
+            </div>
+            <div className="space-y-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={resetAndClose}>Cancelar</Button>
+              <Button onClick={() => setStep(2)} disabled={!form.title.trim()}>Siguiente →</Button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Buscar ejercicio..." value={searchEx} onChange={(e) => setSearchEx(e.target.value)} />
+            </div>
+
+            {loadingEx ? (
+              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : (
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                {filteredExercises.map((ex) => {
+                  const selected = selectedExercises.find(s => s.id === ex.id);
+                  return (
+                    <div key={ex.id} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={!!selected} onCheckedChange={() => toggleExercise(ex)} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{ex.name}</p>
+                          {ex.body_region && <p className="text-xs text-muted-foreground">{ex.body_region}</p>}
+                        </div>
+                      </div>
+                      {selected && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pl-7">
+                          <div className="space-y-1">
+                            <Label className="text-xs">Repeticiones</Label>
+                            <Input type="number" className="h-8 text-xs" value={selected.repetitions ?? ""} onChange={(e) => updateSelected(ex.id, "repetitions", e.target.value ? parseInt(e.target.value) : null)} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Series</Label>
+                            <Input type="number" className="h-8 text-xs" value={selected.sets ?? ""} onChange={(e) => updateSelected(ex.id, "sets", e.target.value ? parseInt(e.target.value) : null)} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Frecuencia</Label>
+                            <Input className="h-8 text-xs" value={selected.frequency} onChange={(e) => updateSelected(ex.id, "frequency", e.target.value)} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Duración</Label>
+                            <Input className="h-8 text-xs" value={selected.duration} onChange={(e) => updateSelected(ex.id, "duration", e.target.value)} />
+                          </div>
+                          <div className="col-span-2 sm:col-span-4 space-y-1">
+                            <Label className="text-xs">Notas</Label>
+                            <Input className="h-8 text-xs" value={selected.notes} onChange={(e) => updateSelected(ex.id, "notes", e.target.value)} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {filteredExercises.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No se encontraron ejercicios.</p>}
+              </div>
+            )}
+
+            {selectedExercises.length > 0 && (
+              <p className="text-xs text-muted-foreground">{selectedExercises.length} ejercicio(s) seleccionado(s)</p>
+            )}
+
+            <div className="flex justify-between pt-2">
+              <Button variant="outline" onClick={() => setStep(1)}>← Volver</Button>
+              <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar Plan"}</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PlanDetailDialog({ plan, onClose }: { plan: any; onClose: () => void }) {
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (plan) {
+      setLoading(true);
+      supabase.from("treatment_plan_exercises")
+        .select("*, exercise_library(name, body_region)")
+        .eq("treatment_plan_id", plan.id)
+        .order("order_index")
+        .then(({ data }) => { setExercises(data || []); setLoading(false); });
+    } else {
+      setExercises([]);
+    }
+  }, [plan]);
+
+  return (
+    <Dialog open={!!plan} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{plan?.title}</DialogTitle>
+          <DialogDescription className="sr-only">Detalle del plan de tratamiento</DialogDescription>
+        </DialogHeader>
+        {plan && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <StatusBadge status={plan.status} />
+              <span className="text-sm text-muted-foreground">
+                {format(new Date(plan.start_date), "dd/MM/yyyy")}
+                {plan.end_date ? ` — ${format(new Date(plan.end_date), "dd/MM/yyyy")}` : ""}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {[
+                ["Objetivo", plan.objective],
+                ["Indicaciones", plan.indications],
+                ["Cuidado de piel", plan.skin_care],
+                ["Protección articular", plan.joint_protection_guidelines],
+                ["Recomendaciones hogar", plan.home_item_recommendations],
+                ["Notas", plan.notes],
+              ].map(([label, value]) => (
+                <div key={label as string}>
+                  <p className="text-muted-foreground text-xs font-medium">{label as string}</p>
+                  <p className="text-foreground">{(value as string) || "—"}</p>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-sm mb-2">Ejercicios asignados</h3>
+              {loading ? (
+                <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+              ) : exercises.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sin ejercicios asignados.</p>
+              ) : (
+                <div className="space-y-2">
+                  {exercises.map((ex) => (
+                    <div key={ex.id} className="border rounded-lg p-3 text-sm">
+                      <p className="font-medium">{ex.custom_name || ex.exercise_library?.name || "Ejercicio"}</p>
+                      {ex.exercise_library?.body_region && <p className="text-xs text-muted-foreground">{ex.exercise_library.body_region}</p>}
+                      <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                        {ex.repetitions && <span>Rep: {ex.repetitions}</span>}
+                        {ex.sets && <span>Series: {ex.sets}</span>}
+                        {ex.frequency && <span>Frec: {ex.frequency}</span>}
+                        {ex.duration && <span>Dur: {ex.duration}</span>}
+                      </div>
+                      {ex.notes && <p className="text-xs text-muted-foreground mt-1">{ex.notes}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
