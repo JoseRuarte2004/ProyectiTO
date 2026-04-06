@@ -400,12 +400,16 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       exerciseId = data.id;
     }
 
-    // Insert categories
-    const catRows = selectedCategories.map((cat) => ({
-      exercise_id: exerciseId,
-      category: cat as any,
-    }));
-    const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
+    // Insert only system enum categories into exercise_categories
+    const systemCats = selectedCategories.filter((cat) => systemEnumValues.has(cat));
+    if (systemCats.length > 0) {
+      const catRows = systemCats.map((cat) => ({
+        exercise_id: exerciseId,
+        category: cat as any,
+      }));
+      const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
+      if (catError) { toast.error("Ejercicio guardado pero hubo un error con las categorías"); setSaving(false); onSaved(); onClose(); return; }
+    }
     setSaving(false);
 
     if (catError) { toast.error(isEdit ? "Ejercicio actualizado pero hubo un error con las categorías" : "Ejercicio creado pero hubo un error con las categorías"); }
