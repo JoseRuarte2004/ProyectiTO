@@ -289,6 +289,35 @@ export type Database = {
           },
         ]
       }
+      exercise_custom_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          professional_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          professional_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          professional_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_custom_categories_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_library: {
         Row: {
           body_region: string | null
