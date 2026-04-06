@@ -78,7 +78,6 @@ export default function CategoryManager({
             <DialogTitle>Categorías personalizadas</DialogTitle>
             <DialogDescription className="sr-only">Administrá las categorías personalizadas de ejercicios</DialogDescription>
           </DialogHeader>
-          </DialogHeader>
 
           <div className="space-y-6">
             {/* System categories */}
