@@ -420,7 +420,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{isEdit ? "Editar Ejercicio" : "Nuevo Ejercicio"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Editar Ejercicio" : "Nuevo Ejercicio"}</DialogTitle><DialogDescription className="sr-only">{isEdit ? "Modificá los datos del ejercicio" : "Completá los datos del nuevo ejercicio"}</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2"><Label>Nombre *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div className="space-y-2"><Label>Descripción</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>

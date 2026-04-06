@@ -76,6 +76,8 @@ export default function CategoryManager({
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Categorías personalizadas</DialogTitle>
+            <DialogDescription className="sr-only">Administrá las categorías personalizadas de ejercicios</DialogDescription>
+          </DialogHeader>
           </DialogHeader>
 
           <div className="space-y-6">
