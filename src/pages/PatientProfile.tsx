@@ -330,6 +330,12 @@ export default function PatientProfile() {
 
       {/* New Appointment Dialog */}
       <NewPatientApptDialog open={showNewAppt} onClose={() => setShowNewAppt(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+
+      {/* New Plan Dialog */}
+      <NewPlanDialog open={showNewPlan} onClose={() => setShowNewPlan(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+
+      {/* Plan Detail Dialog */}
+      <PlanDetailDialog plan={showPlanDetail} onClose={() => setShowPlanDetail(null)} />
     </div>
   );
 }
