@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Loader2, Dumbbell, Search, Video, Eye, Pencil, EyeOff, Trash2, Repeat, Timer, CalendarDays, FileDown, Settings } from "lucide-react";
+import { Plus, Loader2, Dumbbell, Search, Video, Eye, Pencil, Trash2, Repeat, Timer, CalendarDays, FileDown, Settings } from "lucide-react";
 import { exportExercisesPdf } from "@/components/exercises/ExercisePdfExport";
 import CategoryManager from "@/components/exercises/CategoryManager";
 
