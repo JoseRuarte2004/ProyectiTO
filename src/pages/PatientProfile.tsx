@@ -37,6 +37,8 @@ export default function PatientProfile() {
   const [showNewFuncEval, setShowNewFuncEval] = useState(false);
   const [showNewAnalEval, setShowNewAnalEval] = useState(false);
   const [showNewAppt, setShowNewAppt] = useState(false);
+  const [showNewPlan, setShowNewPlan] = useState(false);
+  const [showPlanDetail, setShowPlanDetail] = useState<any>(null);
   const [showSessionDetail, setShowSessionDetail] = useState<any>(null);
   const [evalSubTab, setEvalSubTab] = useState("functional");
 
