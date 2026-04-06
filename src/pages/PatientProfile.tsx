@@ -51,7 +51,7 @@ export default function PatientProfile() {
       supabase.from("therapy_sessions").select("*").eq("patient_id", id).order("session_date", { ascending: false }),
       supabase.from("functional_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
       supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
-      supabase.from("treatment_plans").select("*").eq("patient_id", id).order("created_at", { ascending: false }),
+      supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
       supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false }),
     ]);
     setPatient(p.data);
