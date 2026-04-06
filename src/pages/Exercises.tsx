@@ -302,7 +302,7 @@ function ExerciseDetailDialog({ exercise, onClose }: { exercise: Exercise; onClo
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" />{exercise.name}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" />{exercise.name}</DialogTitle><DialogDescription className="sr-only">Detalle del ejercicio</DialogDescription></DialogHeader>
         <div className="space-y-4 text-sm">
           {cats.length > 0 && (
             <div className="flex flex-wrap gap-1">
