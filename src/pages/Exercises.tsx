@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Plus, Loader2, Dumbbell, Search, Video, Eye, Pencil, Trash2, Repeat, Timer, CalendarDays, FileDown, Settings } from "lucide-react";
@@ -22,6 +22,8 @@ const systemCategoryOptions = [
   { value: "joint_protection", label: "Protección articular" },
   { value: "skin_care", label: "Cuidado de piel" },
 ] as const;
+
+const systemEnumValues = new Set<string>(systemCategoryOptions.map((c) => c.value));
 
 const categoryMap: Record<string, string> = Object.fromEntries(
   systemCategoryOptions.map((c) => [c.value, c.label])
@@ -244,7 +246,7 @@ export default function Exercises() {
       {/* PDF selection dialog */}
       <Dialog open={showPdfSelect} onOpenChange={setShowPdfSelect}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Seleccioná ejercicios para exportar</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Seleccioná ejercicios para exportar</DialogTitle><DialogDescription className="sr-only">Elegí qué ejercicios incluir en el PDF</DialogDescription></DialogHeader>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">{pdfSelected.size} de {filtered.length} seleccionados</p>
@@ -300,7 +302,7 @@ function ExerciseDetailDialog({ exercise, onClose }: { exercise: Exercise; onClo
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" />{exercise.name}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" />{exercise.name}</DialogTitle><DialogDescription className="sr-only">Detalle del ejercicio</DialogDescription></DialogHeader>
         <div className="space-y-4 text-sm">
           {cats.length > 0 && (
             <div className="flex flex-wrap gap-1">
@@ -398,16 +400,18 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       exerciseId = data.id;
     }
 
-    // Insert categories
-    const catRows = selectedCategories.map((cat) => ({
-      exercise_id: exerciseId,
-      category: cat as any,
-    }));
-    const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
+    // Insert only system enum categories into exercise_categories
+    const systemCats = selectedCategories.filter((cat) => systemEnumValues.has(cat));
+    if (systemCats.length > 0) {
+      const catRows = systemCats.map((cat) => ({
+        exercise_id: exerciseId,
+        category: cat as any,
+      }));
+      const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
+      if (catError) { toast.error("Ejercicio guardado pero hubo un error con las categorías"); setSaving(false); onSaved(); onClose(); return; }
+    }
+    toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente");
     setSaving(false);
-
-    if (catError) { toast.error(isEdit ? "Ejercicio actualizado pero hubo un error con las categorías" : "Ejercicio creado pero hubo un error con las categorías"); }
-    else { toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente"); }
 
     onSaved();
     onClose();
@@ -416,7 +420,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{isEdit ? "Editar Ejercicio" : "Nuevo Ejercicio"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Editar Ejercicio" : "Nuevo Ejercicio"}</DialogTitle><DialogDescription className="sr-only">{isEdit ? "Modificá los datos del ejercicio" : "Completá los datos del nuevo ejercicio"}</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2"><Label>Nombre *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div className="space-y-2"><Label>Descripción</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
