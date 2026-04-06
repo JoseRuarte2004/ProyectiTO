@@ -139,7 +139,7 @@ export default function Exercises() {
           <Button variant="outline" onClick={() => setShowCategoryManager(true)}>
             <Settings className="h-4 w-4 mr-2" />Gestionar categorías
           </Button>
-          <Button variant="outline" onClick={() => exportExercisesPdf(filtered)} disabled={filtered.length === 0}>
+          <Button variant="outline" onClick={handleOpenPdfSelect} disabled={filtered.length === 0}>
             <FileDown className="h-4 w-4 mr-2" />Exportar PDF
           </Button>
           <Button onClick={() => setShowNew(true)}>
