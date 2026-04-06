@@ -416,6 +416,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       if (error) { setSaving(false); toast.error("Error al actualizar ejercicio"); return; }
       exerciseId = exercise.id;
       await supabase.from("exercise_categories").delete().eq("exercise_id", exerciseId);
+      await supabase.from("exercise_custom_category_assignments").delete().eq("exercise_id", exerciseId);
     } else {
       const { data, error } = await supabase.from("exercise_library").insert({
         ...payload,
