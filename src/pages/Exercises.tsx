@@ -482,7 +482,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
               <div className="space-y-2">
                 {customCategories.map((cat) => (
                   <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox checked={selectedCategories.includes(cat.name)} onCheckedChange={() => toggleCategory(cat.name)} />
+                    <Checkbox checked={selectedCustomCats.includes(cat.id)} onCheckedChange={() => toggleCustomCat(cat.id)} />
                     <span className="text-sm">{cat.name}</span>
                   </label>
                 ))}
