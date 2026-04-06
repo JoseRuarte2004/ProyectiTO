@@ -437,6 +437,15 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
       if (catError) { toast.error("Ejercicio guardado pero hubo un error con las categorías"); setSaving(false); onSaved(); onClose(); return; }
     }
+
+    // Insert custom category assignments
+    if (selectedCustomCats.length > 0) {
+      const customRows = selectedCustomCats.map((catId) => ({
+        exercise_id: exerciseId,
+        custom_category_id: catId,
+      }));
+      await supabase.from("exercise_custom_category_assignments").insert(customRows);
+    }
     toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente");
     setSaving(false);
 
