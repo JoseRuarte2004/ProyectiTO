@@ -238,23 +238,29 @@ export default function PatientProfile() {
           )}
         </TabsContent>
 
-        {/* PLANS */}
         <TabsContent value="plans" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="font-semibold text-foreground">Planes de Tratamiento</h2>
+            <Button onClick={() => setShowNewPlan(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nuevo Plan</Button>
           </div>
           {plans.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin planes de tratamiento.</p> : (
             <div className="space-y-2">
               {plans.map((p) => (
                 <Card key={p.id} className="border-border/50">
                   <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-sm text-foreground">{p.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm text-foreground">{p.title}</p>
+                        <StatusBadge status={p.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(p.start_date), "dd/MM/yyyy")} {p.end_date ? `— ${format(new Date(p.end_date), "dd/MM/yyyy")}` : ""}
                       </p>
+                      {p.objective && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.objective}</p>}
                     </div>
-                    <StatusBadge status={p.status} />
+                    <Button variant="ghost" size="icon" onClick={() => setShowPlanDetail(p)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
