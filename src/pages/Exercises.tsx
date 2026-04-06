@@ -39,7 +39,8 @@ export default function Exercises() {
   const [catFilter, setCatFilter] = useState<string>("all");
   const [detailEx, setDetailEx] = useState<Exercise | null>(null);
   const [editEx, setEditEx] = useState<Exercise | null>(null);
-  const [deactivateEx, setDeactivateEx] = useState<Exercise | null>(null);
+  const [showPdfSelect, setShowPdfSelect] = useState(false);
+  const [pdfSelected, setPdfSelected] = useState<Set<string>>(new Set());
   const [deleteEx, setDeleteEx] = useState<Exercise | null>(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
