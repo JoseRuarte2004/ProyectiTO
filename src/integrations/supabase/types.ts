@@ -318,6 +318,42 @@ export type Database = {
           },
         ]
       }
+      exercise_custom_category_assignments: {
+        Row: {
+          created_at: string
+          custom_category_id: string
+          exercise_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_category_id: string
+          exercise_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          custom_category_id?: string
+          exercise_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_custom_category_assignments_custom_category_id_fkey"
+            columns: ["custom_category_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_custom_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_custom_category_assignments_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_library: {
         Row: {
           body_region: string | null

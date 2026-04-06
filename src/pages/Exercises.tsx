@@ -50,7 +50,7 @@ export default function Exercises() {
   const fetchExercises = async () => {
     const { data } = await supabase
       .from("exercise_library")
-      .select("*, exercise_categories(category)")
+      .select("*, exercise_categories(category), exercise_custom_category_assignments(custom_category_id)")
       .order("name");
     setExercises(data || []);
     setLoading(false);
@@ -80,9 +80,19 @@ export default function Exercises() {
       );
     }
     if (catFilter !== "all") {
-      list = list.filter((ex) =>
-        ex.exercise_categories?.some((c: any) => c.category === catFilter)
-      );
+      if (systemEnumValues.has(catFilter)) {
+        list = list.filter((ex) =>
+          ex.exercise_categories?.some((c: any) => c.category === catFilter)
+        );
+      } else {
+        // Custom category filter: match by custom_category_id
+        const customCat = customCategories.find((c) => c.name === catFilter);
+        if (customCat) {
+          list = list.filter((ex) =>
+            ex.exercise_custom_category_assignments?.some((a: any) => a.custom_category_id === customCat.id)
+          );
+        }
+      }
     }
     return list;
   }, [exercises, search, catFilter]);
@@ -180,6 +190,8 @@ export default function Exercises() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((ex) => {
             const cats: string[] = ex.exercise_categories?.map((c: any) => c.category) || [];
+            const customCatIds: string[] = ex.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || [];
+            const customCatNames = customCatIds.map((id) => customCategories.find((c) => c.id === id)?.name).filter(Boolean) as string[];
             return (
               <Card key={ex.id} className="border-border/50 flex flex-col">
                 <CardContent className="p-5 flex flex-col flex-1">
@@ -197,11 +209,16 @@ export default function Exercises() {
                   </div>
 
                   {/* Categories */}
-                  {cats.length > 0 && (
+                  {(cats.length > 0 || customCatNames.length > 0) && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {cats.map((c) => (
                         <Badge key={c} variant="outline" className="text-xs bg-secondary text-secondary-foreground">
                           {categoryMap[c] || c}
+                        </Badge>
+                      ))}
+                      {customCatNames.map((name) => (
+                        <Badge key={name} variant="outline" className="text-xs bg-accent text-accent-foreground">
+                          {name}
                         </Badge>
                       ))}
                     </div>
@@ -347,6 +364,9 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     exercise?.exercise_categories?.map((c: any) => c.category) || []
   );
+  const [selectedCustomCats, setSelectedCustomCats] = useState<string[]>(
+    exercise?.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || []
+  );
   const [form, setForm] = useState({
     name: exercise?.name || "",
     description: exercise?.description || "",
@@ -365,7 +385,13 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
     );
   };
 
-  const canSave = form.name.trim() !== "" && selectedCategories.length > 0;
+  const toggleCustomCat = (id: string) => {
+    setSelectedCustomCats((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const canSave = form.name.trim() !== "" && (selectedCategories.length > 0 || selectedCustomCats.length > 0);
 
   const handleSave = async () => {
     if (!canSave) { toast.error("Completá el nombre y seleccioná al menos una categoría"); return; }
@@ -390,6 +416,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       if (error) { setSaving(false); toast.error("Error al actualizar ejercicio"); return; }
       exerciseId = exercise.id;
       await supabase.from("exercise_categories").delete().eq("exercise_id", exerciseId);
+      await supabase.from("exercise_custom_category_assignments").delete().eq("exercise_id", exerciseId);
     } else {
       const { data, error } = await supabase.from("exercise_library").insert({
         ...payload,
@@ -409,6 +436,15 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
       }));
       const { error: catError } = await supabase.from("exercise_categories").insert(catRows);
       if (catError) { toast.error("Ejercicio guardado pero hubo un error con las categorías"); setSaving(false); onSaved(); onClose(); return; }
+    }
+
+    // Insert custom category assignments
+    if (selectedCustomCats.length > 0) {
+      const customRows = selectedCustomCats.map((catId) => ({
+        exercise_id: exerciseId,
+        custom_category_id: catId,
+      }));
+      await supabase.from("exercise_custom_category_assignments").insert(customRows);
     }
     toast.success(isEdit ? "Ejercicio actualizado correctamente" : "Ejercicio creado correctamente");
     setSaving(false);
@@ -446,7 +482,7 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
               <div className="space-y-2">
                 {customCategories.map((cat) => (
                   <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox checked={selectedCategories.includes(cat.name)} onCheckedChange={() => toggleCategory(cat.name)} />
+                    <Checkbox checked={selectedCustomCats.includes(cat.id)} onCheckedChange={() => toggleCustomCat(cat.id)} />
                     <span className="text-sm">{cat.name}</span>
                   </label>
                 ))}
