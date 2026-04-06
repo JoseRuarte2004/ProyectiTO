@@ -241,19 +241,40 @@ export default function Exercises() {
       {detailEx && <ExerciseDetailDialog exercise={detailEx} onClose={() => setDetailEx(null)} />}
       <CategoryManager open={showCategoryManager} onClose={() => setShowCategoryManager(false)} userId={user!.id} onChanged={fetchCustomCategories} />
 
-      {/* Deactivate dialog */}
-      <AlertDialog open={!!deactivateEx} onOpenChange={(open) => { if (!open) setDeactivateEx(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Desactivar este ejercicio?</AlertDialogTitle>
-            <AlertDialogDescription>Ya no aparecerá al crear planes terapéuticos.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeactivate} className="bg-orange-600 text-white hover:bg-orange-700">Desactivar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* PDF selection dialog */}
+      <Dialog open={showPdfSelect} onOpenChange={setShowPdfSelect}>
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Seleccioná ejercicios para exportar</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">{pdfSelected.size} de {filtered.length} seleccionados</p>
+              <Button variant="ghost" size="sm" onClick={() => {
+                if (pdfSelected.size === filtered.length) setPdfSelected(new Set());
+                else setPdfSelected(new Set(filtered.map((ex) => ex.id)));
+              }}>
+                {pdfSelected.size === filtered.length ? "Deseleccionar todos" : "Seleccionar todos"}
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+              {filtered.map((ex) => (
+                <label key={ex.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer">
+                  <Checkbox checked={pdfSelected.has(ex.id)} onCheckedChange={() => togglePdfSelect(ex.id)} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{ex.name}</p>
+                    {ex.body_region && <p className="text-xs text-muted-foreground">{ex.body_region}</p>}
+                  </div>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowPdfSelect(false)}>Cancelar</Button>
+              <Button onClick={handleExportPdf} disabled={pdfSelected.size === 0}>
+                <FileDown className="h-4 w-4 mr-1" />Exportar ({pdfSelected.size})
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete dialog */}
       <AlertDialog open={!!deleteEx} onOpenChange={(open) => { if (!open) setDeleteEx(null); }}>
