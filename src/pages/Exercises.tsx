@@ -364,6 +364,9 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCa
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     exercise?.exercise_categories?.map((c: any) => c.category) || []
   );
+  const [selectedCustomCats, setSelectedCustomCats] = useState<string[]>(
+    exercise?.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || []
+  );
   const [form, setForm] = useState({
     name: exercise?.name || "",
     description: exercise?.description || "",
