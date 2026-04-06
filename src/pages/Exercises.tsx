@@ -190,6 +190,8 @@ export default function Exercises() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((ex) => {
             const cats: string[] = ex.exercise_categories?.map((c: any) => c.category) || [];
+            const customCatIds: string[] = ex.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || [];
+            const customCatNames = customCatIds.map((id) => customCategories.find((c) => c.id === id)?.name).filter(Boolean) as string[];
             return (
               <Card key={ex.id} className="border-border/50 flex flex-col">
                 <CardContent className="p-5 flex flex-col flex-1">
@@ -207,7 +209,7 @@ export default function Exercises() {
                   </div>
 
                   {/* Categories */}
-                  {cats.length > 0 && (
+                  {(cats.length > 0 || customCatNames.length > 0) && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {cats.map((c) => (
                         <Badge key={c} variant="outline" className="text-xs bg-secondary text-secondary-foreground">
