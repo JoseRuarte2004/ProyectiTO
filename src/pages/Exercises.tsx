@@ -246,7 +246,7 @@ export default function Exercises() {
       {/* PDF selection dialog */}
       <Dialog open={showPdfSelect} onOpenChange={setShowPdfSelect}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Seleccioná ejercicios para exportar</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Seleccioná ejercicios para exportar</DialogTitle><DialogDescription className="sr-only">Elegí qué ejercicios incluir en el PDF</DialogDescription></DialogHeader>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">{pdfSelected.size} de {filtered.length} seleccionados</p>
