@@ -85,13 +85,25 @@ export default function Exercises() {
     return list;
   }, [exercises, search, catFilter]);
 
-  const handleDeactivate = async () => {
-    if (!deactivateEx) return;
-    const { error } = await supabase.from("exercise_library").update({ is_active: false }).eq("id", deactivateEx.id);
-    setDeactivateEx(null);
-    if (error) { toast.error("Error al desactivar ejercicio"); return; }
-    toast.success("Ejercicio desactivado correctamente");
-    fetchExercises();
+  const handleOpenPdfSelect = () => {
+    setPdfSelected(new Set(filtered.map((ex) => ex.id)));
+    setShowPdfSelect(true);
+  };
+
+  const togglePdfSelect = (id: string) => {
+    setPdfSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleExportPdf = () => {
+    const selected = filtered.filter((ex) => pdfSelected.has(ex.id));
+    if (selected.length === 0) { toast.error("Seleccioná al menos un ejercicio"); return; }
+    exportExercisesPdf(selected);
+    setShowPdfSelect(false);
+    toast.success(`PDF exportado con ${selected.length} ejercicio(s)`);
   };
 
   const handleDelete = async () => {
