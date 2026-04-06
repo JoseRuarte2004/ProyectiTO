@@ -224,11 +224,6 @@ export default function Exercises() {
                     <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setEditEx(ex)}>
                       <Pencil className="h-3 w-3 mr-1" />Editar
                     </Button>
-                    {ex.is_active && (
-                      <Button variant="outline" size="sm" className="text-xs text-orange-600 border-orange-300 hover:bg-orange-50" onClick={() => setDeactivateEx(ex)} title="Desactivar">
-                        <EyeOff className="h-3 w-3" />
-                      </Button>
-                    )}
                     <Button variant="outline" size="sm" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setDeleteEx(ex)} title="Eliminar">
                       <Trash2 className="h-3 w-3" />
                     </Button>
