@@ -11,9 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Loader2, Dumbbell, Search, Video, Eye, Pencil, Ban, Repeat, Clock, Timer, CalendarDays } from "lucide-react";
+import { Plus, Loader2, Dumbbell, Search, Video, Eye, Pencil, EyeOff, Trash2, Repeat, Timer, CalendarDays, FileDown, Settings } from "lucide-react";
+import { exportExercisesPdf } from "@/components/exercises/ExercisePdfExport";
+import CategoryManager from "@/components/exercises/CategoryManager";
 
-const categoryOptions = [
+const systemCategoryOptions = [
   { value: "general", label: "General" },
   { value: "occupation", label: "Ocupación" },
   { value: "sport", label: "Deporte" },
@@ -21,9 +23,12 @@ const categoryOptions = [
   { value: "skin_care", label: "Cuidado de piel" },
 ] as const;
 
-const categoryMap: Record<string, string> = Object.fromEntries(categoryOptions.map((c) => [c.value, c.label]));
+const categoryMap: Record<string, string> = Object.fromEntries(
+  systemCategoryOptions.map((c) => [c.value, c.label])
+);
 
 type Exercise = any;
+type CustomCategory = { id: string; name: string };
 
 export default function Exercises() {
   const { user } = useAuth();
@@ -35,6 +40,9 @@ export default function Exercises() {
   const [detailEx, setDetailEx] = useState<Exercise | null>(null);
   const [editEx, setEditEx] = useState<Exercise | null>(null);
   const [deactivateEx, setDeactivateEx] = useState<Exercise | null>(null);
+  const [deleteEx, setDeleteEx] = useState<Exercise | null>(null);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
 
   const fetchExercises = async () => {
     const { data } = await supabase
@@ -45,7 +53,20 @@ export default function Exercises() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchExercises(); }, []);
+  const fetchCustomCategories = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("exercise_custom_categories")
+      .select("id, name")
+      .eq("professional_id", user.id)
+      .order("name");
+    setCustomCategories(data || []);
+  };
+
+  useEffect(() => {
+    fetchExercises();
+    fetchCustomCategories();
+  }, []);
 
   const filtered = useMemo(() => {
     let list = exercises;
@@ -72,11 +93,46 @@ export default function Exercises() {
     fetchExercises();
   };
 
+  const handleDelete = async () => {
+    if (!deleteEx) return;
+    // Delete categories first, then exercise
+    await supabase.from("exercise_categories").delete().eq("exercise_id", deleteEx.id);
+    const { error } = await supabase.from("exercise_library").delete().eq("id", deleteEx.id);
+    setDeleteEx(null);
+    if (error) {
+      if (error.code === "23503") {
+        toast.error("No se puede eliminar este ejercicio porque está asignado a un plan terapéutico. Podés desactivarlo en su lugar.");
+      } else {
+        toast.error("Error al eliminar ejercicio");
+      }
+      return;
+    }
+    toast.success("Ejercicio eliminado correctamente");
+    fetchExercises();
+  };
+
+  // Build combined filter options (system + custom)
+  const allFilterOptions = [
+    ...systemCategoryOptions,
+    ...customCategories.map((c) => ({ value: c.name, label: c.name })),
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold text-foreground">Biblioteca de Ejercicios</h1>
-        <Button onClick={() => setShowNew(true)}><Plus className="h-4 w-4 mr-2" />Nuevo Ejercicio</Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => setShowCategoryManager(true)}>
+            <Settings className="h-4 w-4 mr-2" />Gestionar categorías
+          </Button>
+          <Button variant="outline" onClick={() => exportExercisesPdf(filtered)} disabled={filtered.length === 0}>
+            <FileDown className="h-4 w-4 mr-2" />Exportar PDF
+          </Button>
+          <Button onClick={() => setShowNew(true)}>
+            <Plus className="h-4 w-4 mr-2" />Nuevo Ejercicio
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -88,7 +144,7 @@ export default function Exercises() {
       {/* Category filter pills */}
       <div className="flex gap-2 flex-wrap">
         <Button variant={catFilter === "all" ? "default" : "outline"} size="sm" onClick={() => setCatFilter("all")}>Todos</Button>
-        {categoryOptions.map((c) => (
+        {allFilterOptions.map((c) => (
           <Button key={c.value} variant={catFilter === c.value ? "default" : "outline"} size="sm" onClick={() => setCatFilter(c.value)}>
             {c.label}
           </Button>
@@ -136,26 +192,15 @@ export default function Exercises() {
                     </div>
                   )}
 
-                  {/* Body region */}
                   {ex.body_region && <p className="text-xs text-muted-foreground mb-2">Región: {ex.body_region}</p>}
-
-                  {/* Description */}
                   {ex.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ex.description}</p>}
 
                   {/* Execution params */}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-4">
-                    {ex.default_repetitions && (
-                      <span className="flex items-center gap-1"><Repeat className="h-3 w-3" />{ex.default_repetitions} rep.</span>
-                    )}
-                    {ex.default_sets && (
-                      <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{ex.default_sets} series</span>
-                    )}
-                    {ex.default_duration && (
-                      <span className="flex items-center gap-1"><Timer className="h-3 w-3" />{ex.default_duration}</span>
-                    )}
-                    {ex.default_frequency && (
-                      <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{ex.default_frequency}</span>
-                    )}
+                    {ex.default_repetitions && <span className="flex items-center gap-1"><Repeat className="h-3 w-3" />{ex.default_repetitions} rep.</span>}
+                    {ex.default_sets && <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{ex.default_sets} series</span>}
+                    {ex.default_duration && <span className="flex items-center gap-1"><Timer className="h-3 w-3" />{ex.default_duration}</span>}
+                    {ex.default_frequency && <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{ex.default_frequency}</span>}
                   </div>
 
                   {/* Actions */}
@@ -167,10 +212,13 @@ export default function Exercises() {
                       <Pencil className="h-3 w-3 mr-1" />Editar
                     </Button>
                     {ex.is_active && (
-                      <Button variant="outline" size="sm" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setDeactivateEx(ex)}>
-                        <Ban className="h-3 w-3" />
+                      <Button variant="outline" size="sm" className="text-xs text-orange-600 border-orange-300 hover:bg-orange-50" onClick={() => setDeactivateEx(ex)} title="Desactivar">
+                        <EyeOff className="h-3 w-3" />
                       </Button>
                     )}
+                    <Button variant="outline" size="sm" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setDeleteEx(ex)} title="Eliminar">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -180,10 +228,12 @@ export default function Exercises() {
       )}
 
       {/* Modals */}
-      <ExerciseFormDialog open={showNew} onClose={() => setShowNew(false)} userId={user!.id} onSaved={fetchExercises} />
-      {editEx && <ExerciseFormDialog open onClose={() => setEditEx(null)} userId={user!.id} onSaved={fetchExercises} exercise={editEx} />}
+      <ExerciseFormDialog open={showNew} onClose={() => setShowNew(false)} userId={user!.id} onSaved={() => { fetchExercises(); fetchCustomCategories(); }} customCategories={customCategories} />
+      {editEx && <ExerciseFormDialog open onClose={() => setEditEx(null)} userId={user!.id} onSaved={() => { fetchExercises(); fetchCustomCategories(); }} exercise={editEx} customCategories={customCategories} />}
       {detailEx && <ExerciseDetailDialog exercise={detailEx} onClose={() => setDetailEx(null)} />}
+      <CategoryManager open={showCategoryManager} onClose={() => setShowCategoryManager(false)} userId={user!.id} onChanged={fetchCustomCategories} />
 
+      {/* Deactivate dialog */}
       <AlertDialog open={!!deactivateEx} onOpenChange={(open) => { if (!open) setDeactivateEx(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -192,7 +242,21 @@ export default function Exercises() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeactivate} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Desactivar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeactivate} className="bg-orange-600 text-white hover:bg-orange-700">Desactivar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete dialog */}
+      <AlertDialog open={!!deleteEx} onOpenChange={(open) => { if (!open) setDeleteEx(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este ejercicio permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -244,8 +308,8 @@ function Field({ label, value }: { label: string; value: string }) {
 
 /* ────────── Create / Edit Dialog ────────── */
 
-function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise }: {
-  open: boolean; onClose: () => void; userId: string; onSaved: () => void; exercise?: Exercise;
+function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise, customCategories }: {
+  open: boolean; onClose: () => void; userId: string; onSaved: () => void; exercise?: Exercise; customCategories: CustomCategory[];
 }) {
   const isEdit = !!exercise;
   const [saving, setSaving] = useState(false);
@@ -294,7 +358,6 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise }: {
       const { error } = await supabase.from("exercise_library").update(payload).eq("id", exercise.id);
       if (error) { setSaving(false); toast.error("Error al actualizar ejercicio"); return; }
       exerciseId = exercise.id;
-      // Delete old categories and reinsert
       await supabase.from("exercise_categories").delete().eq("exercise_id", exerciseId);
     } else {
       const { data, error } = await supabase.from("exercise_library").insert({
@@ -330,11 +393,11 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise }: {
           <div className="space-y-2"><Label>Descripción</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
           <div className="space-y-2"><Label>Instrucciones</Label><Textarea value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} rows={3} /></div>
 
-          {/* Categories */}
+          {/* System categories */}
           <div className="space-y-2">
-            <Label>Categorías *</Label>
+            <Label>Categorías del sistema *</Label>
             <div className="space-y-2">
-              {categoryOptions.map((cat) => (
+              {systemCategoryOptions.map((cat) => (
                 <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
                   <Checkbox checked={selectedCategories.includes(cat.value)} onCheckedChange={() => toggleCategory(cat.value)} />
                   <span className="text-sm">{cat.label}</span>
@@ -342,6 +405,21 @@ function ExerciseFormDialog({ open, onClose, userId, onSaved, exercise }: {
               ))}
             </div>
           </div>
+
+          {/* Custom categories */}
+          {customCategories.length > 0 && (
+            <div className="space-y-2">
+              <Label>Categorías personalizadas</Label>
+              <div className="space-y-2">
+                {customCategories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox checked={selectedCategories.includes(cat.name)} onCheckedChange={() => toggleCategory(cat.name)} />
+                    <span className="text-sm">{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2"><Label>Región corporal</Label><Input value={form.body_region} onChange={(e) => setForm({ ...form, body_region: e.target.value })} /></div>
           <div className="space-y-2"><Label>Repeticiones por serie</Label><Input type="number" value={form.default_repetitions} onChange={(e) => setForm({ ...form, default_repetitions: e.target.value })} /></div>
