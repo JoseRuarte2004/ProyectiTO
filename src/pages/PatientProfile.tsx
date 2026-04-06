@@ -13,7 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Eye, Edit } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Eye, Edit, Search } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
 
 export default function PatientProfile() {
