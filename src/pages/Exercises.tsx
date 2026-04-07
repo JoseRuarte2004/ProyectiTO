@@ -193,13 +193,13 @@ export default function Exercises() {
             const customCatIds: string[] = ex.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || [];
             const customCatNames = customCatIds.map((id) => customCategories.find((c) => c.id === id)?.name).filter(Boolean) as string[];
             return (
-              <Card key={ex.id} className="border-border/50 flex flex-col">
-                <CardContent className="p-5 flex flex-col flex-1">
+              <Card key={ex.id} className="border-border/50 flex flex-col h-full">
+                <CardContent className="p-5 flex flex-col h-full">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Dumbbell className="h-4 w-4 text-primary shrink-0" />
-                      <p className="font-semibold text-foreground truncate">{ex.name}</p>
+                      <p className="font-semibold text-foreground truncate" title={ex.name}>{ex.name}</p>
                     </div>
                     {ex.video_url && (
                       <button onClick={() => window.open(ex.video_url, "_blank")} className="text-primary hover:text-primary/80 shrink-0 ml-2" title="Ver video">
@@ -209,23 +209,21 @@ export default function Exercises() {
                   </div>
 
                   {/* Categories */}
-                  {(cats.length > 0 || customCatNames.length > 0) && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {cats.map((c) => (
-                        <Badge key={c} variant="outline" className="text-xs bg-secondary text-secondary-foreground">
-                          {categoryMap[c] || c}
-                        </Badge>
-                      ))}
-                      {customCatNames.map((name) => (
-                        <Badge key={name} variant="outline" className="text-xs bg-accent text-accent-foreground">
-                          {name}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-1 mb-2 min-h-[24px]">
+                    {cats.map((c) => (
+                      <Badge key={c} variant="outline" className="text-xs bg-secondary text-secondary-foreground">
+                        {categoryMap[c] || c}
+                      </Badge>
+                    ))}
+                    {customCatNames.map((name) => (
+                      <Badge key={name} variant="outline" className="text-xs bg-accent text-accent-foreground">
+                        {name}
+                      </Badge>
+                    ))}
+                  </div>
 
-                  {ex.body_region && <p className="text-xs text-muted-foreground mb-2">Región: {ex.body_region}</p>}
-                  {ex.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{ex.description}</p>}
+                  {ex.body_region && <p className="text-xs text-muted-foreground mb-1">Región: {ex.body_region}</p>}
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 min-h-[2rem]">{ex.description || ""}</p>
 
                   {/* Execution params */}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-4">
@@ -237,14 +235,14 @@ export default function Exercises() {
 
                   {/* Actions */}
                   <div className="flex gap-2 mt-auto pt-2 border-t border-border/50">
-                    <Button variant="default" size="sm" className="flex-1 text-xs" onClick={() => setDetailEx(ex)}>
+                    <Button variant="default" size="sm" className="text-xs" onClick={() => setDetailEx(ex)}>
                       <Eye className="h-3 w-3 mr-1" />Ver detalle
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setEditEx(ex)}>
+                    <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditEx(ex)}>
                       <Pencil className="h-3 w-3 mr-1" />Editar
                     </Button>
-                    <Button variant="outline" size="sm" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setDeleteEx(ex)} title="Eliminar">
-                      <Trash2 className="h-3 w-3" />
+                    <Button variant="outline" size="icon" className="h-8 w-8 text-destructive border-destructive/30 hover:bg-destructive/10 shrink-0" onClick={() => setDeleteEx(ex)} title="Eliminar">
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </CardContent>
