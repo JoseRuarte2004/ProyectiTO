@@ -241,14 +241,14 @@ export default function Exercises() {
                   </div>
 
                   {/* Actions — always at bottom */}
-                  <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50">
-                    <Button variant="default" size="sm" className="flex-1" onClick={() => setDetailEx(ex)}>
-                      <Eye className="h-3.5 w-3.5 mr-1" />Ver detalle
+                  <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50 min-w-0">
+                    <Button variant="default" size="sm" className="flex-1 min-w-0" onClick={() => setDetailEx(ex)}>
+                      <Eye className="h-3.5 w-3.5 mr-1 shrink-0" />Ver detalle
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditEx(ex)}>
-                      <Pencil className="h-3.5 w-3.5 mr-1" />Editar
+                    <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={() => setEditEx(ex)}>
+                      <Pencil className="h-3.5 w-3.5 mr-1 shrink-0" />Editar
                     </Button>
-                    <Button variant="outline" size="sm" className="w-9 h-9 p-0 text-destructive hover:text-destructive" onClick={() => setDeleteEx(ex)} title="Eliminar">
+                    <Button variant="outline" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setDeleteEx(ex)} title="Eliminar">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
