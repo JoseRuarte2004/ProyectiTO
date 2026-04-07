@@ -187,14 +187,14 @@ export default function Exercises() {
       ) : filtered.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">No se encontraron ejercicios con esos filtros.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {filtered.map((ex) => {
             const cats: string[] = ex.exercise_categories?.map((c: any) => c.category) || [];
             const customCatIds: string[] = ex.exercise_custom_category_assignments?.map((a: any) => a.custom_category_id) || [];
             const customCatNames = customCatIds.map((id) => customCategories.find((c) => c.id === id)?.name).filter(Boolean) as string[];
             return (
               <Card key={ex.id} className="border-border/50 flex flex-col h-full">
-                <CardContent className="p-5 flex flex-col h-full">
+                <CardContent className="p-5 flex flex-col flex-1">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -208,8 +208,8 @@ export default function Exercises() {
                     )}
                   </div>
 
-                  {/* Categories */}
-                  <div className="flex flex-wrap gap-1 mb-2 min-h-[24px]">
+                  {/* Categories — fixed 2-line height */}
+                  <div className="flex flex-wrap gap-1 min-h-[52px] items-start content-start mb-2">
                     {cats.map((c) => (
                       <Badge key={c} variant="outline" className="text-xs bg-secondary text-secondary-foreground">
                         {categoryMap[c] || c}
@@ -222,27 +222,34 @@ export default function Exercises() {
                     ))}
                   </div>
 
-                  {ex.body_region && <p className="text-xs text-muted-foreground mb-1">Región: {ex.body_region}</p>}
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 min-h-[2rem]">{ex.description || ""}</p>
+                  {/* Region */}
+                  <p className="text-xs text-muted-foreground mb-1 min-h-[18px]">
+                    {ex.body_region ? `Región: ${ex.body_region}` : "\u00A0"}
+                  </p>
 
-                  {/* Execution params */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-4">
+                  {/* Description — always 2 lines */}
+                  <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] mb-3">
+                    {ex.description || ""}
+                  </p>
+
+                  {/* Execution params — flexible area */}
+                  <div className="space-y-1 text-xs text-muted-foreground flex-1">
                     {ex.default_repetitions && <span className="flex items-center gap-1"><Repeat className="h-3 w-3" />{ex.default_repetitions} rep.</span>}
                     {ex.default_sets && <span className="flex items-center gap-1"><Dumbbell className="h-3 w-3" />{ex.default_sets} series</span>}
                     {ex.default_duration && <span className="flex items-center gap-1"><Timer className="h-3 w-3" />{ex.default_duration}</span>}
                     {ex.default_frequency && <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{ex.default_frequency}</span>}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2 mt-auto pt-2 border-t border-border/50">
-                    <Button variant="default" size="sm" className="text-xs" onClick={() => setDetailEx(ex)}>
-                      <Eye className="h-3 w-3 mr-1" />Ver detalle
+                  {/* Actions — always at bottom */}
+                  <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50">
+                    <Button variant="default" size="sm" className="flex-1" onClick={() => setDetailEx(ex)}>
+                      <Eye className="h-3.5 w-3.5 mr-1" />Ver detalle
                     </Button>
-                    <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditEx(ex)}>
-                      <Pencil className="h-3 w-3 mr-1" />Editar
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditEx(ex)}>
+                      <Pencil className="h-3.5 w-3.5 mr-1" />Editar
                     </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8 text-destructive border-destructive/30 hover:bg-destructive/10 shrink-0" onClick={() => setDeleteEx(ex)} title="Eliminar">
-                      <Trash2 className="h-3.5 w-3.5" />
+                    <Button variant="outline" size="sm" className="w-9 h-9 p-0 text-destructive hover:text-destructive" onClick={() => setDeleteEx(ex)} title="Eliminar">
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
