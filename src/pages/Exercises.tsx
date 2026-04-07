@@ -243,7 +243,7 @@ export default function Exercises() {
                   {/* Actions — always at bottom */}
                   <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50 min-w-0">
                     <Button variant="default" size="sm" className="flex-1 min-w-0" onClick={() => setDetailEx(ex)}>
-                      <Eye className="h-3.5 w-3.5 mr-1 shrink-0" />Ver detalle
+                      <Eye className="h-3.5 w-3.5 mr-1 shrink-0" />Detalle
                     </Button>
                     <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={() => setEditEx(ex)}>
                       <Pencil className="h-3.5 w-3.5 mr-1 shrink-0" />Editar
