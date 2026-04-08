@@ -63,12 +63,18 @@ function buildPlanHtml(plan: any, patient: any, exercises: any[]): string {
   const exerciseCards = exercises
     .map((ex) => {
       const lib = ex.exercise_library;
-      const name = ex.custom_name || lib?.name || "Ejercicio";
+      const name = lib?.name || "Ejercicio";
       const region = lib?.body_region
         ? `<span style="background:#ccfbf1;color:#0f766e;font-size:11px;border-radius:4px;padding:2px 8px;margin-left:8px;display:inline-block">${lib.body_region}</span>`
         : "";
+      const description = lib?.description
+        ? `<div style="font-size:12px;color:#374151;margin:6px 0;white-space:pre-wrap">${lib.description}</div>`
+        : "";
       const instructions = lib?.instructions
-        ? `<div style="font-size:12px;color:#374151;margin:6px 0;white-space:pre-wrap">${lib.instructions}</div>`
+        ? `<div style="margin:6px 0">
+            <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px">Instrucciones</div>
+            <div style="font-size:12px;color:#374151;white-space:pre-wrap">${lib.instructions}</div>
+          </div>`
         : "";
 
       const params: string[] = [];
@@ -92,14 +98,20 @@ function buildPlanHtml(plan: any, patient: any, exercises: any[]): string {
         ? `<div style="font-style:italic;color:#6b7280;font-size:11px;margin-top:6px">Nota: ${ex.notes}</div>`
         : "";
 
+      const video = lib?.video_url
+        ? `<div style="font-size:11px;color:#6b7280;margin-top:6px">▶ Video: <span style="color:#0d9488">${lib.video_url}</span></div>`
+        : "";
+
       return `
         <div style="background:#f9fafb;border-radius:8px;padding:14px 16px;margin-bottom:10px">
           <div style="display:flex;align-items:center;flex-wrap:wrap">
             <span style="font-weight:600;font-size:13px">${name}</span>${region}
           </div>
+          ${description}
           ${instructions}
           ${paramPills ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${paramPills}</div>` : ""}
           ${note}
+          ${video}
         </div>`;
     })
     .join("");
@@ -137,9 +149,14 @@ function buildPlanHtml(plan: any, patient: any, exercises: any[]): string {
 export async function exportPlanPdf(plan: any, patient: any) {
   const { data: exercises } = await supabase
     .from("treatment_plan_exercises")
-    .select(
-      "*, exercise_library(name, description, body_region, instructions, default_repetitions, default_sets, default_frequency, default_duration)"
-    )
+    .select(`
+      order_index, repetitions, sets, frequency, duration, notes,
+      exercise_library (
+        name, description, body_region, instructions,
+        default_repetitions, default_sets, default_frequency,
+        default_duration, video_url
+      )
+    `)
     .eq("treatment_plan_id", plan.id)
     .order("order_index");
 
