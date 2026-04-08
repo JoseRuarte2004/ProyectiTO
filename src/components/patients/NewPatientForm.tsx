@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -35,6 +36,9 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [currentTreatment, setCurrentTreatment] = useState("");
   const [weeksPostInjury, setWeeksPostInjury] = useState("");
   const [weeksPostSurgery, setWeeksPostSurgery] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [treatmentType, setTreatmentType] = useState("");
+  const [immobilizationWeeks, setImmobilizationWeeks] = useState("");
   const [studies, setStudies] = useState("");
   const [nextOyt, setNextOyt] = useState("");
   const [doctorName, setDoctorName] = useState("");
@@ -49,6 +53,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [leisure, setLeisure] = useState("");
   const [physicalActivity, setPhysicalActivity] = useState("");
   const [sleepRest, setSleepRest] = useState("");
+  const [dominance, setDominance] = useState("");
+  const [avd, setAvd] = useState("");
+  const [aivd, setAivd] = useState("");
+  const [healthManagement, setHealthManagement] = useState("");
+  const [dashScore, setDashScore] = useState("");
   const [occNotes, setOccNotes] = useState("");
 
   const handleSave = async () => {
@@ -92,6 +101,9 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         current_treatment: currentTreatment || null,
         weeks_post_injury: weeksPostInjury ? parseInt(weeksPostInjury) : null,
         weeks_post_surgery: weeksPostSurgery ? parseInt(weeksPostSurgery) : null,
+        diagnosis: diagnosis || null,
+        treatment_type: treatmentType || null,
+        immobilization_weeks: immobilizationWeeks ? parseInt(immobilizationWeeks) : null,
         studies: studies || null,
         next_oyt_appointment: nextOyt || null,
         doctor_name: doctorName || null,
@@ -107,6 +119,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         leisure: leisure || null,
         physical_activity: physicalActivity || null,
         sleep_rest: sleepRest || null,
+        dominance: dominance || null,
+        avd: avd || null,
+        aivd: aivd || null,
+        health_management: healthManagement || null,
+        dash_score: dashScore ? parseInt(dashScore) : null,
         notes: occNotes || null,
       }),
     ]);
@@ -202,6 +219,25 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
             <Label>Semanas post cirugía</Label>
             <Input type="number" value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Diagnóstico</Label>
+            <Input value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de tratamiento</Label>
+            <Select value={treatmentType} onValueChange={setTreatmentType}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="conservative">Conservador</SelectItem>
+                <SelectItem value="surgery">Quirúrgico</SelectItem>
+                <SelectItem value="mixed">Mixto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Semanas de inmovilización</Label>
+            <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} />
+          </div>
           <div className="space-y-2">
             <Label>Próximo turno OyT</Label>
             <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} />
@@ -232,6 +268,21 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
       {/* Step 3 */}
       {step === 3 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Lateralidad</Label>
+            <Select value={dominance} onValueChange={setDominance}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="right">Derecha</SelectItem>
+                <SelectItem value="left">Izquierda</SelectItem>
+                <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Puntaje DASH</Label>
+            <Input type="number" min={0} max={100} placeholder="0-100" value={dashScore} onChange={(e) => setDashScore(e.target.value)} />
+          </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Red de apoyo</Label>
             <Textarea value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} rows={2} />
@@ -245,6 +296,14 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
             <Input value={job} onChange={(e) => setJob(e.target.value)} />
           </div>
           <div className="space-y-2 sm:col-span-2">
+            <Label>Actividades de la vida diaria (AVD)</Label>
+            <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={2} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Actividades instrumentales (AIVD)</Label>
+            <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={2} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
             <Label>Ocio y tiempo libre</Label>
             <Textarea value={leisure} onChange={(e) => setLeisure(e.target.value)} rows={2} />
           </div>
@@ -255,6 +314,10 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
           <div className="space-y-2 sm:col-span-2">
             <Label>Sueño y descanso</Label>
             <Textarea value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} rows={2} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Gestión de la salud</Label>
+            <Textarea value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} placeholder="Adherencia a turnos médicos, hábitos de salud..." rows={2} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Observaciones</Label>

@@ -18,68 +18,125 @@ export type Database = {
         Row: {
           arom: string | null
           created_at: string
+          dynamometer_msd: number | null
+          dynamometer_msi: number | null
           edema: string | null
+          edema_circummetry: string | null
           emotional_state: string | null
           evaluation_date: string
+          godet_test: string | null
+          goniometry: Json | null
           id: string
           kapandji: string | null
           muscle_strength: string | null
+          muscle_strength_cubital: string | null
+          muscle_strength_median: string | null
+          muscle_strength_radial: string | null
           notes: string | null
+          osas_score: number | null
           pain: string | null
+          pain_aggravating_factors: string | null
+          pain_appearance: string | null
+          pain_characteristics: string | null
+          pain_location: string | null
+          pain_radiation: string | null
           pain_score: number | null
           patient_id: string
           posture: string | null
           professional_id: string
           prom: string | null
           scar: string | null
+          scar_evaluation: Json | null
           sensitivity: string | null
+          sensitivity_functional: string | null
+          sensitivity_protective: string | null
           session_id: string | null
+          specific_tests: Json | null
           trophic_state: string | null
           updated_at: string
+          vancouver_score: number | null
         }
         Insert: {
           arom?: string | null
           created_at?: string
+          dynamometer_msd?: number | null
+          dynamometer_msi?: number | null
           edema?: string | null
+          edema_circummetry?: string | null
           emotional_state?: string | null
           evaluation_date?: string
+          godet_test?: string | null
+          goniometry?: Json | null
           id?: string
           kapandji?: string | null
           muscle_strength?: string | null
+          muscle_strength_cubital?: string | null
+          muscle_strength_median?: string | null
+          muscle_strength_radial?: string | null
           notes?: string | null
+          osas_score?: number | null
           pain?: string | null
+          pain_aggravating_factors?: string | null
+          pain_appearance?: string | null
+          pain_characteristics?: string | null
+          pain_location?: string | null
+          pain_radiation?: string | null
           pain_score?: number | null
           patient_id: string
           posture?: string | null
           professional_id: string
           prom?: string | null
           scar?: string | null
+          scar_evaluation?: Json | null
           sensitivity?: string | null
+          sensitivity_functional?: string | null
+          sensitivity_protective?: string | null
           session_id?: string | null
+          specific_tests?: Json | null
           trophic_state?: string | null
           updated_at?: string
+          vancouver_score?: number | null
         }
         Update: {
           arom?: string | null
           created_at?: string
+          dynamometer_msd?: number | null
+          dynamometer_msi?: number | null
           edema?: string | null
+          edema_circummetry?: string | null
           emotional_state?: string | null
           evaluation_date?: string
+          godet_test?: string | null
+          goniometry?: Json | null
           id?: string
           kapandji?: string | null
           muscle_strength?: string | null
+          muscle_strength_cubital?: string | null
+          muscle_strength_median?: string | null
+          muscle_strength_radial?: string | null
           notes?: string | null
+          osas_score?: number | null
           pain?: string | null
+          pain_aggravating_factors?: string | null
+          pain_appearance?: string | null
+          pain_characteristics?: string | null
+          pain_location?: string | null
+          pain_radiation?: string | null
           pain_score?: number | null
           patient_id?: string
           posture?: string | null
           professional_id?: string
           prom?: string | null
           scar?: string | null
+          scar_evaluation?: Json | null
           sensitivity?: string | null
+          sensitivity_functional?: string | null
+          sensitivity_protective?: string | null
           session_id?: string | null
+          specific_tests?: Json | null
           trophic_state?: string | null
           updated_at?: string
+          vancouver_score?: number | null
         }
         Relationships: [
           {
@@ -419,8 +476,10 @@ export type Database = {
           avd: string | null
           barthel_score: number | null
           created_at: string
+          dash_score: number | null
           dominance: Database["public"]["Enums"]["dominance_type"] | null
           evaluation_date: string
+          health_management: string | null
           id: string
           notes: string | null
           patient_id: string
@@ -435,8 +494,10 @@ export type Database = {
           avd?: string | null
           barthel_score?: number | null
           created_at?: string
+          dash_score?: number | null
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
           evaluation_date?: string
+          health_management?: string | null
           id?: string
           notes?: string | null
           patient_id: string
@@ -451,8 +512,10 @@ export type Database = {
           avd?: string | null
           barthel_score?: number | null
           created_at?: string
+          dash_score?: number | null
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
           evaluation_date?: string
+          health_management?: string | null
           id?: string
           notes?: string | null
           patient_id?: string
@@ -490,8 +553,10 @@ export type Database = {
         Row: {
           created_at: string
           current_treatment: string | null
+          diagnosis: string | null
           doctor_name: string | null
           id: string
+          immobilization_weeks: number | null
           injury_date: string | null
           injury_mechanism: string | null
           medical_history: string | null
@@ -501,6 +566,7 @@ export type Database = {
           pharmacological_treatment: string | null
           studies: string | null
           symptom_start_date: string | null
+          treatment_type: string | null
           updated_at: string
           weeks_post_injury: number | null
           weeks_post_surgery: number | null
@@ -508,8 +574,10 @@ export type Database = {
         Insert: {
           created_at?: string
           current_treatment?: string | null
+          diagnosis?: string | null
           doctor_name?: string | null
           id?: string
+          immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
           medical_history?: string | null
@@ -519,6 +587,7 @@ export type Database = {
           pharmacological_treatment?: string | null
           studies?: string | null
           symptom_start_date?: string | null
+          treatment_type?: string | null
           updated_at?: string
           weeks_post_injury?: number | null
           weeks_post_surgery?: number | null
@@ -526,8 +595,10 @@ export type Database = {
         Update: {
           created_at?: string
           current_treatment?: string | null
+          diagnosis?: string | null
           doctor_name?: string | null
           id?: string
+          immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
           medical_history?: string | null
@@ -537,6 +608,7 @@ export type Database = {
           pharmacological_treatment?: string | null
           studies?: string | null
           symptom_start_date?: string | null
+          treatment_type?: string | null
           updated_at?: string
           weeks_post_injury?: number | null
           weeks_post_surgery?: number | null
@@ -553,8 +625,13 @@ export type Database = {
       }
       patient_occupational_profiles: {
         Row: {
+          aivd: string | null
+          avd: string | null
           created_at: string
+          dash_score: number | null
+          dominance: string | null
           education: string | null
+          health_management: string | null
           id: string
           job: string | null
           leisure: string | null
@@ -566,8 +643,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aivd?: string | null
+          avd?: string | null
           created_at?: string
+          dash_score?: number | null
+          dominance?: string | null
           education?: string | null
+          health_management?: string | null
           id?: string
           job?: string | null
           leisure?: string | null
@@ -579,8 +661,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aivd?: string | null
+          avd?: string | null
           created_at?: string
+          dash_score?: number | null
+          dominance?: string | null
           education?: string | null
+          health_management?: string | null
           id?: string
           job?: string | null
           leisure?: string | null
