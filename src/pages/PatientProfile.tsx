@@ -13,11 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2, FileDown } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
+import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -263,17 +264,7 @@ export default function PatientProfile() {
                         {p.objective && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.objective}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                      <Button variant="default" size="sm" className="flex-1" onClick={() => setShowPlanDetail(p)}>
-                        <Eye className="h-4 w-4 mr-1" /> Detalle
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditPlan(p)}>
-                        <Edit className="h-4 w-4 mr-1" /> Editar
-                      </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeletePlan(p)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <PlanCardActions plan={p} patient={patient} onDetail={() => setShowPlanDetail(p)} onEdit={() => setEditPlan(p)} onDelete={() => setDeletePlan(p)} />
                   </CardContent>
                 </Card>
               ))}
@@ -1128,5 +1119,39 @@ function DeletePlanConfirm({ plan, onClose, onSaved }: { plan: any; onClose: () 
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function PlanCardActions({ plan, patient, onDetail, onEdit, onDelete }: { plan: any; patient: any; onDetail: () => void; onEdit: () => void; onDelete: () => void }) {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportPlanPdf(plan, patient);
+      toast.success("PDF exportado correctamente");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al exportar PDF");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+      <Button variant="default" size="sm" className="flex-1 min-w-0" onClick={onDetail}>
+        <Eye className="h-4 w-4 mr-1 shrink-0" /> Detalle
+      </Button>
+      <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={onEdit}>
+        <Edit className="h-4 w-4 mr-1 shrink-0" /> Editar
+      </Button>
+      <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={handleExport} disabled={exporting}>
+        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><FileDown className="h-4 w-4 mr-1 shrink-0" /> PDF</>}
+      </Button>
+      <Button variant="outline" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive" onClick={onDelete}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
   );
 }
