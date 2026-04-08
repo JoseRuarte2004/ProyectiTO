@@ -35,6 +35,9 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [currentTreatment, setCurrentTreatment] = useState("");
   const [weeksPostInjury, setWeeksPostInjury] = useState("");
   const [weeksPostSurgery, setWeeksPostSurgery] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [treatmentType, setTreatmentType] = useState("");
+  const [immobilizationWeeks, setImmobilizationWeeks] = useState("");
   const [studies, setStudies] = useState("");
   const [nextOyt, setNextOyt] = useState("");
   const [doctorName, setDoctorName] = useState("");
@@ -49,6 +52,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [leisure, setLeisure] = useState("");
   const [physicalActivity, setPhysicalActivity] = useState("");
   const [sleepRest, setSleepRest] = useState("");
+  const [dominance, setDominance] = useState("");
+  const [avd, setAvd] = useState("");
+  const [aivd, setAivd] = useState("");
+  const [healthManagement, setHealthManagement] = useState("");
+  const [dashScore, setDashScore] = useState("");
   const [occNotes, setOccNotes] = useState("");
 
   const handleSave = async () => {
