@@ -1121,3 +1121,37 @@ function DeletePlanConfirm({ plan, onClose, onSaved }: { plan: any; onClose: () 
     </AlertDialog>
   );
 }
+
+function PlanCardActions({ plan, patient, onDetail, onEdit, onDelete }: { plan: any; patient: any; onDetail: () => void; onEdit: () => void; onDelete: () => void }) {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportPlanPdf(plan, patient);
+      toast.success("PDF exportado correctamente");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al exportar PDF");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+      <Button variant="default" size="sm" className="flex-1 min-w-0" onClick={onDetail}>
+        <Eye className="h-4 w-4 mr-1 shrink-0" /> Detalle
+      </Button>
+      <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={onEdit}>
+        <Edit className="h-4 w-4 mr-1 shrink-0" /> Editar
+      </Button>
+      <Button variant="outline" size="sm" className="flex-1 min-w-0" onClick={handleExport} disabled={exporting}>
+        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><FileDown className="h-4 w-4 mr-1 shrink-0" /> PDF</>}
+      </Button>
+      <Button variant="outline" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive" onClick={onDelete}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
