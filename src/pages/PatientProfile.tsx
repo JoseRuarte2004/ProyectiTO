@@ -18,6 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
+import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -263,17 +264,7 @@ export default function PatientProfile() {
                         {p.objective && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.objective}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                      <Button variant="default" size="sm" className="flex-1" onClick={() => setShowPlanDetail(p)}>
-                        <Eye className="h-4 w-4 mr-1" /> Detalle
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditPlan(p)}>
-                        <Edit className="h-4 w-4 mr-1" /> Editar
-                      </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeletePlan(p)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <PlanCardActions plan={p} patient={patient} onDetail={() => setShowPlanDetail(p)} onEdit={() => setEditPlan(p)} onDelete={() => setDeletePlan(p)} />
                   </CardContent>
                 </Card>
               ))}
