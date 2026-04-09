@@ -184,7 +184,6 @@ export default function PatientProfile() {
                   {[
                     ["Lateralidad", occupational.dominance ? ({ right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance : null],
                     ["Red de apoyo", occupational.support_network],
-                    ["Nivel educativo", occupational.education],
                     ["Educación", occupational.education],
                     ["Trabajo", occupational.job],
                     ["AVD", occupational.avd],
