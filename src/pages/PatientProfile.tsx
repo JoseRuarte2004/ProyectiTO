@@ -35,6 +35,9 @@ export default function PatientProfile() {
   const [analEvals, setAnalEvals] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [clinicalFiles, setClinicalFiles] = useState<any[]>([]);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [loadingUrls, setLoadingUrls] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Dialog states
