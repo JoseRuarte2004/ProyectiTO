@@ -105,7 +105,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [interventions, setInterventions] = useState("");
   const [homeInstructions, setHomeInstructions] = useState("");
   const [sessionNotes, setSessionNotes] = useState("");
-  const [sessionNotes, setSessionNotes] = useState("");
 
   const or = (v: string) => v.trim() || null;
   const orNum = (v: string) => (v.trim() ? parseInt(v) : null);
