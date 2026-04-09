@@ -21,6 +21,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
+import { es } from "date-fns/locale";
 import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
 
@@ -133,8 +134,9 @@ export default function PatientProfile() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="ficha" className="space-y-4">
+      <Tabs defaultValue="resumen" className="space-y-4">
         <TabsList className="bg-muted">
+          <TabsTrigger value="resumen">Resumen</TabsTrigger>
           <TabsTrigger value="ficha">Ficha</TabsTrigger>
           <TabsTrigger value="sessions">Sesiones</TabsTrigger>
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
@@ -142,6 +144,243 @@ export default function PatientProfile() {
           <TabsTrigger value="appointments">Turnos</TabsTrigger>
           <TabsTrigger value="archivos">Archivos</TabsTrigger>
         </TabsList>
+
+        {/* RESUMEN */}
+        <TabsContent value="resumen">
+          {(() => {
+            const treatmentMap: Record<string, string> = { conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" };
+            const dominanceMap: Record<string, string> = { right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" };
+            const ordinalR = (n: number | null) => {
+              if (!n) return "";
+              const m: Record<number, string> = {1:"1ra",2:"2da",3:"3ra",4:"4ta",5:"5ta",6:"6ta",7:"7ma",8:"8va",9:"9na",10:"10ma"};
+              return m[n] || `${n}ra`;
+            };
+
+            const clinicalFields = clinical ? [
+              ["Tipo de tratamiento", clinical.treatment_type ? treatmentMap[clinical.treatment_type] || clinical.treatment_type : null],
+              ["Fecha de lesión", clinical.injury_date ? format(new Date(clinical.injury_date + "T12:00:00"), "dd/MM/yyyy") : null],
+              ["Mecanismo de lesión", clinical.injury_mechanism],
+              ["Semanas post lesión", clinical.weeks_post_injury != null ? `${clinical.weeks_post_injury} semanas` : null],
+              ["Semanas post cirugía", clinical.weeks_post_surgery != null ? `${clinical.weeks_post_surgery} semanas` : null],
+              ["Semanas de inmovilización", clinical.immobilization_weeks != null ? `${clinical.immobilization_weeks} semanas` : null],
+              ["Médico derivante", clinical.doctor_name],
+              ["Próximo OyT", clinical.next_oyt_appointment ? format(new Date(clinical.next_oyt_appointment + "T12:00:00"), "dd/MM/yyyy") : null],
+              ["Estudios", clinical.studies],
+              ["Antecedentes personales", clinical.medical_history],
+              ["Tratamiento farmacológico", clinical.pharmacological_treatment],
+              ["Notas clínicas", clinical.notes],
+            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
+
+            const occFields = occupational ? [
+              ["Lateralidad", occupational.dominance ? dominanceMap[occupational.dominance] || occupational.dominance : null],
+              ["Red de apoyo", occupational.support_network],
+              ["Educación", occupational.education],
+              ["Trabajo", occupational.job],
+              ["AVD", occupational.avd],
+              ["AIVD", occupational.aivd],
+              ["Ocio", occupational.leisure],
+              ["Actividad física", occupational.physical_activity],
+              ["Sueño y descanso", occupational.sleep_rest],
+              ["Gestión de la salud", occupational.health_management],
+              ["Puntaje DASH", occupational.dash_score != null ? `${occupational.dash_score}/100` : null],
+            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
+
+            const firstFuncEval = funcEvals.length > 0
+              ? [...funcEvals].sort((a, b) => a.evaluation_date.localeCompare(b.evaluation_date))[0]
+              : null;
+
+            const funcFields = firstFuncEval ? [
+              ["Fecha", format(new Date(firstFuncEval.evaluation_date + "T12:00:00"), "dd/MM/yyyy")],
+              ["Lateralidad", firstFuncEval.dominance ? dominanceMap[firstFuncEval.dominance] || firstFuncEval.dominance : null],
+              ["Barthel", firstFuncEval.barthel_score != null ? `${firstFuncEval.barthel_score}/100` : null],
+              ["DASH", firstFuncEval.dash_score != null ? `${firstFuncEval.dash_score}/100` : null],
+              ["AVD", firstFuncEval.avd],
+              ["AIVD", firstFuncEval.aivd],
+              ["Actividad física", firstFuncEval.physical_activity],
+              ["Sueño y descanso", firstFuncEval.sleep_rest],
+              ["Gestión de la salud", firstFuncEval.health_management],
+              ["Notas", firstFuncEval.notes],
+            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
+
+            const sortedSessions = [...sessions].sort((a, b) => a.session_date.localeCompare(b.session_date));
+
+            return (
+              <div className="max-w-3xl mx-auto space-y-0 text-sm text-foreground">
+                {/* ENCABEZADO */}
+                <div className="pb-4 border-b border-border">
+                  <h2 className="text-xl font-bold">{patient.last_name}, {patient.first_name}</h2>
+                  <p className="text-muted-foreground mt-1">
+                    DNI: {patient.dni} · {age !== null ? `${age} años` : "Edad desconocida"} · {patient.insurance || "Sin obra social"} · Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}
+                  </p>
+                  {clinical?.diagnosis && (
+                    <p className="mt-2 font-semibold text-teal-700">Dx: {clinical.diagnosis}</p>
+                  )}
+                </div>
+
+                {/* DATOS CLÍNICOS */}
+                {clinicalFields.length > 0 && (
+                  <div className="border-b border-border">
+                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">DATOS CLÍNICOS</p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
+                      {clinicalFields.map(([label, value]) => (
+                        <div key={label}>
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          <p className="text-sm text-foreground">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* PERFIL OCUPACIONAL */}
+                {occFields.length > 0 && (
+                  <div className="border-b border-border">
+                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">PERFIL OCUPACIONAL</p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
+                      {occFields.map(([label, value]) => (
+                        <div key={label}>
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          <p className="text-sm text-foreground">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* EVALUACIÓN FUNCIONAL INICIAL */}
+                {funcFields.length > 0 && (
+                  <div className="border-b border-border">
+                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">EVALUACIÓN FUNCIONAL INICIAL</p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
+                      {funcFields.map(([label, value]) => (
+                        <div key={label}>
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          <p className="text-sm text-foreground">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* HISTORIAL DE VISITAS */}
+                {sortedSessions.length > 0 ? (
+                  <div>
+                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">HISTORIAL DE VISITAS</p>
+                    {sortedSessions.map((s) => {
+                      const linkedEval = analEvals.find((e: any) => e.session_id === s.id);
+                      return (
+                        <div key={s.id} className="pt-4 pb-4 border-b border-border/40 last:border-0">
+                          {/* Session header */}
+                          <div className="flex items-center gap-3 mb-3 flex-wrap">
+                            <span className="font-semibold">
+                              {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: es })}
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              s.session_type === "admission" ? "bg-purple-100 text-purple-700" :
+                              s.session_type === "discharge" ? "bg-green-100 text-green-700" :
+                              "bg-teal-50 text-teal-700"
+                            }`}>
+                              {s.session_type === "admission" ? "Admisión" : s.session_type === "discharge" ? "Alta" : "Seguimiento"}
+                            </span>
+                            {s.session_number && (
+                              <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>
+                            )}
+                            {s.week_at_session != null && (
+                              <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>
+                            )}
+                          </div>
+
+                          {/* Opening line */}
+                          {(s.session_number || s.week_at_session != null) && (
+                            <p className="italic text-muted-foreground text-xs mb-3">
+                              Paciente asiste a {ordinalR(s.session_number)} sesión
+                              {s.week_at_session != null ? `, cursando su ${s.week_at_session}ma semana POP/PL` : ""}.
+                            </p>
+                          )}
+
+                          {/* EVOLUCIÓN */}
+                          {(s.general_observations || s.evolution || s.symptom_changes || s.clinical_changes || s.treatment_adjustments) && (
+                            <div className="mb-3 space-y-1">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Evolución</p>
+                              {s.general_observations && <p className="whitespace-pre-wrap">{s.general_observations}</p>}
+                              {s.evolution && <p className="whitespace-pre-wrap">{s.evolution}</p>}
+                              {s.symptom_changes && <p><span className="font-medium">Cambios en síntomas:</span> {s.symptom_changes}</p>}
+                              {s.clinical_changes && <p><span className="font-medium">Cambios clínicos:</span> {s.clinical_changes}</p>}
+                              {s.treatment_adjustments && <p><span className="font-medium">Ajustes:</span> {s.treatment_adjustments}</p>}
+                            </div>
+                          )}
+
+                          {/* MEDICIONES */}
+                          {linkedEval && (
+                            <div className="mb-3 bg-blue-50/40 rounded-lg p-3 space-y-1 border border-blue-100/60">
+                              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Mediciones del día</p>
+                              {linkedEval.pain_score != null && (
+                                <p><span className="font-medium">Dolor EVA:</span> {linkedEval.pain_score}/10
+                                  {linkedEval.pain_location ? ` — ${linkedEval.pain_location}` : ""}
+                                  {linkedEval.pain_characteristics ? ` — ${linkedEval.pain_characteristics}` : ""}
+                                </p>
+                              )}
+                              {linkedEval.pain && <p className="text-muted-foreground">{linkedEval.pain}</p>}
+                              {linkedEval.pain_aggravating_factors && <p><span className="font-medium">Agravantes/Atenuantes:</span> {linkedEval.pain_aggravating_factors}</p>}
+                              {linkedEval.edema && <p><span className="font-medium">Edema:</span> {linkedEval.edema}</p>}
+                              {linkedEval.edema_circummetry && <p><span className="font-medium">Circometría:</span> {linkedEval.edema_circummetry}</p>}
+                              {linkedEval.godet_test && <p><span className="font-medium">Godet:</span> {linkedEval.godet_test}</p>}
+                              {linkedEval.arom && <p><span className="font-medium">AROM:</span> {linkedEval.arom}</p>}
+                              {linkedEval.prom && <p><span className="font-medium">PROM:</span> {linkedEval.prom}</p>}
+                              {linkedEval.kapandji && <p><span className="font-medium">Kapandji:</span> {linkedEval.kapandji}</p>}
+                              {(linkedEval.dynamometer_msd || linkedEval.dynamometer_msi) && (
+                                <p><span className="font-medium">Dinamómetro:</span>
+                                  {linkedEval.dynamometer_msd ? ` MSD ${linkedEval.dynamometer_msd}kg` : ""}
+                                  {linkedEval.dynamometer_msi ? ` / MSI ${linkedEval.dynamometer_msi}kg` : ""}
+                                </p>
+                              )}
+                              {linkedEval.muscle_strength && <p><span className="font-medium">Fuerza:</span> {linkedEval.muscle_strength}</p>}
+                              {linkedEval.sensitivity_functional && <p><span className="font-medium">Sensibilidad epicrítica:</span> {linkedEval.sensitivity_functional}</p>}
+                              {linkedEval.sensitivity_protective && <p><span className="font-medium">Sensibilidad protopática:</span> {linkedEval.sensitivity_protective}</p>}
+                              {linkedEval.sensitivity && <p><span className="font-medium">Sensibilidad:</span> {linkedEval.sensitivity}</p>}
+                              {linkedEval.trophic_state && <p><span className="font-medium">Estado trófico:</span> {linkedEval.trophic_state}</p>}
+                              {linkedEval.scar && <p><span className="font-medium">Cicatriz:</span> {linkedEval.scar}</p>}
+                              {linkedEval.vancouver_score != null && <p><span className="font-medium">Vancouver VSS:</span> {linkedEval.vancouver_score}/15</p>}
+                              {linkedEval.osas_score != null && <p><span className="font-medium">OSAS:</span> {linkedEval.osas_score}/60</p>}
+                              {linkedEval.posture && <p><span className="font-medium">Postura:</span> {linkedEval.posture}</p>}
+                              {linkedEval.emotional_state && <p><span className="font-medium">Emotividad:</span> {linkedEval.emotional_state}</p>}
+                            </div>
+                          )}
+
+                          {/* EN EL DÍA DE HOY SE ABORDÓ */}
+                          {s.interventions && (
+                            <div className="mb-3">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">En el día de hoy se abordó</p>
+                              <p className="whitespace-pre-wrap">{s.interventions}</p>
+                            </div>
+                          )}
+
+                          {/* INDICACIONES ENVIADAS */}
+                          {s.home_instructions_sent && (
+                            <div className="mb-3">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Indicaciones enviadas</p>
+                              <p className="whitespace-pre-wrap">{s.home_instructions_sent}</p>
+                            </div>
+                          )}
+
+                          {/* NOTAS */}
+                          {s.notes && (
+                            <p className="italic text-muted-foreground text-xs mt-2">{s.notes}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="pt-8 text-center text-muted-foreground text-sm">
+                    <p>Aún no hay visitas registradas.</p>
+                    <p className="text-xs mt-1">Registrá la primera visita desde el tab Sesiones.</p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </TabsContent>
 
         {/* FICHA */}
         <TabsContent value="ficha" className="space-y-4">
