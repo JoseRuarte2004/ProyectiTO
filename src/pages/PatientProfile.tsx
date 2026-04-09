@@ -273,7 +273,7 @@ export default function PatientProfile() {
                           {/* Session header */}
                           <div className="flex items-center gap-3 mb-3 flex-wrap">
                             <span className="font-semibold">
-                              {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: (await import("date-fns/locale")).es } as any)}
+                              {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: es })}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                               s.session_type === "admission" ? "bg-purple-100 text-purple-700" :
