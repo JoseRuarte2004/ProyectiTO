@@ -127,6 +127,13 @@ export default function PatientProfile() {
                 {patient.insurance && <span>{patient.insurance}</span>}
                 <span>Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}</span>
               </div>
+              {(patient.birth_date || patient.phone || patient.address) && (
+                <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
+                  {patient.birth_date && <span>Nac: {format(new Date(patient.birth_date + "T12:00:00"), "dd/MM/yyyy")}</span>}
+                  {patient.phone && <span>Tel: {patient.phone}</span>}
+                  {patient.address && <span>Dir: {patient.address}</span>}
+                </div>
+              )}
             </div>
             <StatusBadge status={patient.status} />
           </div>
@@ -136,7 +143,7 @@ export default function PatientProfile() {
       {/* Tabs */}
       <Tabs defaultValue="resumen" className="space-y-4">
         <TabsList className="bg-muted">
-          <TabsTrigger value="resumen">Resumen</TabsTrigger>
+          <TabsTrigger value="resumen">Historia</TabsTrigger>
           <TabsTrigger value="ficha">Ficha</TabsTrigger>
           <TabsTrigger value="sessions">Sesiones</TabsTrigger>
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
@@ -148,60 +155,11 @@ export default function PatientProfile() {
         {/* RESUMEN */}
         <TabsContent value="resumen">
           {(() => {
-            const treatmentMap: Record<string, string> = { conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" };
-            const dominanceMap: Record<string, string> = { right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" };
             const ordinalR = (n: number | null) => {
               if (!n) return "";
               const m: Record<number, string> = {1:"1ra",2:"2da",3:"3ra",4:"4ta",5:"5ta",6:"6ta",7:"7ma",8:"8va",9:"9na",10:"10ma"};
               return m[n] || `${n}ra`;
             };
-
-            const clinicalFields = clinical ? [
-              ["Tipo de tratamiento", clinical.treatment_type ? treatmentMap[clinical.treatment_type] || clinical.treatment_type : null],
-              ["Fecha de lesión", clinical.injury_date ? format(new Date(clinical.injury_date + "T12:00:00"), "dd/MM/yyyy") : null],
-              ["Mecanismo de lesión", clinical.injury_mechanism],
-              ["Semanas post lesión", clinical.weeks_post_injury != null ? `${clinical.weeks_post_injury} semanas` : null],
-              ["Semanas post cirugía", clinical.weeks_post_surgery != null ? `${clinical.weeks_post_surgery} semanas` : null],
-              ["Semanas de inmovilización", clinical.immobilization_weeks != null ? `${clinical.immobilization_weeks} semanas` : null],
-              ["Médico derivante", clinical.doctor_name],
-              ["Próximo OyT", clinical.next_oyt_appointment ? format(new Date(clinical.next_oyt_appointment + "T12:00:00"), "dd/MM/yyyy") : null],
-              ["Estudios", clinical.studies],
-              ["Antecedentes personales", clinical.medical_history],
-              ["Tratamiento farmacológico", clinical.pharmacological_treatment],
-              ["Notas clínicas", clinical.notes],
-            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
-
-            const occFields = occupational ? [
-              ["Lateralidad", occupational.dominance ? dominanceMap[occupational.dominance] || occupational.dominance : null],
-              ["Red de apoyo", occupational.support_network],
-              ["Educación", occupational.education],
-              ["Trabajo", occupational.job],
-              ["AVD", occupational.avd],
-              ["AIVD", occupational.aivd],
-              ["Ocio", occupational.leisure],
-              ["Actividad física", occupational.physical_activity],
-              ["Sueño y descanso", occupational.sleep_rest],
-              ["Gestión de la salud", occupational.health_management],
-              ["Puntaje DASH", occupational.dash_score != null ? `${occupational.dash_score}/100` : null],
-            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
-
-            const firstFuncEval = funcEvals.length > 0
-              ? [...funcEvals].sort((a, b) => a.evaluation_date.localeCompare(b.evaluation_date))[0]
-              : null;
-
-            const funcFields = firstFuncEval ? [
-              ["Fecha", format(new Date(firstFuncEval.evaluation_date + "T12:00:00"), "dd/MM/yyyy")],
-              ["Lateralidad", firstFuncEval.dominance ? dominanceMap[firstFuncEval.dominance] || firstFuncEval.dominance : null],
-              ["Barthel", firstFuncEval.barthel_score != null ? `${firstFuncEval.barthel_score}/100` : null],
-              ["DASH", firstFuncEval.dash_score != null ? `${firstFuncEval.dash_score}/100` : null],
-              ["AVD", firstFuncEval.avd],
-              ["AIVD", firstFuncEval.aivd],
-              ["Actividad física", firstFuncEval.physical_activity],
-              ["Sueño y descanso", firstFuncEval.sleep_rest],
-              ["Gestión de la salud", firstFuncEval.health_management],
-              ["Notas", firstFuncEval.notes],
-            ].filter(([, v]) => v != null && v !== "") as [string, string][] : [];
-
             const sortedSessions = [...sessions].sort((a, b) => a.session_date.localeCompare(b.session_date));
 
             return (
@@ -217,51 +175,6 @@ export default function PatientProfile() {
                   )}
                 </div>
 
-                {/* DATOS CLÍNICOS */}
-                {clinicalFields.length > 0 && (
-                  <div className="border-b border-border">
-                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">DATOS CLÍNICOS</p>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
-                      {clinicalFields.map(([label, value]) => (
-                        <div key={label}>
-                          <p className="text-xs text-muted-foreground">{label}</p>
-                          <p className="text-sm text-foreground">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* PERFIL OCUPACIONAL */}
-                {occFields.length > 0 && (
-                  <div className="border-b border-border">
-                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">PERFIL OCUPACIONAL</p>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
-                      {occFields.map(([label, value]) => (
-                        <div key={label}>
-                          <p className="text-xs text-muted-foreground">{label}</p>
-                          <p className="text-sm text-foreground">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* EVALUACIÓN FUNCIONAL INICIAL */}
-                {funcFields.length > 0 && (
-                  <div className="border-b border-border">
-                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">EVALUACIÓN FUNCIONAL INICIAL</p>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 pb-4">
-                      {funcFields.map(([label, value]) => (
-                        <div key={label}>
-                          <p className="text-xs text-muted-foreground">{label}</p>
-                          <p className="text-sm text-foreground">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* HISTORIAL DE VISITAS */}
                 {sortedSessions.length > 0 ? (
                   <div>
@@ -270,7 +183,6 @@ export default function PatientProfile() {
                       const linkedEval = analEvals.find((e: any) => e.session_id === s.id);
                       return (
                         <div key={s.id} className="pt-4 pb-4 border-b border-border/40 last:border-0">
-                          {/* Session header */}
                           <div className="flex items-center gap-3 mb-3 flex-wrap">
                             <span className="font-semibold">
                               {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: es })}
@@ -290,7 +202,6 @@ export default function PatientProfile() {
                             )}
                           </div>
 
-                          {/* Opening line */}
                           {(s.session_number || s.week_at_session != null) && (
                             <p className="italic text-muted-foreground text-xs mb-3">
                               Paciente asiste a {ordinalR(s.session_number)} sesión
@@ -298,7 +209,6 @@ export default function PatientProfile() {
                             </p>
                           )}
 
-                          {/* EVOLUCIÓN */}
                           {(s.general_observations || s.evolution || s.symptom_changes || s.clinical_changes || s.treatment_adjustments) && (
                             <div className="mb-3 space-y-1">
                               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Evolución</p>
@@ -310,7 +220,6 @@ export default function PatientProfile() {
                             </div>
                           )}
 
-                          {/* MEDICIONES */}
                           {linkedEval && (
                             <div className="mb-3 bg-blue-50/40 rounded-lg p-3 space-y-1 border border-blue-100/60">
                               <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Mediciones del día</p>
@@ -325,8 +234,8 @@ export default function PatientProfile() {
                               {linkedEval.edema && <p><span className="font-medium">Edema:</span> {linkedEval.edema}</p>}
                               {linkedEval.edema_circummetry && <p><span className="font-medium">Circometría:</span> {linkedEval.edema_circummetry}</p>}
                               {linkedEval.godet_test && <p><span className="font-medium">Godet:</span> {linkedEval.godet_test}</p>}
-                              {linkedEval.arom && <p><span className="font-medium">AROM:</span> {linkedEval.arom}</p>}
-                              {linkedEval.prom && <p><span className="font-medium">PROM:</span> {linkedEval.prom}</p>}
+                              {linkedEval.arom && <p><span className="font-medium">Goniometría PRE:</span> {linkedEval.arom}</p>}
+                              {linkedEval.prom && <p><span className="font-medium">Goniometría POST:</span> {linkedEval.prom}</p>}
                               {linkedEval.kapandji && <p><span className="font-medium">Kapandji:</span> {linkedEval.kapandji}</p>}
                               {(linkedEval.dynamometer_msd || linkedEval.dynamometer_msi) && (
                                 <p><span className="font-medium">Dinamómetro:</span>
@@ -347,7 +256,6 @@ export default function PatientProfile() {
                             </div>
                           )}
 
-                          {/* EN EL DÍA DE HOY SE ABORDÓ */}
                           {s.interventions && (
                             <div className="mb-3">
                               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">En el día de hoy se abordó</p>
@@ -355,7 +263,6 @@ export default function PatientProfile() {
                             </div>
                           )}
 
-                          {/* INDICACIONES ENVIADAS */}
                           {s.home_instructions_sent && (
                             <div className="mb-3">
                               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Indicaciones enviadas</p>
@@ -363,7 +270,6 @@ export default function PatientProfile() {
                             </div>
                           )}
 
-                          {/* NOTAS */}
                           {s.notes && (
                             <p className="italic text-muted-foreground text-xs mt-2">{s.notes}</p>
                           )}
@@ -462,7 +368,18 @@ export default function PatientProfile() {
               <p className="text-sm text-muted-foreground mt-1">Registrá la primera visita con el botón de arriba</p>
             </div>
           ) : (
-            <SessionTimeline sessions={sessions} analEvals={analEvals} />
+            <>
+              <SessionTimeline sessions={sessions} analEvals={analEvals} />
+              {(() => {
+                const dischargeSession = sessions.find(s => s.session_type === "discharge");
+                if (!dischargeSession) return null;
+                return (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800 font-medium">
+                    ✓ Alta otorgada el {format(new Date(dischargeSession.session_date + "T12:00:00"), "dd/MM/yyyy")} — Objetivos de tratamiento cumplidos
+                  </div>
+                );
+              })()}
+            </>
           )}
         </TabsContent>
 
@@ -826,8 +743,8 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                           )}
                           {hasMobility && (
                             <div>
-                              {nn(e.arom) && <Line>AROM: {e.arom}</Line>}
-                              {nn(e.prom) && <Line>PROM: {e.prom}</Line>}
+                              {nn(e.arom) && <Line>Goniometría PRE: {e.arom}</Line>}
+                              {nn(e.prom) && <Line>Goniometría POST: {e.prom}</Line>}
                               {nn(e.kapandji) && <Line>Kapandji: {e.kapandji}</Line>}
                               {renderGoniometry(e.goniometry)}
                             </div>
@@ -913,19 +830,30 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
 
 function NewSessionSheet({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
+  const [showMeasurements, setShowMeasurements] = useState(false);
+  const [showPostGonio, setShowPostGonio] = useState(false);
   const initForm = () => ({
     session_date: new Date().toISOString().split("T")[0],
     session_type: "follow_up", session_number: "", week_at_session: "",
-    general_observations: "", evolution: "", symptom_changes: "",
-    interventions: "", treatment_adjustments: "", home_instructions_sent: "",
-    next_appointment: "", notes: "",
-    // Measurements
-    pain_score: null as number | null,
-    pain_location: "", pain_characteristics: "", pain_aggravating_factors: "", pain: "",
-    edema: "", edema_circummetry: "", godet_test: "",
-    arom: "", kapandji: "", prom: "",
+    general_observations: "", symptom_changes: "", clinical_changes: "",
+    interventions: "", home_instructions_sent: "", notes: "",
+    discharge_summary: "",
+    // Pain
+    pain_score: 0,
+    pain_location: "", pain_characteristics: "", pain_aggravating_factors: "",
+    pain_radiates: false, pain_radiation: "",
+    // Circummetry
+    circ_wrist_msd: "", circ_wrist_msi: "", circ_global_msd: "", circ_global_msi: "",
+    // Goniometry PRE
+    gonio_pre_flex: "", gonio_pre_ext: "", gonio_pre_dc: "", gonio_pre_dr: "", gonio_pre_prono: "", gonio_pre_supino: "",
+    // Goniometry POST
+    gonio_post_flex: "", gonio_post_ext: "", gonio_post_dc: "", gonio_post_dr: "", gonio_post_prono: "", gonio_post_supino: "",
+    // Strength
     dynamometer_msd: "", dynamometer_msi: "",
-    muscle_strength: "", sensitivity: "", trophic_state: "", scar: "",
+    kapandji_score: "", kapandji_with_pain: false,
+    dppd: "", muscle_strength: "",
+    // Sensitivity & trophic
+    sensitivity: "", trophic_state: "", scar: "", posture: "", emotional_state: "",
   });
   const [form, setForm] = useState(initForm());
   const f = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
@@ -934,77 +862,101 @@ function NewSessionSheet({ open, onClose, patientId, userId, onSaved }: { open: 
     if (!form.session_date) return;
     setSaving(true);
 
+    // Build concatenated fields
+    const painLoc = [form.pain_location, form.pain_radiates && form.pain_radiation ? `Irradia a: ${form.pain_radiation}` : ""].filter(Boolean).join(" — ") || null;
+
+    const circParts: string[] = [];
+    if (form.circ_wrist_msd || form.circ_global_msd) circParts.push(`MSD: ${form.circ_wrist_msd || "-"}cm muñeca / ${form.circ_global_msd || "-"}cm global`);
+    if (form.circ_wrist_msi || form.circ_global_msi) circParts.push(`MSI: ${form.circ_wrist_msi || "-"}cm muñeca / ${form.circ_global_msi || "-"}cm global`);
+    const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
+
+    const gonioPre = [form.gonio_pre_flex, form.gonio_pre_ext, form.gonio_pre_dc, form.gonio_pre_dr, form.gonio_pre_prono, form.gonio_pre_supino];
+    const gonioLabels = ["Flex", "Ext", "DC", "DR", "Prono", "Supino"];
+    const aromVal = gonioPre.some(v => v !== "") ? gonioPre.map((v, i) => v ? `${gonioLabels[i]}:${v}°` : "").filter(Boolean).join(" ") : null;
+
+    const gonioPost = [form.gonio_post_flex, form.gonio_post_ext, form.gonio_post_dc, form.gonio_post_dr, form.gonio_post_prono, form.gonio_post_supino];
+    const promVal = showPostGonio && gonioPost.some(v => v !== "") ? gonioPost.map((v, i) => v ? `${gonioLabels[i]}:${v}°` : "").filter(Boolean).join(" ") : null;
+
+    const kapandjiVal = form.kapandji_score ? `${form.kapandji_score}/10${form.kapandji_with_pain ? " con dolor" : ""}` : null;
+
+    const muscleStrParts: string[] = [];
+    if (form.dppd) muscleStrParts.push(`DPPD: ${form.dppd}cm`);
+    if (form.muscle_strength) muscleStrParts.push(form.muscle_strength);
+    const muscleStrVal = muscleStrParts.length > 0 ? muscleStrParts.join(" — ") : null;
+
+    const generalObs = [form.discharge_summary, form.general_observations].filter(Boolean).join("\n\n") || null;
+
     const { data: session, error } = await supabase.from("therapy_sessions").insert({
       patient_id: patientId, professional_id: userId, is_deleted: false,
       session_date: form.session_date,
       session_type: form.session_type || null,
       session_number: form.session_number ? parseInt(form.session_number) : null,
       week_at_session: form.week_at_session ? parseInt(form.week_at_session) : null,
-      general_observations: form.general_observations || null,
-      evolution: form.evolution || null,
+      general_observations: generalObs,
       symptom_changes: form.symptom_changes || null,
+      clinical_changes: form.clinical_changes || null,
       interventions: form.interventions || null,
-      treatment_adjustments: form.treatment_adjustments || null,
       home_instructions_sent: form.home_instructions_sent || null,
-      next_appointment: form.next_appointment || null,
       notes: form.notes || null,
     } as any).select().single();
 
     if (error || !session) { setSaving(false); toast.error("Error al registrar la visita"); return; }
 
     // Check if any measurement field has a value
-    const measurementFields = [
-      form.pain_score, form.pain_location, form.pain_characteristics,
-      form.pain_aggravating_factors, form.pain, form.edema, form.edema_circummetry,
-      form.godet_test, form.arom, form.kapandji, form.prom,
-      form.dynamometer_msd, form.dynamometer_msi, form.muscle_strength,
-      form.sensitivity, form.trophic_state, form.scar,
-    ];
-    const hasMeasurements = measurementFields.some(v => v !== "" && v !== null && v !== undefined);
+    const hasMeasurements = showMeasurements && [
+      form.pain_score > 0, painLoc, form.pain_characteristics,
+      form.pain_aggravating_factors, edemaCirc, aromVal, promVal,
+      form.dynamometer_msd, form.dynamometer_msi, kapandjiVal, muscleStrVal,
+      form.sensitivity, form.trophic_state, form.scar, form.posture, form.emotional_state,
+    ].some(v => v !== "" && v !== null && v !== undefined && v !== false);
 
     if (hasMeasurements) {
       await supabase.from("analytical_evaluations").insert({
         patient_id: patientId, professional_id: userId,
         session_id: session.id, evaluation_date: form.session_date,
-        pain_score: form.pain_score ?? null,
-        pain_location: form.pain_location || null,
+        pain_score: form.pain_score > 0 ? form.pain_score : null,
+        pain_location: painLoc,
         pain_characteristics: form.pain_characteristics || null,
         pain_aggravating_factors: form.pain_aggravating_factors || null,
-        pain: form.pain || null,
-        edema: form.edema || null,
-        edema_circummetry: form.edema_circummetry || null,
-        godet_test: form.godet_test || null,
-        arom: form.arom || null,
-        kapandji: form.kapandji || null,
-        prom: form.prom || null,
+        edema_circummetry: edemaCirc,
+        arom: aromVal,
+        prom: promVal,
         dynamometer_msd: form.dynamometer_msd ? parseFloat(form.dynamometer_msd) : null,
         dynamometer_msi: form.dynamometer_msi ? parseFloat(form.dynamometer_msi) : null,
-        muscle_strength: form.muscle_strength || null,
+        kapandji: kapandjiVal,
+        muscle_strength: muscleStrVal,
         sensitivity: form.sensitivity || null,
         trophic_state: form.trophic_state || null,
         scar: form.scar || null,
+        posture: form.posture || null,
+        emotional_state: form.emotional_state || null,
       });
     }
 
     setSaving(false);
     toast.success("Visita registrada correctamente");
     setForm(initForm());
+    setShowMeasurements(false);
+    setShowPostGonio(false);
     onSaved(); onClose();
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { if (!v) { setForm(initForm()); onClose(); } }}>
+    <Sheet open={open} onOpenChange={(v) => { if (!v) { setForm(initForm()); setShowMeasurements(false); setShowPostGonio(false); onClose(); } }}>
       <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Registrar visita</SheetTitle>
           <SheetDescription className="sr-only">Formulario de registro de visita clínica</SheetDescription>
         </SheetHeader>
         <div className="mt-4">
-          <Accordion type="multiple" defaultValue={["visit", "evolution", "interventions", "closure"]} className="w-full">
-            <AccordionItem value="visit">
-              <AccordionTrigger className="text-sm font-semibold">Datos de la visita</AccordionTrigger>
+          <Accordion type="multiple" defaultValue={["session-data", "evolution", "interventions", "closure"]} className="w-full">
+            {/* Section 1: Session Data */}
+            <AccordionItem value="session-data">
+              <AccordionTrigger className="text-sm font-semibold">Datos de la sesión</AccordionTrigger>
               <AccordionContent className="space-y-4 pt-2">
                 <div className="space-y-2"><Label>Fecha *</Label><Input type="date" value={form.session_date} onChange={(e) => f("session_date", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Nº de sesión</Label><Input type="number" min={1} value={form.session_number} onChange={(e) => f("session_number", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Semanas POP/PL</Label><Input type="number" min={0} value={form.week_at_session} onChange={(e) => f("week_at_session", e.target.value)} /></div>
                 <div className="space-y-2">
                   <Label>Tipo de sesión</Label>
                   <Select value={form.session_type} onValueChange={(v) => f("session_type", v)}>
@@ -1016,107 +968,156 @@ function NewSessionSheet({ open, onClose, patientId, userId, onSaved }: { open: 
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2"><Label>Nº de sesión</Label><Input type="number" min={1} value={form.session_number} onChange={(e) => f("session_number", e.target.value)} /></div>
-                <div className="space-y-2">
-                  <Label>Semana POP / Post lesión</Label>
-                  <Input type="number" min={0} value={form.week_at_session} onChange={(e) => f("week_at_session", e.target.value)} />
-                  <p className="text-xs text-muted-foreground">Semana al momento de esta visita</p>
-                </div>
               </AccordionContent>
             </AccordionItem>
 
+            {/* Section 2: Evolution */}
             <AccordionItem value="evolution">
               <AccordionTrigger className="text-sm font-semibold">Evolución</AccordionTrigger>
               <AccordionContent className="space-y-4 pt-2">
-                <div className="space-y-2"><Label>Observaciones generales</Label><Textarea rows={3} placeholder="Estado general del paciente al inicio de la visita..." value={form.general_observations} onChange={(e) => f("general_observations", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Evolución</Label><Textarea rows={4} placeholder="Ej: Paciente refiere mejoría en rangos de flexión..." value={form.evolution} onChange={(e) => f("evolution", e.target.value)} /></div>
+                {form.session_type === "discharge" && (
+                  <div className="space-y-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <Label className="text-green-800">Resumen de alta / motivo</Label>
+                    <Textarea rows={3} placeholder="Motivo del alta, objetivos cumplidos..." value={form.discharge_summary} onChange={(e) => f("discharge_summary", e.target.value)} />
+                  </div>
+                )}
+                <div className="space-y-2"><Label>Evolución general / observaciones</Label><Textarea rows={3} placeholder="Estado general del paciente al inicio de la visita..." value={form.general_observations} onChange={(e) => f("general_observations", e.target.value)} /></div>
                 <div className="space-y-2"><Label>Cambios en síntomas</Label><Textarea rows={3} placeholder="Dolor, edema, sensibilidad, parestesias..." value={form.symptom_changes} onChange={(e) => f("symptom_changes", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Cambios clínicos</Label><Textarea rows={3} value={form.clinical_changes} onChange={(e) => f("clinical_changes", e.target.value)} /></div>
               </AccordionContent>
             </AccordionItem>
 
+            {/* Section 3: Measurements */}
+            <AccordionItem value="measurements">
+              <AccordionTrigger className="text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={showMeasurements} onCheckedChange={(v) => setShowMeasurements(!!v)} onClick={(e) => e.stopPropagation()} />
+                  <span>Registrar mediciones del día</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-2">
+                {showMeasurements && (
+                  <>
+                    {/* Pain */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">▸ Dolor</h4>
+                      <div className="space-y-2">
+                        <Label>Intensidad EVA (0-10)</Label>
+                        <div className="flex items-center gap-3">
+                          <Slider min={0} max={10} step={1} value={[form.pain_score]} onValueChange={([v]) => f("pain_score", v)} className="flex-1" />
+                          <span className="text-sm font-medium w-6 text-center">{form.pain_score}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2"><Label>Localización</Label><Input value={form.pain_location} onChange={(e) => f("pain_location", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Características (urente, punzante, etc.)</Label><Input value={form.pain_characteristics} onChange={(e) => f("pain_characteristics", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Agravantes / atenuantes</Label><Textarea rows={2} value={form.pain_aggravating_factors} onChange={(e) => f("pain_aggravating_factors", e.target.value)} /></div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox checked={form.pain_radiates} onCheckedChange={(v) => f("pain_radiates", !!v)} />
+                        <Label className="font-normal">Irradia</Label>
+                      </div>
+                      {form.pain_radiates && (
+                        <div className="space-y-2"><Label>¿Hacia dónde?</Label><Input value={form.pain_radiation} onChange={(e) => f("pain_radiation", e.target.value)} /></div>
+                      )}
+                    </div>
+
+                    {/* Circummetry */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">▸ Circometría</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2"><Label>Muñeca MSD (cm)</Label><Input type="number" step="0.1" value={form.circ_wrist_msd} onChange={(e) => f("circ_wrist_msd", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Muñeca MSI (cm)</Label><Input type="number" step="0.1" value={form.circ_wrist_msi} onChange={(e) => f("circ_wrist_msi", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Global MSD (cm)</Label><Input type="number" step="0.1" value={form.circ_global_msd} onChange={(e) => f("circ_global_msd", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Global MSI (cm)</Label><Input type="number" step="0.1" value={form.circ_global_msi} onChange={(e) => f("circ_global_msi", e.target.value)} /></div>
+                      </div>
+                    </div>
+
+                    {/* Goniometry PRE */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">▸ Goniometría PRE tratamiento</h4>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="space-y-2"><Label>Flex °</Label><Input type="number" value={form.gonio_pre_flex} onChange={(e) => f("gonio_pre_flex", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Ext °</Label><Input type="number" value={form.gonio_pre_ext} onChange={(e) => f("gonio_pre_ext", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>DC °</Label><Input type="number" value={form.gonio_pre_dc} onChange={(e) => f("gonio_pre_dc", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>DR °</Label><Input type="number" value={form.gonio_pre_dr} onChange={(e) => f("gonio_pre_dr", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Prono °</Label><Input type="number" value={form.gonio_pre_prono} onChange={(e) => f("gonio_pre_prono", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Supino °</Label><Input type="number" value={form.gonio_pre_supino} onChange={(e) => f("gonio_pre_supino", e.target.value)} /></div>
+                      </div>
+                    </div>
+
+                    {/* Goniometry POST */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Checkbox checked={showPostGonio} onCheckedChange={(v) => setShowPostGonio(!!v)} />
+                        <Label className="font-normal">Registrar goniometría POST tratamiento</Label>
+                      </div>
+                      {showPostGonio && (
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-2"><Label>Flex °</Label><Input type="number" value={form.gonio_post_flex} onChange={(e) => f("gonio_post_flex", e.target.value)} /></div>
+                          <div className="space-y-2"><Label>Ext °</Label><Input type="number" value={form.gonio_post_ext} onChange={(e) => f("gonio_post_ext", e.target.value)} /></div>
+                          <div className="space-y-2"><Label>DC °</Label><Input type="number" value={form.gonio_post_dc} onChange={(e) => f("gonio_post_dc", e.target.value)} /></div>
+                          <div className="space-y-2"><Label>DR °</Label><Input type="number" value={form.gonio_post_dr} onChange={(e) => f("gonio_post_dr", e.target.value)} /></div>
+                          <div className="space-y-2"><Label>Prono °</Label><Input type="number" value={form.gonio_post_prono} onChange={(e) => f("gonio_post_prono", e.target.value)} /></div>
+                          <div className="space-y-2"><Label>Supino °</Label><Input type="number" value={form.gonio_post_supino} onChange={(e) => f("gonio_post_supino", e.target.value)} /></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Strength & Kapandji */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">▸ Fuerza y Kapandji</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2"><Label>Dinamómetro MSD (kg)</Label><Input type="number" step="0.1" value={form.dynamometer_msd} onChange={(e) => f("dynamometer_msd", e.target.value)} /></div>
+                        <div className="space-y-2"><Label>Dinamómetro MSI (kg)</Label><Input type="number" step="0.1" value={form.dynamometer_msi} onChange={(e) => f("dynamometer_msi", e.target.value)} /></div>
+                      </div>
+                      <div className="flex items-end gap-3">
+                        <div className="space-y-2 flex-1"><Label>Kapandji (0-10)</Label><Input type="number" min={0} max={10} value={form.kapandji_score} onChange={(e) => f("kapandji_score", e.target.value)} /></div>
+                        <div className="flex items-center gap-2 pb-2">
+                          <Checkbox checked={form.kapandji_with_pain} onCheckedChange={(v) => f("kapandji_with_pain", !!v)} />
+                          <Label className="font-normal text-sm">Con dolor</Label>
+                        </div>
+                      </div>
+                      <div className="space-y-2"><Label>DPPD (cm)</Label><Input type="number" step="0.1" value={form.dppd} onChange={(e) => f("dppd", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Observaciones de fuerza</Label><Textarea rows={2} value={form.muscle_strength} onChange={(e) => f("muscle_strength", e.target.value)} /></div>
+                    </div>
+
+                    {/* Sensitivity & trophic */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-foreground">▸ Sensibilidad y estado trófico</h4>
+                      <div className="space-y-2"><Label>Sensibilidad</Label><Textarea rows={2} value={form.sensitivity} onChange={(e) => f("sensitivity", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={form.trophic_state} onChange={(e) => f("trophic_state", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={form.scar} onChange={(e) => f("scar", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Postura</Label><Textarea rows={2} value={form.posture} onChange={(e) => f("posture", e.target.value)} /></div>
+                      <div className="space-y-2"><Label>Emotividad</Label><Textarea rows={2} value={form.emotional_state} onChange={(e) => f("emotional_state", e.target.value)} /></div>
+                    </div>
+                  </>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Section 4: Interventions */}
             <AccordionItem value="interventions">
               <AccordionTrigger className="text-sm font-semibold">Intervenciones</AccordionTrigger>
               <AccordionContent className="space-y-4 pt-2">
                 <div className="space-y-2"><Label>En el día de hoy se abordó</Label><Textarea rows={5} placeholder="Ej: Ejercicios de movilidad activa de muñeca, elongaciones, baños de contraste..." value={form.interventions} onChange={(e) => f("interventions", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Indicaciones enviadas</Label><Textarea rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios 3 veces al día, 10 repeticiones..." value={form.home_instructions_sent} onChange={(e) => f("home_instructions_sent", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Ajustes al tratamiento</Label><Textarea rows={2} value={form.treatment_adjustments} onChange={(e) => f("treatment_adjustments", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Próximo turno</Label><Input type="date" value={form.next_appointment} onChange={(e) => f("next_appointment", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Notas</Label><Textarea rows={2} value={form.notes} onChange={(e) => f("notes", e.target.value)} /></div>
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="measurements">
-              <AccordionTrigger className="text-sm font-semibold">Mediciones del día</AccordionTrigger>
-              <AccordionContent className="space-y-6 pt-2">
-                <p className="text-xs text-muted-foreground">Opcional — completá solo si realizaste mediciones en esta visita</p>
-
-                {/* Dolor */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-foreground">▸ Dolor</h4>
-                  <div className="space-y-2">
-                    <Label>Intensidad EVA (0-10)</Label>
-                    <div className="flex items-center gap-3">
-                      <Slider min={0} max={10} step={1} value={[form.pain_score ?? 0]} onValueChange={([v]) => f("pain_score", v)} className="flex-1" />
-                      <span className="text-sm font-medium w-6 text-center">{form.pain_score ?? 0}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2"><Label>Localización</Label><Input value={form.pain_location} onChange={(e) => f("pain_location", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Características</Label><Input placeholder="punzante, urente, opresivo..." value={form.pain_characteristics} onChange={(e) => f("pain_characteristics", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Agravantes / Atenuantes</Label><Textarea rows={2} value={form.pain_aggravating_factors} onChange={(e) => f("pain_aggravating_factors", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Observaciones del dolor</Label><Textarea rows={2} value={form.pain} onChange={(e) => f("pain", e.target.value)} /></div>
-                </div>
-
-                {/* Edema */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-foreground">▸ Edema y circometría</h4>
-                  <div className="space-y-2"><Label>Observación del edema</Label><Textarea rows={2} value={form.edema} onChange={(e) => f("edema", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Circometría</Label><Textarea rows={2} placeholder="Ej: MSD muñeca 19cm / MSI 17cm" value={form.edema_circummetry} onChange={(e) => f("edema_circummetry", e.target.value)} /></div>
-                  <div className="space-y-2">
-                    <Label>Test de Godet</Label>
-                    <Select value={form.godet_test} onValueChange={(v) => f("godet_test", v)}>
-                      <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="negative">Negativo</SelectItem>
-                        <SelectItem value="1+">1+</SelectItem>
-                        <SelectItem value="2+">2+</SelectItem>
-                        <SelectItem value="3+">3+</SelectItem>
-                        <SelectItem value="4+">4+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Movilidad */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-foreground">▸ Movilidad</h4>
-                  <div className="space-y-2"><Label>AROM</Label><Textarea rows={3} placeholder="Ej: Flex muñeca 45°, Ext 60°, DR 15°, DC 25°, Pron 90°, Sup 80°" value={form.arom} onChange={(e) => f("arom", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Kapandji</Label><Input placeholder="Ej: 8/10" value={form.kapandji} onChange={(e) => f("kapandji", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Cierre de puño</Label><Input placeholder="Ej: Completo / Incompleto con tirantez" value={form.prom} onChange={(e) => f("prom", e.target.value)} /></div>
-                </div>
-
-                {/* Fuerza */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-foreground">▸ Fuerza</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2"><Label>Dinamómetro MSD (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msd} onChange={(e) => f("dynamometer_msd", e.target.value)} /></div>
-                    <div className="space-y-2"><Label>Dinamómetro MSI (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msi} onChange={(e) => f("dynamometer_msi", e.target.value)} /></div>
-                  </div>
-                  <div className="space-y-2"><Label>Observaciones de fuerza</Label><Textarea rows={2} value={form.muscle_strength} onChange={(e) => f("muscle_strength", e.target.value)} /></div>
-                </div>
-
-                {/* Sensibilidad */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-foreground">▸ Sensibilidad y estado trófico</h4>
-                  <div className="space-y-2"><Label>Sensibilidad</Label><Textarea rows={2} value={form.sensitivity} onChange={(e) => f("sensitivity", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={form.trophic_state} onChange={(e) => f("trophic_state", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={form.scar} onChange={(e) => f("scar", e.target.value)} /></div>
+            {/* Section 5: Instructions & Notes */}
+            <AccordionItem value="closure">
+              <AccordionTrigger className="text-sm font-semibold">Indicaciones y notas internas</AccordionTrigger>
+              <AccordionContent className="space-y-4 pt-2">
+                <div className="space-y-2"><Label>Indicaciones enviadas al paciente</Label><Textarea rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios 3 veces al día, 10 repeticiones..." value={form.home_instructions_sent} onChange={(e) => f("home_instructions_sent", e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Notas internas / pendientes</Label>
+                  <Textarea rows={2} value={form.notes} onChange={(e) => f("notes", e.target.value)} />
+                  <p className="text-xs text-muted-foreground">Campo interno — no se muestra en el resumen clínico</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
           <div className="flex justify-end gap-2 pt-4 pb-2">
-            <Button variant="outline" onClick={() => { setForm(initForm()); onClose(); }}>Cancelar</Button>
+            <Button variant="outline" onClick={() => { setForm(initForm()); setShowMeasurements(false); setShowPostGonio(false); onClose(); }}>Cancelar</Button>
             <Button onClick={handleSave} disabled={saving || !form.session_date}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar visita"}</Button>
           </div>
         </div>
@@ -1129,7 +1130,7 @@ function NewFuncEvalDialog({ open, onClose, patientId, userId, onSaved }: { open
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     evaluation_date: new Date().toISOString().split("T")[0],
-    dominance: "", barthel_score: "", dash_score: "",
+    barthel_score: "", dash_score: "",
     avd: "", aivd: "", work_education: "", leisure: "",
     physical_activity: "", sleep_rest: "", health_management: "",
     observations: "",
@@ -1137,7 +1138,7 @@ function NewFuncEvalDialog({ open, onClose, patientId, userId, onSaved }: { open
 
   const resetForm = () => setForm({
     evaluation_date: new Date().toISOString().split("T")[0],
-    dominance: "", barthel_score: "", dash_score: "",
+    barthel_score: "", dash_score: "",
     avd: "", aivd: "", work_education: "", leisure: "",
     physical_activity: "", sleep_rest: "", health_management: "",
     observations: "",
@@ -1156,7 +1157,7 @@ function NewFuncEvalDialog({ open, onClose, patientId, userId, onSaved }: { open
     const { error } = await supabase.from("functional_evaluations").insert({
       patient_id: patientId, professional_id: userId,
       evaluation_date: form.evaluation_date,
-      dominance: (form.dominance as any) || null,
+      
       barthel_score: form.barthel_score ? parseInt(form.barthel_score) : null,
       dash_score: form.dash_score ? parseInt(form.dash_score) : null,
       avd: form.avd || null, aivd: form.aivd || null,
@@ -1187,17 +1188,6 @@ function NewFuncEvalDialog({ open, onClose, patientId, userId, onSaved }: { open
               <div className="space-y-2">
                 <Label>Fecha de evaluación *</Label>
                 <Input type="date" value={form.evaluation_date} onChange={(e) => setForm({ ...form, evaluation_date: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Lateralidad</Label>
-                <Select value={form.dominance} onValueChange={(v) => setForm({ ...form, dominance: v })}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="right">Derecha</SelectItem>
-                    <SelectItem value="left">Izquierda</SelectItem>
-                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Puntaje Barthel (0-100)</Label>
