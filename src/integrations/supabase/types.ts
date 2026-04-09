@@ -269,6 +269,8 @@ export type Database = {
           id: string
           is_deleted: boolean
           patient_id: string
+          photo_date: string | null
+          session_id: string | null
           updated_at: string
           uploaded_by: string
         }
@@ -283,6 +285,8 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           patient_id: string
+          photo_date?: string | null
+          session_id?: string | null
           updated_at?: string
           uploaded_by: string
         }
@@ -297,6 +301,8 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           patient_id?: string
+          photo_date?: string | null
+          session_id?: string | null
           updated_at?: string
           uploaded_by?: string
         }
@@ -306,6 +312,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_files_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "therapy_sessions"
             referencedColumns: ["id"]
           },
           {

@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2, FileDown } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2, FileDown, Upload, Download, Image as ImageIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription } from "@/components/ui/dialog";
@@ -34,6 +35,9 @@ export default function PatientProfile() {
   const [analEvals, setAnalEvals] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [clinicalFiles, setClinicalFiles] = useState<any[]>([]);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [loadingUrls, setLoadingUrls] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Dialog states
@@ -47,10 +51,12 @@ export default function PatientProfile() {
   const [deletePlan, setDeletePlan] = useState<any>(null);
   const [showSessionDetail, setShowSessionDetail] = useState<any>(null);
   const [evalSubTab, setEvalSubTab] = useState("functional");
+  const [showUploadFile, setShowUploadFile] = useState(false);
+  const [deleteFile, setDeleteFile] = useState<any>(null);
 
   const fetchAll = async () => {
     if (!id) return;
-    const [p, c, o, s, fe, ae, pl, ap] = await Promise.all([
+    const [p, c, o, s, fe, ae, pl, ap, cf] = await Promise.all([
       supabase.from("patients").select("*").eq("id", id).single(),
       supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
       supabase.from("patient_occupational_profiles").select("*").eq("patient_id", id).single(),
@@ -59,6 +65,7 @@ export default function PatientProfile() {
       supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
       supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
       supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false }),
+      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
     ]);
     setPatient(p.data);
     setClinical(c.data);
@@ -68,7 +75,25 @@ export default function PatientProfile() {
     setAnalEvals(ae.data || []);
     setPlans(pl.data || []);
     setAppointments(ap.data || []);
+    const files = cf.data || [];
+    setClinicalFiles(files);
     setLoading(false);
+    // Fetch signed URLs for all files
+    fetchSignedUrls(files);
+  };
+
+  const fetchSignedUrls = async (files: any[]) => {
+    if (files.length === 0) { setSignedUrls({}); return; }
+    setLoadingUrls(true);
+    const urls: Record<string, string> = {};
+    const results = await Promise.all(
+      files.map(f => supabase.storage.from("clinical-files").createSignedUrl(f.file_path, 3600))
+    );
+    files.forEach((f, i) => {
+      if (results[i].data?.signedUrl) urls[f.id] = results[i].data!.signedUrl;
+    });
+    setSignedUrls(urls);
+    setLoadingUrls(false);
   };
 
   useEffect(() => { fetchAll(); }, [id]);
@@ -114,6 +139,7 @@ export default function PatientProfile() {
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
           <TabsTrigger value="plans">Planes</TabsTrigger>
           <TabsTrigger value="appointments">Turnos</TabsTrigger>
+          <TabsTrigger value="archivos">Archivos</TabsTrigger>
         </TabsList>
 
         {/* FICHA */}
@@ -292,6 +318,93 @@ export default function PatientProfile() {
             </div>
           )}
         </TabsContent>
+
+        {/* ARCHIVOS */}
+        <TabsContent value="archivos" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold text-foreground">Archivos Clínicos</h2>
+            <Button onClick={() => setShowUploadFile(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Agregar archivo</Button>
+          </div>
+
+          {/* Fotos de evolución */}
+          <div>
+            <h3 className="font-medium text-foreground mb-3 flex items-center gap-2"><ImageIcon className="h-4 w-4" />Fotos de evolución</h3>
+            {(() => {
+              const photos = clinicalFiles.filter(f => f.category === "photo");
+              if (photos.length === 0) return <p className="text-muted-foreground text-sm text-center py-6">Sin fotos de evolución. Agregá la primera foto.</p>;
+              if (loadingUrls) return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {photos.map(p => <Skeleton key={p.id} className="h-48 w-full rounded-lg" />)}
+                </div>
+              );
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {photos.map(p => (
+                    <div key={p.id} className="relative group rounded-lg border border-border/50 overflow-hidden bg-muted">
+                      {signedUrls[p.id] ? (
+                        <img src={signedUrls[p.id]} alt={p.description || p.file_name} className="w-full h-48 object-cover" />
+                      ) : (
+                        <div className="w-full h-48 flex items-center justify-center text-muted-foreground text-sm">Sin vista previa</div>
+                      )}
+                      <button
+                        onClick={() => setDeleteFile(p)}
+                        className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <div className="p-2">
+                        <p className="font-medium text-sm text-foreground">{format(new Date(p.photo_date), "dd/MM/yyyy")}</p>
+                        {p.description && <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="border-t border-border/50" />
+
+          {/* Documentos y estudios */}
+          <div>
+            <h3 className="font-medium text-foreground mb-3">Documentos y estudios</h3>
+            {(() => {
+              const docs = clinicalFiles.filter(f => f.category === "study" || f.category === "document");
+              if (docs.length === 0) return <p className="text-muted-foreground text-sm text-center py-6">Sin documentos ni estudios.</p>;
+              return (
+                <div className="space-y-2">
+                  {docs.map(d => (
+                    <Card key={d.id} className="border-border/50">
+                      <CardContent className="p-3 flex items-center gap-3">
+                        <span className="text-lg flex-shrink-0">{d.category === "study" ? "🔬" : "📄"}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm text-foreground truncate">{d.file_name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${d.category === "study" ? "bg-blue-100 text-blue-800" : "bg-muted text-muted-foreground"}`}>
+                              {d.category === "study" ? "Estudio" : "Documento"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(d.photo_date), "dd/MM/yyyy")}</span>
+                          </div>
+                          {d.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{d.description}</p>}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {signedUrls[d.id] && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(signedUrls[d.id], "_blank")}>
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteFile(d)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Session Detail Dialog */}
@@ -320,6 +433,15 @@ export default function PatientProfile() {
 
       {/* Delete Plan Confirm */}
       <DeletePlanConfirm plan={deletePlan} onClose={() => setDeletePlan(null)} onSaved={fetchAll} />
+
+      {/* Upload File Dialog */}
+      <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+
+      {/* Delete File Confirm */}
+      <DeleteFileConfirm file={deleteFile} onClose={() => setDeleteFile(null)} onDeleted={(fileId) => {
+        setClinicalFiles(prev => prev.filter(f => f.id !== fileId));
+        setSignedUrls(prev => { const n = { ...prev }; delete n[fileId]; return n; });
+      }} />
     </div>
   );
 }
@@ -1312,5 +1434,122 @@ function PlanCardActions({ plan, patient, onDetail, onEdit, onDelete }: { plan: 
         <Trash2 className="h-4 w-4" />
       </Button>
     </div>
+  );
+}
+
+function UploadFileDialog({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
+  const [category, setCategory] = useState<string>("");
+  const [photoDate, setPhotoDate] = useState(new Date().toISOString().split("T")[0]);
+  const [description, setDescription] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const resetAndClose = () => {
+    setCategory(""); setPhotoDate(new Date().toISOString().split("T")[0]); setDescription(""); setFile(null); setFileError(""); onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    setFileError("");
+    if (!f) { setFile(null); return; }
+    if (f.size > 50 * 1024 * 1024) { setFileError("El archivo supera los 50MB permitidos."); setFile(null); return; }
+    setFile(f);
+  };
+
+  const handleSave = async () => {
+    if (!category || !file) return;
+    setSaving(true);
+    const path = `${userId}/${patientId}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabase.storage.from("clinical-files").upload(path, file, { contentType: file.type });
+    if (upErr) { toast.error("Error al subir el archivo"); setSaving(false); return; }
+    const { error } = await supabase.from("clinical_files").insert({
+      patient_id: patientId, uploaded_by: userId, file_name: file.name,
+      file_path: path, file_type: file.type, category: category as any,
+      description: description || null, photo_date: photoDate, is_deleted: false,
+    });
+    setSaving(false);
+    if (error) { toast.error("Error al guardar el archivo"); return; }
+    toast.success("Archivo guardado correctamente");
+    resetAndClose();
+    onSaved();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={resetAndClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Agregar archivo</DialogTitle>
+          <DialogDescription>Subí fotos de evolución, estudios o documentos del paciente.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Categoría *</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="photo">Foto de evolución</SelectItem>
+                <SelectItem value="study">Estudio (Rx, RMN, eco...)</SelectItem>
+                <SelectItem value="document">Documento</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Fecha</Label>
+            <Input type="date" value={photoDate} onChange={(e) => setPhotoDate(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Podés cambiar la fecha si la foto es de otro día</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Descripción (opcional)</Label>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ej: Semana 3 post-cirugía, dorso de mano..." />
+          </div>
+          <div className="space-y-2">
+            <Label>Archivo *</Label>
+            <Input type="file" accept="image/*,application/pdf,video/mp4,video/quicktime" onChange={handleFileChange} />
+            {fileError && <p className="text-xs text-destructive">{fileError}</p>}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={resetAndClose}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving || !category || !file}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+              Subir
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteFileConfirm({ file, onClose, onDeleted }: { file: any; onClose: () => void; onDeleted: (id: string) => void }) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase.from("clinical_files").update({ is_deleted: true }).eq("id", file.id);
+    setDeleting(false);
+    if (error) { toast.error("Error al eliminar el archivo"); return; }
+    toast.success("Archivo eliminado");
+    onDeleted(file.id);
+    onClose();
+  };
+
+  return (
+    <AlertDialog open={!!file} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Eliminar archivo?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se eliminará "{file?.file_name}". Esta acción no se puede deshacer.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Eliminar"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
