@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
 import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
+import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
