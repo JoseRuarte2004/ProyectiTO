@@ -441,96 +441,101 @@ export default function PatientProfile() {
 function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: any[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-  const typeColor: Record<string, string> = { admission: "bg-teal-100 text-teal-800", follow_up: "bg-blue-100 text-blue-800", discharge: "bg-green-100 text-green-800" };
+  const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
 
-  const Section = ({ title, fields }: { title: string; fields: [string, any][] }) => {
+  const FieldGroup = ({ label, value }: { label: string; value: any }) => {
+    if (value == null || value === "") return null;
+    return (
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
+        <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
+      </div>
+    );
+  };
+
+  const SectionBlock = ({ title, fields }: { title: string; fields: [string, any][] }) => {
     const visible = fields.filter(([, v]) => v != null && v !== "");
     if (visible.length === 0) return null;
     return (
-      <div>
-        <h4 className="font-semibold text-foreground text-xs uppercase tracking-wide mb-1.5">{title}</h4>
-        <div className="space-y-1.5">
-          {visible.map(([label, value]) => (
-            <div key={label}><p className="text-muted-foreground text-xs">{label}</p><p className="text-sm whitespace-pre-wrap">{value}</p></div>
-          ))}
-        </div>
+      <div className="space-y-3">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{title}</p>
+        {visible.map(([label, value]) => (
+          <FieldGroup key={label} label={label} value={value} />
+        ))}
       </div>
     );
   };
 
   return (
-    <div className="relative pl-6">
-      <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-primary/30" />
+    <div className="relative">
+      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
       {sessions.map((s) => {
         const isOpen = expanded === s.id;
         const linkedEval = analEvals.find(e => e.session_id === s.id);
-        const preview = s.evolution || s.general_observations || "";
-        const previewLines = preview.split("\n").slice(0, 2).join("\n");
 
         return (
-          <div key={s.id} className="relative mb-4">
-            <div className="absolute -left-6 top-3 w-[18px] h-[18px] rounded-full bg-primary border-2 border-background z-10" />
-            <div className="bg-card border border-border/50 rounded-lg p-4">
-              <div className="flex items-start justify-between gap-2">
+          <div key={s.id} className="relative pl-12 pb-8">
+            <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
+            <div className="bg-white rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
-                    <span className="font-medium text-sm text-foreground">{format(new Date(s.session_date), "dd/MM/yyyy")}</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap">
                     {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
-                    {s.week_at_session != null && <span className="text-xs text-muted-foreground">Semana {s.week_at_session} POP/PL</span>}
-                    {linkedEval && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">📊 Con mediciones</span>}
+                    {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                   </div>
-                  {!isOpen && previewLines && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{previewLines}</p>}
+                  {linkedEval && (
+                    <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
+                      📊 Con mediciones
+                    </span>
+                  )}
                 </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setExpanded(isOpen ? null : s.id)}>
-                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
+                <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </div>
               </div>
 
+              {/* Expanded content */}
               {isOpen && (
-                <div className="mt-4 space-y-4 text-sm border-t border-border/50 pt-4">
-                  <Section title="Datos de la visita" fields={[
-                    ["Tipo", typeLabel[s.session_type] || null],
-                    ["Nº de sesión", s.session_number],
-                    ["Semana POP/PL", s.week_at_session],
-                  ]} />
-                  <Section title="Evolución" fields={[
+                <div className="border-t border-border/30 p-4 space-y-4">
+                  <SectionBlock title="Evolución" fields={[
                     ["Observaciones generales", s.general_observations],
                     ["Evolución", s.evolution],
                     ["Cambios en síntomas", s.symptom_changes],
                     ["Cambios clínicos", s.clinical_changes],
                   ]} />
-                  <Section title="Intervenciones" fields={[
+                  <SectionBlock title="Intervenciones" fields={[
                     ["En el día de hoy se abordó", s.interventions],
                     ["Ajustes al tratamiento", s.treatment_adjustments],
                     ["Indicaciones enviadas", s.home_instructions_sent],
+                  ]} />
+                  <SectionBlock title="Cierre" fields={[
                     ["Próximo turno", s.next_appointment ? format(new Date(s.next_appointment), "dd/MM/yyyy") : null],
                     ["Notas", s.notes],
                   ]} />
+
                   {linkedEval && (
-                    <div>
-                      <h4 className="font-semibold text-foreground text-xs uppercase tracking-wide mb-1.5 flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" /> Mediciones del día</h4>
-                      <div className="space-y-1.5">
-                        {linkedEval.pain_score != null && <div><p className="text-muted-foreground text-xs">Dolor EVA</p><p className="text-sm">{linkedEval.pain_score}/10</p></div>}
-                        {linkedEval.pain_location && <div><p className="text-muted-foreground text-xs">Localización dolor</p><p className="text-sm">{linkedEval.pain_location}</p></div>}
-                        {linkedEval.pain_characteristics && <div><p className="text-muted-foreground text-xs">Características</p><p className="text-sm">{linkedEval.pain_characteristics}</p></div>}
-                        {linkedEval.pain_aggravating_factors && <div><p className="text-muted-foreground text-xs">Agravantes/Atenuantes</p><p className="text-sm whitespace-pre-wrap">{linkedEval.pain_aggravating_factors}</p></div>}
-                        {linkedEval.pain && <div><p className="text-muted-foreground text-xs">Obs. dolor</p><p className="text-sm whitespace-pre-wrap">{linkedEval.pain}</p></div>}
-                        {linkedEval.edema && <div><p className="text-muted-foreground text-xs">Edema</p><p className="text-sm whitespace-pre-wrap">{linkedEval.edema}</p></div>}
-                        {linkedEval.edema_circummetry && <div><p className="text-muted-foreground text-xs">Circometría</p><p className="text-sm whitespace-pre-wrap">{linkedEval.edema_circummetry}</p></div>}
-                        {linkedEval.godet_test && <div><p className="text-muted-foreground text-xs">Test de Godet</p><p className="text-sm">{linkedEval.godet_test}</p></div>}
-                        {linkedEval.arom && <div><p className="text-muted-foreground text-xs">AROM</p><p className="text-sm whitespace-pre-wrap">{linkedEval.arom}</p></div>}
-                        {linkedEval.kapandji && <div><p className="text-muted-foreground text-xs">Kapandji</p><p className="text-sm">{linkedEval.kapandji}</p></div>}
-                        {linkedEval.prom && <div><p className="text-muted-foreground text-xs">Cierre de puño</p><p className="text-sm">{linkedEval.prom}</p></div>}
-                        {linkedEval.dynamometer_msd != null && <div><p className="text-muted-foreground text-xs">Dinamómetro MSD</p><p className="text-sm">{linkedEval.dynamometer_msd} kgf</p></div>}
-                        {linkedEval.dynamometer_msi != null && <div><p className="text-muted-foreground text-xs">Dinamómetro MSI</p><p className="text-sm">{linkedEval.dynamometer_msi} kgf</p></div>}
-                        {linkedEval.muscle_strength && <div><p className="text-muted-foreground text-xs">Fuerza</p><p className="text-sm whitespace-pre-wrap">{linkedEval.muscle_strength}</p></div>}
-                        {linkedEval.sensitivity && <div><p className="text-muted-foreground text-xs">Sensibilidad</p><p className="text-sm whitespace-pre-wrap">{linkedEval.sensitivity}</p></div>}
-                        {linkedEval.trophic_state && <div><p className="text-muted-foreground text-xs">Estado trófico</p><p className="text-sm whitespace-pre-wrap">{linkedEval.trophic_state}</p></div>}
-                        {linkedEval.scar && <div><p className="text-muted-foreground text-xs">Cicatriz</p><p className="text-sm whitespace-pre-wrap">{linkedEval.scar}</p></div>}
-                      </div>
+                    <div className="mt-4 pt-4 border-t border-blue-100 bg-blue-50/30 rounded-lg p-3 space-y-3">
+                      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">📊 Mediciones del día</p>
+                      {linkedEval.pain_score != null && <FieldGroup label="Dolor EVA" value={`${linkedEval.pain_score}/10`} />}
+                      {linkedEval.pain_location && <FieldGroup label="Localización dolor" value={linkedEval.pain_location} />}
+                      {linkedEval.pain_characteristics && <FieldGroup label="Características" value={linkedEval.pain_characteristics} />}
+                      {linkedEval.pain_aggravating_factors && <FieldGroup label="Agravantes/Atenuantes" value={linkedEval.pain_aggravating_factors} />}
+                      {linkedEval.pain && <FieldGroup label="Obs. dolor" value={linkedEval.pain} />}
+                      {linkedEval.edema && <FieldGroup label="Edema" value={linkedEval.edema} />}
+                      {linkedEval.edema_circummetry && <FieldGroup label="Circometría" value={linkedEval.edema_circummetry} />}
+                      {linkedEval.godet_test && <FieldGroup label="Test de Godet" value={linkedEval.godet_test} />}
+                      {linkedEval.arom && <FieldGroup label="AROM" value={linkedEval.arom} />}
+                      {linkedEval.kapandji && <FieldGroup label="Kapandji" value={linkedEval.kapandji} />}
+                      {linkedEval.prom && <FieldGroup label="Cierre de puño" value={linkedEval.prom} />}
+                      {linkedEval.dynamometer_msd != null && <FieldGroup label="Dinamómetro MSD" value={`${linkedEval.dynamometer_msd} kgf`} />}
+                      {linkedEval.dynamometer_msi != null && <FieldGroup label="Dinamómetro MSI" value={`${linkedEval.dynamometer_msi} kgf`} />}
+                      {linkedEval.muscle_strength && <FieldGroup label="Fuerza" value={linkedEval.muscle_strength} />}
+                      {linkedEval.sensitivity && <FieldGroup label="Sensibilidad" value={linkedEval.sensitivity} />}
+                      {linkedEval.trophic_state && <FieldGroup label="Estado trófico" value={linkedEval.trophic_state} />}
+                      {linkedEval.scar && <FieldGroup label="Cicatriz" value={linkedEval.scar} />}
                     </div>
                   )}
                 </div>
