@@ -235,18 +235,7 @@ export default function PatientProfile() {
                 <h2 className="font-semibold text-foreground">Evaluaciones Analíticas</h2>
                 <Button onClick={() => setShowNewAnalEval(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Evaluación</Button>
               </div>
-              {analEvals.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin evaluaciones analíticas.</p> : (
-                <div className="space-y-2">
-                  {analEvals.map((e) => (
-                    <Card key={e.id} className="border-border/50">
-                      <CardContent className="p-4">
-                        <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
-                        <p className="text-xs text-muted-foreground">Dolor EVA: {e.pain_score ?? "—"}/10 · Edema: {e.edema || "—"}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              <AnalEvalList evaluations={analEvals} />
             </>
           )}
         </TabsContent>
