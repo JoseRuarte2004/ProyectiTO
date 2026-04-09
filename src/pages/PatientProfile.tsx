@@ -56,7 +56,7 @@ export default function PatientProfile() {
 
   const fetchAll = async () => {
     if (!id) return;
-    const [p, c, o, s, fe, ae, pl, ap] = await Promise.all([
+    const [p, c, o, s, fe, ae, pl, ap, cf] = await Promise.all([
       supabase.from("patients").select("*").eq("id", id).single(),
       supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
       supabase.from("patient_occupational_profiles").select("*").eq("patient_id", id).single(),
@@ -65,6 +65,7 @@ export default function PatientProfile() {
       supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
       supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
       supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false }),
+      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
     ]);
     setPatient(p.data);
     setClinical(c.data);
@@ -74,7 +75,25 @@ export default function PatientProfile() {
     setAnalEvals(ae.data || []);
     setPlans(pl.data || []);
     setAppointments(ap.data || []);
+    const files = cf.data || [];
+    setClinicalFiles(files);
     setLoading(false);
+    // Fetch signed URLs for all files
+    fetchSignedUrls(files);
+  };
+
+  const fetchSignedUrls = async (files: any[]) => {
+    if (files.length === 0) { setSignedUrls({}); return; }
+    setLoadingUrls(true);
+    const urls: Record<string, string> = {};
+    const results = await Promise.all(
+      files.map(f => supabase.storage.from("clinical-files").createSignedUrl(f.file_path, 3600))
+    );
+    files.forEach((f, i) => {
+      if (results[i].data?.signedUrl) urls[f.id] = results[i].data!.signedUrl;
+    });
+    setSignedUrls(urls);
+    setLoadingUrls(false);
   };
 
   useEffect(() => { fetchAll(); }, [id]);
