@@ -50,7 +50,7 @@ export default function PatientProfile() {
   const [showPlanDetail, setShowPlanDetail] = useState<any>(null);
   const [editPlan, setEditPlan] = useState<any>(null);
   const [deletePlan, setDeletePlan] = useState<any>(null);
-  const [showSessionDetail, setShowSessionDetail] = useState<any>(null);
+  
   const [evalSubTab, setEvalSubTab] = useState("functional");
   const [showUploadFile, setShowUploadFile] = useState(false);
   const [deleteFile, setDeleteFile] = useState<any>(null);
