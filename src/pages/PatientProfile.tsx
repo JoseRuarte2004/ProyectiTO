@@ -318,6 +318,93 @@ export default function PatientProfile() {
             </div>
           )}
         </TabsContent>
+
+        {/* ARCHIVOS */}
+        <TabsContent value="archivos" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold text-foreground">Archivos Clínicos</h2>
+            <Button onClick={() => setShowUploadFile(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Agregar archivo</Button>
+          </div>
+
+          {/* Fotos de evolución */}
+          <div>
+            <h3 className="font-medium text-foreground mb-3 flex items-center gap-2"><ImageIcon className="h-4 w-4" />Fotos de evolución</h3>
+            {(() => {
+              const photos = clinicalFiles.filter(f => f.category === "photo");
+              if (photos.length === 0) return <p className="text-muted-foreground text-sm text-center py-6">Sin fotos de evolución. Agregá la primera foto.</p>;
+              if (loadingUrls) return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {photos.map(p => <Skeleton key={p.id} className="h-48 w-full rounded-lg" />)}
+                </div>
+              );
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {photos.map(p => (
+                    <div key={p.id} className="relative group rounded-lg border border-border/50 overflow-hidden bg-muted">
+                      {signedUrls[p.id] ? (
+                        <img src={signedUrls[p.id]} alt={p.description || p.file_name} className="w-full h-48 object-cover" />
+                      ) : (
+                        <div className="w-full h-48 flex items-center justify-center text-muted-foreground text-sm">Sin vista previa</div>
+                      )}
+                      <button
+                        onClick={() => setDeleteFile(p)}
+                        className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <div className="p-2">
+                        <p className="font-medium text-sm text-foreground">{format(new Date(p.photo_date), "dd/MM/yyyy")}</p>
+                        {p.description && <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="border-t border-border/50" />
+
+          {/* Documentos y estudios */}
+          <div>
+            <h3 className="font-medium text-foreground mb-3">Documentos y estudios</h3>
+            {(() => {
+              const docs = clinicalFiles.filter(f => f.category === "study" || f.category === "document");
+              if (docs.length === 0) return <p className="text-muted-foreground text-sm text-center py-6">Sin documentos ni estudios.</p>;
+              return (
+                <div className="space-y-2">
+                  {docs.map(d => (
+                    <Card key={d.id} className="border-border/50">
+                      <CardContent className="p-3 flex items-center gap-3">
+                        <span className="text-lg flex-shrink-0">{d.category === "study" ? "🔬" : "📄"}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm text-foreground truncate">{d.file_name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${d.category === "study" ? "bg-blue-100 text-blue-800" : "bg-muted text-muted-foreground"}`}>
+                              {d.category === "study" ? "Estudio" : "Documento"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(d.photo_date), "dd/MM/yyyy")}</span>
+                          </div>
+                          {d.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{d.description}</p>}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {signedUrls[d.id] && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(signedUrls[d.id], "_blank")}>
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteFile(d)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Session Detail Dialog */}
