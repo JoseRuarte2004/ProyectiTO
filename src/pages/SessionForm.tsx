@@ -171,10 +171,10 @@ export default function SessionForm() {
       const { error: feErr } = await supabase.from("functional_evaluations").insert({
         patient_id: patientId!, professional_id: user.id,
         evaluation_date: session_date,
-        dominance: func_dominance || null,
+        dominance: (func_dominance || null) as any,
         avd: func_avd || null, aivd: func_aivd || null,
         sleep_rest: func_sleep || null, health_management: func_health || null,
-      });
+      } as any);
       if (feErr) console.error("Error inserting func eval:", feErr);
     }
 
