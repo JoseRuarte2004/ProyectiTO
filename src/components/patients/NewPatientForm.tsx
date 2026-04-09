@@ -120,7 +120,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
       if (!admissionDate) errs.admissionDate = true;
     } else if (s === 2) {
       if (!diagnosis.trim()) errs.diagnosis = true;
-    } else if (s === 3) {
       if (!dominance) errs.dominance = true;
     } else if (s === 6) {
       if (!interventions.trim()) errs.interventions = true;
@@ -357,6 +356,18 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                 <Input value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} placeholder="Ej: Fx distal de radio D°, STC, Reparación tendinosa zona II" className={fieldClass("diagnosis")} />
                 {errors.diagnosis && <p className="text-xs text-destructive">Campo obligatorio</p>}
               </div>
+              <div className="space-y-2">
+                <Label>Lateralidad *</Label>
+                <Select value={dominance} onValueChange={setDominance}>
+                  <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="right">Diestro/a</SelectItem>
+                    <SelectItem value="left">Zurdo/a</SelectItem>
+                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.dominance && <p className="text-xs text-destructive">Campo obligatorio</p>}
+              </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Derivado/a por OyT</Label>
                 <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} placeholder="Nombre del médico derivante y fecha" />
@@ -424,18 +435,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               <p className="text-sm text-muted-foreground mt-0.5">Paso 3 de 6 — Perfil ocupacional</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Lateralidad *</Label>
-                <Select value={dominance} onValueChange={setDominance}>
-                  <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="right">Diestro/a</SelectItem>
-                    <SelectItem value="left">Zurdo/a</SelectItem>
-                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.dominance && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label>Red de apoyo / Con quién vive</Label>
                 <Textarea value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} rows={2} placeholder="Ej: Vive con sus padres. Pareja como red de apoyo principal." />
@@ -699,10 +698,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               <div className="space-y-2">
                 <Label>Indicaciones enviadas</Label>
                 <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios de movilidad 3 veces al día, 10 repeticiones." />
-              </div>
-              <div className="space-y-2">
-                <Label>Próximo turno</Label>
-                <Input type="date" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Notas</Label>
