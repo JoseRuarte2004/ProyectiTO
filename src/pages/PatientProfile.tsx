@@ -151,19 +151,19 @@ export default function PatientProfile() {
               {clinical ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {[
-                    ["Fecha de lesión", clinical.injury_date],
-                    ["Inicio de síntomas", clinical.symptom_start_date],
-                    ["Mecanismo de lesión", clinical.injury_mechanism],
                     ["Diagnóstico", clinical.diagnosis],
                     ["Tipo de tratamiento", clinical.treatment_type ? ({ conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" } as Record<string, string>)[clinical.treatment_type] || clinical.treatment_type : null],
+                    ["Fecha de lesión", clinical.injury_date ? format(new Date(clinical.injury_date + "T12:00:00"), "dd/MM/yyyy") : null],
+                    ["Inicio de síntomas", clinical.symptom_start_date ? format(new Date(clinical.symptom_start_date + "T12:00:00"), "dd/MM/yyyy") : null],
+                    ["Mecanismo de lesión", clinical.injury_mechanism],
                     ["Tratamiento actual", clinical.current_treatment],
-                    ["Semanas post lesión", clinical.weeks_post_injury],
-                    ["Semanas post cirugía", clinical.weeks_post_surgery],
+                    ["Semanas post lesión", clinical.weeks_post_injury != null ? `${clinical.weeks_post_injury} semanas` : null],
+                    ["Semanas post cirugía", clinical.weeks_post_surgery != null ? `${clinical.weeks_post_surgery} semanas` : null],
                     ["Semanas de inmovilización", clinical.immobilization_weeks != null ? `${clinical.immobilization_weeks} semanas` : null],
                     ["Médico derivante", clinical.doctor_name],
-                    ["Próximo OyT", clinical.next_oyt_appointment],
+                    ["Próximo OyT", clinical.next_oyt_appointment ? format(new Date(clinical.next_oyt_appointment + "T12:00:00"), "dd/MM/yyyy") : null],
                     ["Estudios", clinical.studies],
-                    ["Antecedentes", clinical.medical_history],
+                    ["Antecedentes personales", clinical.medical_history],
                     ["Tratamiento farmacológico", clinical.pharmacological_treatment],
                     ["Notas", clinical.notes],
                   ].filter(([, value]) => value != null && value !== "").map(([label, value]) => (
@@ -182,9 +182,9 @@ export default function PatientProfile() {
               {occupational ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {[
-                    ["Lateralidad", occupational.dominance ? ({ right: "Derecha", left: "Izquierda", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance : null],
+                    ["Lateralidad", occupational.dominance ? ({ right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance : null],
                     ["Red de apoyo", occupational.support_network],
-                    ["Nivel educativo", occupational.education],
+                    ["Educación", occupational.education],
                     ["Trabajo", occupational.job],
                     ["AVD", occupational.avd],
                     ["AIVD", occupational.aivd],
