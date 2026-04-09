@@ -389,11 +389,8 @@ export default function PatientProfile() {
         </TabsContent>
       </Tabs>
 
-      {/* Session Detail Dialog */}
-      <SessionDetailDialog session={showSessionDetail} onClose={() => setShowSessionDetail(null)} />
-
-      {/* New Session Dialog */}
-      <NewSessionDialog open={showNewSession} onClose={() => setShowNewSession(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+      {/* New Session Sheet */}
+      <NewSessionSheet open={showNewSession} onClose={() => setShowNewSession(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
 
       {/* New Functional Eval Dialog */}
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
