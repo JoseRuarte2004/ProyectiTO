@@ -443,27 +443,43 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
   const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
 
-  const FieldGroup = ({ label, value }: { label: string; value: any }) => {
-    if (value == null || value === "") return null;
-    return (
-      <div>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
-        <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
-      </div>
-    );
+  const ordinal = (n: number) => {
+    if (n === 1) return "1ra";
+    if (n === 2) return "2da";
+    if (n === 3) return "3ra";
+    if (n === 4) return "4ta";
+    if (n === 5) return "5ta";
+    return `${n}ma`;
   };
 
-  const SectionBlock = ({ title, fields }: { title: string; fields: [string, any][] }) => {
-    const visible = fields.filter(([, v]) => v != null && v !== "");
-    if (visible.length === 0) return null;
-    return (
-      <div className="space-y-3">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{title}</p>
-        {visible.map(([label, value]) => (
-          <FieldGroup key={label} label={label} value={value} />
-        ))}
-      </div>
-    );
+  const SectionHeading = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-2">{children}</p>
+  );
+
+  const Line = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-sm text-foreground whitespace-pre-wrap">{children}</p>
+  );
+
+  const nn = (v: any) => v != null && v !== "";
+
+  const renderGoniometry = (g: any) => {
+    if (!g || typeof g !== "object") return null;
+    const lines: string[] = [];
+    Object.entries(g).forEach(([joint, movements]: [string, any]) => {
+      if (!movements || typeof movements !== "object") return;
+      const parts = Object.entries(movements)
+        .filter(([, val]) => nn(val))
+        .map(([mov, val]) => `${mov} ${val}°`);
+      if (parts.length > 0) lines.push(`${joint}: ${parts.join(" · ")}`);
+    });
+    return lines.length > 0 ? <Line>{lines.join("\n")}</Line> : null;
+  };
+
+  const renderSpecificTests = (tests: any) => {
+    if (!tests || typeof tests !== "object") return null;
+    const entries = Object.entries(tests).filter(([, v]) => nn(v));
+    if (entries.length === 0) return null;
+    return <>{entries.map(([name, result]) => <Line key={name}>{name}: {String(result)}</Line>)}</>;
   };
 
   return (
@@ -497,47 +513,153 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                 </div>
               </div>
 
-              {/* Expanded content */}
+              {/* Expanded clinical note */}
               {isOpen && (
-                <div className="border-t border-border/30 p-4 space-y-4">
-                  <SectionBlock title="Evolución" fields={[
-                    ["Observaciones generales", s.general_observations],
-                    ["Evolución", s.evolution],
-                    ["Cambios en síntomas", s.symptom_changes],
-                    ["Cambios clínicos", s.clinical_changes],
-                  ]} />
-                  <SectionBlock title="Intervenciones" fields={[
-                    ["En el día de hoy se abordó", s.interventions],
-                    ["Ajustes al tratamiento", s.treatment_adjustments],
-                    ["Indicaciones enviadas", s.home_instructions_sent],
-                  ]} />
-                  <SectionBlock title="Cierre" fields={[
-                    ["Próximo turno", s.next_appointment ? format(new Date(s.next_appointment), "dd/MM/yyyy") : null],
-                    ["Notas", s.notes],
-                  ]} />
+                <div className="border-t border-border/30 px-5 py-4 space-y-5 bg-gray-50/50 font-sans text-sm text-foreground">
+                  {/* Header line */}
+                  <p className="italic text-muted-foreground mb-3">
+                    {s.session_number != null
+                      ? `Paciente asiste a ${ordinal(s.session_number)} sesión`
+                      : "Paciente asiste a sesión"}
+                    {s.week_at_session != null && (
+                      `, cursando su ${s.week_at_session} semana ${
+                        s.session_type === "admission" ? "de admisión" :
+                        s.session_type === "discharge" ? "de alta" : "POP/PL"
+                      }`
+                    )}
+                    {s.week_at_session == null && s.session_type === "admission" && " de admisión"}
+                    {s.week_at_session == null && s.session_type === "discharge" && " de alta"}
+                    .
+                  </p>
 
-                  {linkedEval && (
-                    <div className="mt-4 pt-4 border-t border-blue-100 bg-blue-50/30 rounded-lg p-3 space-y-3">
-                      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">📊 Mediciones del día</p>
-                      {linkedEval.pain_score != null && <FieldGroup label="Dolor EVA" value={`${linkedEval.pain_score}/10`} />}
-                      {linkedEval.pain_location && <FieldGroup label="Localización dolor" value={linkedEval.pain_location} />}
-                      {linkedEval.pain_characteristics && <FieldGroup label="Características" value={linkedEval.pain_characteristics} />}
-                      {linkedEval.pain_aggravating_factors && <FieldGroup label="Agravantes/Atenuantes" value={linkedEval.pain_aggravating_factors} />}
-                      {linkedEval.pain && <FieldGroup label="Obs. dolor" value={linkedEval.pain} />}
-                      {linkedEval.edema && <FieldGroup label="Edema" value={linkedEval.edema} />}
-                      {linkedEval.edema_circummetry && <FieldGroup label="Circometría" value={linkedEval.edema_circummetry} />}
-                      {linkedEval.godet_test && <FieldGroup label="Test de Godet" value={linkedEval.godet_test} />}
-                      {linkedEval.arom && <FieldGroup label="AROM" value={linkedEval.arom} />}
-                      {linkedEval.kapandji && <FieldGroup label="Kapandji" value={linkedEval.kapandji} />}
-                      {linkedEval.prom && <FieldGroup label="Cierre de puño" value={linkedEval.prom} />}
-                      {linkedEval.dynamometer_msd != null && <FieldGroup label="Dinamómetro MSD" value={`${linkedEval.dynamometer_msd} kgf`} />}
-                      {linkedEval.dynamometer_msi != null && <FieldGroup label="Dinamómetro MSI" value={`${linkedEval.dynamometer_msi} kgf`} />}
-                      {linkedEval.muscle_strength && <FieldGroup label="Fuerza" value={linkedEval.muscle_strength} />}
-                      {linkedEval.sensitivity && <FieldGroup label="Sensibilidad" value={linkedEval.sensitivity} />}
-                      {linkedEval.trophic_state && <FieldGroup label="Estado trófico" value={linkedEval.trophic_state} />}
-                      {linkedEval.scar && <FieldGroup label="Cicatriz" value={linkedEval.scar} />}
+                  {/* EVOLUCIÓN */}
+                  {(nn(s.general_observations) || nn(s.evolution) || nn(s.symptom_changes) || nn(s.clinical_changes) || nn(s.treatment_adjustments)) && (
+                    <div className="space-y-2">
+                      <SectionHeading>Evolución</SectionHeading>
+                      {nn(s.general_observations) && <Line>{s.general_observations}</Line>}
+                      {nn(s.evolution) && <Line>{s.evolution}</Line>}
+                      {nn(s.symptom_changes) && <Line>Cambios en síntomas: {s.symptom_changes}</Line>}
+                      {nn(s.clinical_changes) && <Line>Cambios clínicos: {s.clinical_changes}</Line>}
+                      {nn(s.treatment_adjustments) && <Line>Ajustes al tratamiento: {s.treatment_adjustments}</Line>}
                     </div>
                   )}
+
+                  {/* MEDICIONES DEL DÍA */}
+                  {linkedEval && (() => {
+                    const e = linkedEval;
+                    const hasPain = nn(e.pain_score) || nn(e.pain_location) || nn(e.pain_characteristics) || nn(e.pain_appearance) || nn(e.pain_radiation) || nn(e.pain_aggravating_factors) || nn(e.pain);
+                    const hasEdema = nn(e.edema) || nn(e.edema_circummetry) || nn(e.godet_test);
+                    const hasMobility = nn(e.arom) || nn(e.prom) || nn(e.kapandji) || (e.goniometry && typeof e.goniometry === "object");
+                    const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.muscle_strength) || nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
+                    const hasSensitivity = nn(e.sensitivity_functional) || nn(e.sensitivity_protective) || nn(e.sensitivity);
+                    const hasTrophic = nn(e.trophic_state) || nn(e.scar) || nn(e.vancouver_score) || nn(e.osas_score);
+                    const hasTests = e.specific_tests && typeof e.specific_tests === "object" && Object.values(e.specific_tests).some((v: any) => nn(v));
+                    const hasPosture = nn(e.posture) || nn(e.emotional_state);
+                    const hasAny = hasPain || hasEdema || hasMobility || hasStrength || hasSensitivity || hasTrophic || hasTests || hasPosture;
+
+                    if (!hasAny && !nn(e.notes)) return null;
+
+                    return (
+                      <div className="space-y-2">
+                        <SectionHeading>Mediciones del día</SectionHeading>
+                        <div className="bg-white rounded-lg border border-border/40 p-3 space-y-2">
+                          {hasPain && (
+                            <div>
+                              <Line>
+                                {[
+                                  nn(e.pain_score) && `Dolor: ${e.pain_score}/10`,
+                                  nn(e.pain_location) && e.pain_location,
+                                  nn(e.pain_characteristics) && e.pain_characteristics,
+                                  nn(e.pain_appearance) && e.pain_appearance,
+                                  nn(e.pain_radiation) && `Irradia: ${e.pain_radiation}`,
+                                  nn(e.pain_aggravating_factors) && `Agravantes: ${e.pain_aggravating_factors}`,
+                                ].filter(Boolean).join(" — ")}
+                              </Line>
+                              {nn(e.pain) && <Line>{e.pain}</Line>}
+                            </div>
+                          )}
+                          {hasEdema && (
+                            <div>
+                              {nn(e.edema) && <Line>Edema: {e.edema}</Line>}
+                              {nn(e.edema_circummetry) && <Line>Circometría: {e.edema_circummetry}</Line>}
+                              {nn(e.godet_test) && <Line>Test de Godet: {e.godet_test}</Line>}
+                            </div>
+                          )}
+                          {hasMobility && (
+                            <div>
+                              {nn(e.arom) && <Line>AROM: {e.arom}</Line>}
+                              {nn(e.prom) && <Line>PROM: {e.prom}</Line>}
+                              {nn(e.kapandji) && <Line>Kapandji: {e.kapandji}</Line>}
+                              {renderGoniometry(e.goniometry)}
+                            </div>
+                          )}
+                          {hasStrength && (
+                            <div>
+                              {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
+                                <Line>Dinamómetro: {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}{nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}{nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}</Line>
+                              )}
+                              {nn(e.muscle_strength) && <Line>{e.muscle_strength}</Line>}
+                              {nn(e.muscle_strength_median) && <Line>Nervio mediano: {e.muscle_strength_median}</Line>}
+                              {nn(e.muscle_strength_cubital) && <Line>Nervio cubital: {e.muscle_strength_cubital}</Line>}
+                              {nn(e.muscle_strength_radial) && <Line>Nervio radial: {e.muscle_strength_radial}</Line>}
+                            </div>
+                          )}
+                          {hasSensitivity && (
+                            <div>
+                              {nn(e.sensitivity_functional) && <Line>Epicrítica: {e.sensitivity_functional}</Line>}
+                              {nn(e.sensitivity_protective) && <Line>Protopática: {e.sensitivity_protective}</Line>}
+                              {nn(e.sensitivity) && <Line>{e.sensitivity}</Line>}
+                            </div>
+                          )}
+                          {hasTrophic && (
+                            <div>
+                              {nn(e.trophic_state) && <Line>Estado trófico: {e.trophic_state}</Line>}
+                              {nn(e.scar) && <Line>Cicatriz: {e.scar}</Line>}
+                              {nn(e.vancouver_score) && <Line>Vancouver VSS: {e.vancouver_score}/15</Line>}
+                              {nn(e.osas_score) && <Line>OSAS: {e.osas_score}/60</Line>}
+                            </div>
+                          )}
+                          {hasTests && renderSpecificTests(e.specific_tests)}
+                          {hasPosture && (
+                            <div>
+                              {nn(e.posture) && <Line>Postura: {e.posture}</Line>}
+                              {nn(e.emotional_state) && <Line>Emotividad: {e.emotional_state}</Line>}
+                            </div>
+                          )}
+                          {nn(e.notes) && <p className="text-sm italic text-muted-foreground">{e.notes}</p>}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* EN EL DÍA DE HOY SE ABORDÓ */}
+                  {nn(s.interventions) && (
+                    <div>
+                      <SectionHeading>En el día de hoy se abordó</SectionHeading>
+                      <Line>{s.interventions}</Line>
+                    </div>
+                  )}
+
+                  {/* INDICACIONES ENVIADAS */}
+                  {nn(s.home_instructions_sent) && (
+                    <div>
+                      <SectionHeading>Indicaciones enviadas</SectionHeading>
+                      <Line>{s.home_instructions_sent}</Line>
+                    </div>
+                  )}
+
+                  {/* NOTAS */}
+                  {nn(s.notes) && (
+                    <div>
+                      <SectionHeading>Notas</SectionHeading>
+                      <Line>{s.notes}</Line>
+                    </div>
+                  )}
+
+                  {/* Closing date */}
+                  <p className="text-right text-xs text-muted-foreground pt-2 border-t border-border/20">
+                    {format(new Date(s.session_date), "dd/MM/yyyy")}
+                  </p>
                 </div>
               )}
             </div>
