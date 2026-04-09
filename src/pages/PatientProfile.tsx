@@ -51,6 +51,8 @@ export default function PatientProfile() {
   const [deletePlan, setDeletePlan] = useState<any>(null);
   const [showSessionDetail, setShowSessionDetail] = useState<any>(null);
   const [evalSubTab, setEvalSubTab] = useState("functional");
+  const [showUploadFile, setShowUploadFile] = useState(false);
+  const [deleteFile, setDeleteFile] = useState<any>(null);
 
   const fetchAll = async () => {
     if (!id) return;
