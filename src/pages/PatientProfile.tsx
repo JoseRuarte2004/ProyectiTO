@@ -433,6 +433,15 @@ export default function PatientProfile() {
 
       {/* Delete Plan Confirm */}
       <DeletePlanConfirm plan={deletePlan} onClose={() => setDeletePlan(null)} onSaved={fetchAll} />
+
+      {/* Upload File Dialog */}
+      <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+
+      {/* Delete File Confirm */}
+      <DeleteFileConfirm file={deleteFile} onClose={() => setDeleteFile(null)} onDeleted={(fileId) => {
+        setClinicalFiles(prev => prev.filter(f => f.id !== fileId));
+        setSignedUrls(prev => { const n = { ...prev }; delete n[fileId]; return n; });
+      }} />
     </div>
   );
 }
