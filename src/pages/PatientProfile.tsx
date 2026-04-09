@@ -139,6 +139,7 @@ export default function PatientProfile() {
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
           <TabsTrigger value="plans">Planes</TabsTrigger>
           <TabsTrigger value="appointments">Turnos</TabsTrigger>
+          <TabsTrigger value="archivos">Archivos</TabsTrigger>
         </TabsList>
 
         {/* FICHA */}
