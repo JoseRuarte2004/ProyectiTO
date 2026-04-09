@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2, FileDown, Upload, Download, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Eye, Edit, Search, Trash2, FileDown, Upload, Download, Image as ImageIcon, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,7 +50,7 @@ export default function PatientProfile() {
   const [showPlanDetail, setShowPlanDetail] = useState<any>(null);
   const [editPlan, setEditPlan] = useState<any>(null);
   const [deletePlan, setDeletePlan] = useState<any>(null);
-  const [showSessionDetail, setShowSessionDetail] = useState<any>(null);
+  
   const [evalSubTab, setEvalSubTab] = useState("functional");
   const [showUploadFile, setShowUploadFile] = useState(false);
   const [deleteFile, setDeleteFile] = useState<any>(null);
@@ -205,32 +206,13 @@ export default function PatientProfile() {
           </Card>
         </TabsContent>
 
-        {/* SESSIONS */}
         <TabsContent value="sessions" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="font-semibold text-foreground">Sesiones de Terapia</h2>
-            <Button onClick={() => setShowNewSession(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Sesión</Button>
+            <Button onClick={() => setShowNewSession(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Registrar visita</Button>
           </div>
           {sessions.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin sesiones registradas.</p> : (
-            <div className="space-y-2">
-              {sessions.map((s) => {
-                const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-                const typeColor: Record<string, string> = { admission: "bg-teal-100 text-teal-800", follow_up: "bg-blue-100 text-blue-800", discharge: "bg-green-100 text-green-800" };
-                return (
-                  <Card key={s.id} className="border-border/50 cursor-pointer hover:shadow-sm" onClick={() => setShowSessionDetail(s)}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-sm text-foreground">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
-                        {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
-                        {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
-                        {s.week_at_session != null && <span className="text-xs text-muted-foreground">Semana {s.week_at_session} POP/PL</span>}
-                      </div>
-                      <Eye className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            <SessionTimeline sessions={sessions} analEvals={analEvals} />
           )}
         </TabsContent>
 
@@ -257,9 +239,9 @@ export default function PatientProfile() {
             <>
               <div className="flex justify-between items-center">
                 <h2 className="font-semibold text-foreground">Evaluaciones Analíticas</h2>
-                <Button onClick={() => setShowNewAnalEval(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Evaluación</Button>
               </div>
               <AnalEvalList evaluations={analEvals} />
+              <p className="text-xs text-muted-foreground text-center mt-2">Las evaluaciones analíticas se registran desde el tab Sesiones</p>
             </>
           )}
         </TabsContent>
@@ -407,11 +389,8 @@ export default function PatientProfile() {
         </TabsContent>
       </Tabs>
 
-      {/* Session Detail Dialog */}
-      <SessionDetailDialog session={showSessionDetail} onClose={() => setShowSessionDetail(null)} />
-
-      {/* New Session Dialog */}
-      <NewSessionDialog open={showNewSession} onClose={() => setShowNewSession(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+      {/* New Session Sheet */}
+      <NewSessionSheet open={showNewSession} onClose={() => setShowNewSession(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
 
       {/* New Functional Eval Dialog */}
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
@@ -446,24 +425,22 @@ export default function PatientProfile() {
   );
 }
 
-// --- Sub-dialogs ---
+// --- Session Timeline ---
 
-function SessionDetailDialog({ session, onClose }: { session: any; onClose: () => void }) {
-  if (!session) return null;
+function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: any[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-  const headerParts = [typeLabel[session.session_type] || "", format(new Date(session.session_date), "dd/MM/yyyy")];
-  if (session.session_number != null) headerParts.push(`Sesión Nº ${session.session_number}`);
-  if (session.week_at_session != null) headerParts.push(`Semana ${session.week_at_session} POP/PL`);
+  const typeColor: Record<string, string> = { admission: "bg-teal-100 text-teal-800", follow_up: "bg-blue-100 text-blue-800", discharge: "bg-green-100 text-green-800" };
 
   const Section = ({ title, fields }: { title: string; fields: [string, any][] }) => {
     const visible = fields.filter(([, v]) => v != null && v !== "");
     if (visible.length === 0) return null;
     return (
       <div>
-        <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-        <div className="space-y-2">
+        <h4 className="font-semibold text-foreground text-xs uppercase tracking-wide mb-1.5">{title}</h4>
+        <div className="space-y-1.5">
           {visible.map(([label, value]) => (
-            <div key={label}><p className="text-muted-foreground text-xs font-medium">{label}</p><p className="whitespace-pre-wrap">{value}</p></div>
+            <div key={label}><p className="text-muted-foreground text-xs">{label}</p><p className="text-sm whitespace-pre-wrap">{value}</p></div>
           ))}
         </div>
       </div>
@@ -471,53 +448,116 @@ function SessionDetailDialog({ session, onClose }: { session: any; onClose: () =
   };
 
   return (
-    <Dialog open={!!session} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{headerParts.join(" — ")}</DialogTitle>
-          <DialogDescription className="sr-only">Detalle de sesión</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-5 text-sm">
-          <Section title="Encabezado" fields={[
-            ["Tipo de sesión", typeLabel[session.session_type] || null],
-            ["Nº de sesión", session.session_number],
-            ["Semana POP/PL", session.week_at_session],
-          ]} />
-          <Section title="Evolución" fields={[
-            ["Observaciones generales", session.general_observations],
-            ["Evolución", session.evolution],
-            ["Cambios en síntomas", session.symptom_changes],
-            ["Cambios clínicos", session.clinical_changes],
-          ]} />
-          <Section title="Intervenciones" fields={[
-            ["En el día de hoy se abordó", session.interventions],
-            ["Ajustes al tratamiento", session.treatment_adjustments],
-            ["Indicaciones enviadas", session.home_instructions_sent],
-          ]} />
-          <Section title="Cierre" fields={[
-            ["Próximo turno", session.next_appointment ? format(new Date(session.next_appointment), "dd/MM/yyyy") : null],
-            ["Notas adicionales", session.notes],
-          ]} />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <div className="relative pl-6">
+      <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-primary/30" />
+      {sessions.map((s) => {
+        const isOpen = expanded === s.id;
+        const linkedEval = analEvals.find(e => e.session_id === s.id);
+        const preview = s.evolution || s.general_observations || "";
+        const previewLines = preview.split("\n").slice(0, 2).join("\n");
+
+        return (
+          <div key={s.id} className="relative mb-4">
+            <div className="absolute -left-6 top-3 w-[18px] h-[18px] rounded-full bg-primary border-2 border-background z-10" />
+            <div className="bg-card border border-border/50 rounded-lg p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
+                    <span className="font-medium text-sm text-foreground">{format(new Date(s.session_date), "dd/MM/yyyy")}</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
+                    {s.week_at_session != null && <span className="text-xs text-muted-foreground">Semana {s.week_at_session} POP/PL</span>}
+                    {linkedEval && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">📊 Con mediciones</span>}
+                  </div>
+                  {!isOpen && previewLines && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{previewLines}</p>}
+                </div>
+                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setExpanded(isOpen ? null : s.id)}>
+                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              {isOpen && (
+                <div className="mt-4 space-y-4 text-sm border-t border-border/50 pt-4">
+                  <Section title="Datos de la visita" fields={[
+                    ["Tipo", typeLabel[s.session_type] || null],
+                    ["Nº de sesión", s.session_number],
+                    ["Semana POP/PL", s.week_at_session],
+                  ]} />
+                  <Section title="Evolución" fields={[
+                    ["Observaciones generales", s.general_observations],
+                    ["Evolución", s.evolution],
+                    ["Cambios en síntomas", s.symptom_changes],
+                    ["Cambios clínicos", s.clinical_changes],
+                  ]} />
+                  <Section title="Intervenciones" fields={[
+                    ["En el día de hoy se abordó", s.interventions],
+                    ["Ajustes al tratamiento", s.treatment_adjustments],
+                    ["Indicaciones enviadas", s.home_instructions_sent],
+                    ["Próximo turno", s.next_appointment ? format(new Date(s.next_appointment), "dd/MM/yyyy") : null],
+                    ["Notas", s.notes],
+                  ]} />
+                  {linkedEval && (
+                    <div>
+                      <h4 className="font-semibold text-foreground text-xs uppercase tracking-wide mb-1.5 flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" /> Mediciones del día</h4>
+                      <div className="space-y-1.5">
+                        {linkedEval.pain_score != null && <div><p className="text-muted-foreground text-xs">Dolor EVA</p><p className="text-sm">{linkedEval.pain_score}/10</p></div>}
+                        {linkedEval.pain_location && <div><p className="text-muted-foreground text-xs">Localización dolor</p><p className="text-sm">{linkedEval.pain_location}</p></div>}
+                        {linkedEval.pain_characteristics && <div><p className="text-muted-foreground text-xs">Características</p><p className="text-sm">{linkedEval.pain_characteristics}</p></div>}
+                        {linkedEval.pain_aggravating_factors && <div><p className="text-muted-foreground text-xs">Agravantes/Atenuantes</p><p className="text-sm whitespace-pre-wrap">{linkedEval.pain_aggravating_factors}</p></div>}
+                        {linkedEval.pain && <div><p className="text-muted-foreground text-xs">Obs. dolor</p><p className="text-sm whitespace-pre-wrap">{linkedEval.pain}</p></div>}
+                        {linkedEval.edema && <div><p className="text-muted-foreground text-xs">Edema</p><p className="text-sm whitespace-pre-wrap">{linkedEval.edema}</p></div>}
+                        {linkedEval.edema_circummetry && <div><p className="text-muted-foreground text-xs">Circometría</p><p className="text-sm whitespace-pre-wrap">{linkedEval.edema_circummetry}</p></div>}
+                        {linkedEval.godet_test && <div><p className="text-muted-foreground text-xs">Test de Godet</p><p className="text-sm">{linkedEval.godet_test}</p></div>}
+                        {linkedEval.arom && <div><p className="text-muted-foreground text-xs">AROM</p><p className="text-sm whitespace-pre-wrap">{linkedEval.arom}</p></div>}
+                        {linkedEval.kapandji && <div><p className="text-muted-foreground text-xs">Kapandji</p><p className="text-sm">{linkedEval.kapandji}</p></div>}
+                        {linkedEval.prom && <div><p className="text-muted-foreground text-xs">Cierre de puño</p><p className="text-sm">{linkedEval.prom}</p></div>}
+                        {linkedEval.dynamometer_msd != null && <div><p className="text-muted-foreground text-xs">Dinamómetro MSD</p><p className="text-sm">{linkedEval.dynamometer_msd} kgf</p></div>}
+                        {linkedEval.dynamometer_msi != null && <div><p className="text-muted-foreground text-xs">Dinamómetro MSI</p><p className="text-sm">{linkedEval.dynamometer_msi} kgf</p></div>}
+                        {linkedEval.muscle_strength && <div><p className="text-muted-foreground text-xs">Fuerza</p><p className="text-sm whitespace-pre-wrap">{linkedEval.muscle_strength}</p></div>}
+                        {linkedEval.sensitivity && <div><p className="text-muted-foreground text-xs">Sensibilidad</p><p className="text-sm whitespace-pre-wrap">{linkedEval.sensitivity}</p></div>}
+                        {linkedEval.trophic_state && <div><p className="text-muted-foreground text-xs">Estado trófico</p><p className="text-sm whitespace-pre-wrap">{linkedEval.trophic_state}</p></div>}
+                        {linkedEval.scar && <div><p className="text-muted-foreground text-xs">Cicatriz</p><p className="text-sm whitespace-pre-wrap">{linkedEval.scar}</p></div>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-function NewSessionDialog({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
+// --- New Session Sheet ---
+
+function NewSessionSheet({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const initForm = () => ({
     session_date: new Date().toISOString().split("T")[0],
     session_type: "follow_up", session_number: "", week_at_session: "",
-    general_observations: "", evolution: "", symptom_changes: "", clinical_changes: "",
+    general_observations: "", evolution: "", symptom_changes: "",
     interventions: "", treatment_adjustments: "", home_instructions_sent: "",
     next_appointment: "", notes: "",
+    // Measurements
+    pain_score: null as number | null,
+    pain_location: "", pain_characteristics: "", pain_aggravating_factors: "", pain: "",
+    edema: "", edema_circummetry: "", godet_test: "",
+    arom: "", kapandji: "", prom: "",
+    dynamometer_msd: "", dynamometer_msi: "",
+    muscle_strength: "", sensitivity: "", trophic_state: "", scar: "",
   });
   const [form, setForm] = useState(initForm());
+  const f = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
+    if (!form.session_date) return;
     setSaving(true);
-    const { error } = await supabase.from("therapy_sessions").insert({
+
+    const { data: session, error } = await supabase.from("therapy_sessions").insert({
       patient_id: patientId, professional_id: userId, is_deleted: false,
       session_date: form.session_date,
       session_type: form.session_type || null,
@@ -526,86 +566,185 @@ function NewSessionDialog({ open, onClose, patientId, userId, onSaved }: { open:
       general_observations: form.general_observations || null,
       evolution: form.evolution || null,
       symptom_changes: form.symptom_changes || null,
-      clinical_changes: form.clinical_changes || null,
       interventions: form.interventions || null,
       treatment_adjustments: form.treatment_adjustments || null,
       home_instructions_sent: form.home_instructions_sent || null,
       next_appointment: form.next_appointment || null,
       notes: form.notes || null,
-    } as any);
+    } as any).select().single();
+
+    if (error || !session) { setSaving(false); toast.error("Error al registrar la visita"); return; }
+
+    // Check if any measurement field has a value
+    const measurementFields = [
+      form.pain_score, form.pain_location, form.pain_characteristics,
+      form.pain_aggravating_factors, form.pain, form.edema, form.edema_circummetry,
+      form.godet_test, form.arom, form.kapandji, form.prom,
+      form.dynamometer_msd, form.dynamometer_msi, form.muscle_strength,
+      form.sensitivity, form.trophic_state, form.scar,
+    ];
+    const hasMeasurements = measurementFields.some(v => v !== "" && v !== null && v !== undefined);
+
+    if (hasMeasurements) {
+      await supabase.from("analytical_evaluations").insert({
+        patient_id: patientId, professional_id: userId,
+        session_id: session.id, evaluation_date: form.session_date,
+        pain_score: form.pain_score ?? null,
+        pain_location: form.pain_location || null,
+        pain_characteristics: form.pain_characteristics || null,
+        pain_aggravating_factors: form.pain_aggravating_factors || null,
+        pain: form.pain || null,
+        edema: form.edema || null,
+        edema_circummetry: form.edema_circummetry || null,
+        godet_test: form.godet_test || null,
+        arom: form.arom || null,
+        kapandji: form.kapandji || null,
+        prom: form.prom || null,
+        dynamometer_msd: form.dynamometer_msd ? parseFloat(form.dynamometer_msd) : null,
+        dynamometer_msi: form.dynamometer_msi ? parseFloat(form.dynamometer_msi) : null,
+        muscle_strength: form.muscle_strength || null,
+        sensitivity: form.sensitivity || null,
+        trophic_state: form.trophic_state || null,
+        scar: form.scar || null,
+      });
+    }
+
     setSaving(false);
-    if (error) { toast.error("Error al registrar la sesión"); return; }
-    toast.success("Sesión registrada correctamente");
+    toast.success("Visita registrada correctamente");
     setForm(initForm());
     onSaved(); onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { setForm(initForm()); onClose(); } }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nueva Sesión</DialogTitle>
-          <DialogDescription className="sr-only">Formulario de nueva sesión de terapia</DialogDescription>
-        </DialogHeader>
-        <Accordion type="multiple" defaultValue={["header", "evolution", "interventions", "closure"]} className="w-full">
-          <AccordionItem value="header">
-            <AccordionTrigger className="text-sm font-semibold">Encabezado de sesión</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2"><Label>Fecha *</Label><Input type="date" value={form.session_date} onChange={(e) => setForm({ ...form, session_date: e.target.value })} /></div>
-              <div className="space-y-2">
-                <Label>Tipo de sesión</Label>
-                <Select value={form.session_type} onValueChange={(v) => setForm({ ...form, session_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admission">Admisión</SelectItem>
-                    <SelectItem value="follow_up">Seguimiento</SelectItem>
-                    <SelectItem value="discharge">Alta</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2"><Label>Nº de sesión</Label><Input type="number" min={1} placeholder="Ej: 1 para primera sesión" value={form.session_number} onChange={(e) => setForm({ ...form, session_number: e.target.value })} /></div>
-              <div className="space-y-2">
-                <Label>Semana POP / Post lesión</Label>
-                <Input type="number" min={0} value={form.week_at_session} onChange={(e) => setForm({ ...form, week_at_session: e.target.value })} />
-                <p className="text-xs text-muted-foreground">Semana al momento de esta sesión</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+    <Sheet open={open} onOpenChange={(v) => { if (!v) { setForm(initForm()); onClose(); } }}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Registrar visita</SheetTitle>
+          <SheetDescription className="sr-only">Formulario de registro de visita clínica</SheetDescription>
+        </SheetHeader>
+        <div className="mt-4">
+          <Accordion type="multiple" defaultValue={["visit", "evolution", "interventions", "closure"]} className="w-full">
+            <AccordionItem value="visit">
+              <AccordionTrigger className="text-sm font-semibold">Datos de la visita</AccordionTrigger>
+              <AccordionContent className="space-y-4 pt-2">
+                <div className="space-y-2"><Label>Fecha *</Label><Input type="date" value={form.session_date} onChange={(e) => f("session_date", e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Tipo de sesión</Label>
+                  <Select value={form.session_type} onValueChange={(v) => f("session_type", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admission">Admisión</SelectItem>
+                      <SelectItem value="follow_up">Seguimiento</SelectItem>
+                      <SelectItem value="discharge">Alta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2"><Label>Nº de sesión</Label><Input type="number" min={1} value={form.session_number} onChange={(e) => f("session_number", e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Semana POP / Post lesión</Label>
+                  <Input type="number" min={0} value={form.week_at_session} onChange={(e) => f("week_at_session", e.target.value)} />
+                  <p className="text-xs text-muted-foreground">Semana al momento de esta visita</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          <AccordionItem value="evolution">
-            <AccordionTrigger className="text-sm font-semibold">Evolución</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2"><Label>Observaciones generales</Label><Textarea rows={3} placeholder="Estado general del paciente al inicio de la sesión..." value={form.general_observations} onChange={(e) => setForm({ ...form, general_observations: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Evolución</Label><Textarea rows={3} placeholder="Ej: Paciente refiere mejoría en rangos de flexión respecto a sesión anterior..." value={form.evolution} onChange={(e) => setForm({ ...form, evolution: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Cambios en síntomas</Label><Textarea rows={2} placeholder="Dolor, edema, sensibilidad, parestesias..." value={form.symptom_changes} onChange={(e) => setForm({ ...form, symptom_changes: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Cambios clínicos</Label><Textarea rows={2} placeholder="Goniometría, fuerza, circometría, Kapandji..." value={form.clinical_changes} onChange={(e) => setForm({ ...form, clinical_changes: e.target.value })} /></div>
-            </AccordionContent>
-          </AccordionItem>
+            <AccordionItem value="evolution">
+              <AccordionTrigger className="text-sm font-semibold">Evolución</AccordionTrigger>
+              <AccordionContent className="space-y-4 pt-2">
+                <div className="space-y-2"><Label>Observaciones generales</Label><Textarea rows={3} placeholder="Estado general del paciente al inicio de la visita..." value={form.general_observations} onChange={(e) => f("general_observations", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Evolución</Label><Textarea rows={4} placeholder="Ej: Paciente refiere mejoría en rangos de flexión..." value={form.evolution} onChange={(e) => f("evolution", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Cambios en síntomas</Label><Textarea rows={3} placeholder="Dolor, edema, sensibilidad, parestesias..." value={form.symptom_changes} onChange={(e) => f("symptom_changes", e.target.value)} /></div>
+              </AccordionContent>
+            </AccordionItem>
 
-          <AccordionItem value="interventions">
-            <AccordionTrigger className="text-sm font-semibold">Intervenciones</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2"><Label>En el día de hoy se abordó</Label><Textarea rows={5} placeholder="Ej: Ejercicios de movilidad activa de muñeca, elongaciones, baños de contraste..." value={form.interventions} onChange={(e) => setForm({ ...form, interventions: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Ajustes al tratamiento</Label><Textarea rows={3} placeholder="Cambios en el plan, nueva indicación médica, modificación de ejercicios..." value={form.treatment_adjustments} onChange={(e) => setForm({ ...form, treatment_adjustments: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Indicaciones enviadas (vía telefónica o al alta)</Label><Textarea rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios de movilidad 3 veces al día, 10 repeticiones..." value={form.home_instructions_sent} onChange={(e) => setForm({ ...form, home_instructions_sent: e.target.value })} /></div>
-            </AccordionContent>
-          </AccordionItem>
+            <AccordionItem value="interventions">
+              <AccordionTrigger className="text-sm font-semibold">Intervenciones</AccordionTrigger>
+              <AccordionContent className="space-y-4 pt-2">
+                <div className="space-y-2"><Label>En el día de hoy se abordó</Label><Textarea rows={5} placeholder="Ej: Ejercicios de movilidad activa de muñeca, elongaciones, baños de contraste..." value={form.interventions} onChange={(e) => f("interventions", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Indicaciones enviadas</Label><Textarea rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios 3 veces al día, 10 repeticiones..." value={form.home_instructions_sent} onChange={(e) => f("home_instructions_sent", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Ajustes al tratamiento</Label><Textarea rows={2} value={form.treatment_adjustments} onChange={(e) => f("treatment_adjustments", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Próximo turno</Label><Input type="date" value={form.next_appointment} onChange={(e) => f("next_appointment", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Notas</Label><Textarea rows={2} value={form.notes} onChange={(e) => f("notes", e.target.value)} /></div>
+              </AccordionContent>
+            </AccordionItem>
 
-          <AccordionItem value="closure">
-            <AccordionTrigger className="text-sm font-semibold">Cierre</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2"><Label>Próximo turno</Label><Input type="date" value={form.next_appointment} onChange={(e) => setForm({ ...form, next_appointment: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Notas adicionales</Label><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            <AccordionItem value="measurements">
+              <AccordionTrigger className="text-sm font-semibold">Mediciones del día</AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-2">
+                <p className="text-xs text-muted-foreground">Opcional — completá solo si realizaste mediciones en esta visita</p>
 
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={() => { setForm(initForm()); onClose(); }}>Cancelar</Button>
-          <Button onClick={handleSave} disabled={saving || !form.session_date}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}</Button>
+                {/* Dolor */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">▸ Dolor</h4>
+                  <div className="space-y-2">
+                    <Label>Intensidad EVA (0-10)</Label>
+                    <div className="flex items-center gap-3">
+                      <Slider min={0} max={10} step={1} value={[form.pain_score ?? 0]} onValueChange={([v]) => f("pain_score", v)} className="flex-1" />
+                      <span className="text-sm font-medium w-6 text-center">{form.pain_score ?? 0}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2"><Label>Localización</Label><Input value={form.pain_location} onChange={(e) => f("pain_location", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Características</Label><Input placeholder="punzante, urente, opresivo..." value={form.pain_characteristics} onChange={(e) => f("pain_characteristics", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Agravantes / Atenuantes</Label><Textarea rows={2} value={form.pain_aggravating_factors} onChange={(e) => f("pain_aggravating_factors", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Observaciones del dolor</Label><Textarea rows={2} value={form.pain} onChange={(e) => f("pain", e.target.value)} /></div>
+                </div>
+
+                {/* Edema */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">▸ Edema y circometría</h4>
+                  <div className="space-y-2"><Label>Observación del edema</Label><Textarea rows={2} value={form.edema} onChange={(e) => f("edema", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Circometría</Label><Textarea rows={2} placeholder="Ej: MSD muñeca 19cm / MSI 17cm" value={form.edema_circummetry} onChange={(e) => f("edema_circummetry", e.target.value)} /></div>
+                  <div className="space-y-2">
+                    <Label>Test de Godet</Label>
+                    <Select value={form.godet_test} onValueChange={(v) => f("godet_test", v)}>
+                      <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="negative">Negativo</SelectItem>
+                        <SelectItem value="1+">1+</SelectItem>
+                        <SelectItem value="2+">2+</SelectItem>
+                        <SelectItem value="3+">3+</SelectItem>
+                        <SelectItem value="4+">4+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Movilidad */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">▸ Movilidad</h4>
+                  <div className="space-y-2"><Label>AROM</Label><Textarea rows={3} placeholder="Ej: Flex muñeca 45°, Ext 60°, DR 15°, DC 25°, Pron 90°, Sup 80°" value={form.arom} onChange={(e) => f("arom", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Kapandji</Label><Input placeholder="Ej: 8/10" value={form.kapandji} onChange={(e) => f("kapandji", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Cierre de puño</Label><Input placeholder="Ej: Completo / Incompleto con tirantez" value={form.prom} onChange={(e) => f("prom", e.target.value)} /></div>
+                </div>
+
+                {/* Fuerza */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">▸ Fuerza</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2"><Label>Dinamómetro MSD (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msd} onChange={(e) => f("dynamometer_msd", e.target.value)} /></div>
+                    <div className="space-y-2"><Label>Dinamómetro MSI (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msi} onChange={(e) => f("dynamometer_msi", e.target.value)} /></div>
+                  </div>
+                  <div className="space-y-2"><Label>Observaciones de fuerza</Label><Textarea rows={2} value={form.muscle_strength} onChange={(e) => f("muscle_strength", e.target.value)} /></div>
+                </div>
+
+                {/* Sensibilidad */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-foreground">▸ Sensibilidad y estado trófico</h4>
+                  <div className="space-y-2"><Label>Sensibilidad</Label><Textarea rows={2} value={form.sensitivity} onChange={(e) => f("sensitivity", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={form.trophic_state} onChange={(e) => f("trophic_state", e.target.value)} /></div>
+                  <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={form.scar} onChange={(e) => f("scar", e.target.value)} /></div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <div className="flex justify-end gap-2 pt-4 pb-2">
+            <Button variant="outline" onClick={() => { setForm(initForm()); onClose(); }}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving || !form.session_date}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar visita"}</Button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
