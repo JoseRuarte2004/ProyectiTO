@@ -819,16 +819,21 @@ export type Database = {
           deleted_at: string | null
           evolution: string | null
           general_observations: string | null
+          home_instructions_sent: string | null
           id: string
+          interventions: string | null
           is_deleted: boolean
           next_appointment: string | null
           notes: string | null
           patient_id: string
           professional_id: string
           session_date: string
+          session_number: number | null
+          session_type: string | null
           symptom_changes: string | null
           treatment_adjustments: string | null
           updated_at: string
+          week_at_session: number | null
         }
         Insert: {
           clinical_changes?: string | null
@@ -836,16 +841,21 @@ export type Database = {
           deleted_at?: string | null
           evolution?: string | null
           general_observations?: string | null
+          home_instructions_sent?: string | null
           id?: string
+          interventions?: string | null
           is_deleted?: boolean
           next_appointment?: string | null
           notes?: string | null
           patient_id: string
           professional_id: string
           session_date?: string
+          session_number?: number | null
+          session_type?: string | null
           symptom_changes?: string | null
           treatment_adjustments?: string | null
           updated_at?: string
+          week_at_session?: number | null
         }
         Update: {
           clinical_changes?: string | null
@@ -853,16 +863,21 @@ export type Database = {
           deleted_at?: string | null
           evolution?: string | null
           general_observations?: string | null
+          home_instructions_sent?: string | null
           id?: string
+          interventions?: string | null
           is_deleted?: boolean
           next_appointment?: string | null
           notes?: string | null
           patient_id?: string
           professional_id?: string
           session_date?: string
+          session_number?: number | null
+          session_type?: string | null
           symptom_changes?: string | null
           treatment_adjustments?: string | null
           updated_at?: string
+          week_at_session?: number | null
         }
         Relationships: [
           {
