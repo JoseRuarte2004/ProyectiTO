@@ -239,9 +239,9 @@ export default function PatientProfile() {
             <>
               <div className="flex justify-between items-center">
                 <h2 className="font-semibold text-foreground">Evaluaciones Analíticas</h2>
-                <Button onClick={() => setShowNewAnalEval(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Evaluación</Button>
               </div>
               <AnalEvalList evaluations={analEvals} />
+              <p className="text-xs text-muted-foreground text-center mt-2">Las evaluaciones analíticas se registran desde el tab Sesiones</p>
             </>
           )}
         </TabsContent>
