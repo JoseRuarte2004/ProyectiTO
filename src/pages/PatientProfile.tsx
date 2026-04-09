@@ -206,32 +206,13 @@ export default function PatientProfile() {
           </Card>
         </TabsContent>
 
-        {/* SESSIONS */}
         <TabsContent value="sessions" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="font-semibold text-foreground">Sesiones de Terapia</h2>
-            <Button onClick={() => setShowNewSession(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Sesión</Button>
+            <Button onClick={() => setShowNewSession(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Registrar visita</Button>
           </div>
           {sessions.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin sesiones registradas.</p> : (
-            <div className="space-y-2">
-              {sessions.map((s) => {
-                const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-                const typeColor: Record<string, string> = { admission: "bg-teal-100 text-teal-800", follow_up: "bg-blue-100 text-blue-800", discharge: "bg-green-100 text-green-800" };
-                return (
-                  <Card key={s.id} className="border-border/50 cursor-pointer hover:shadow-sm" onClick={() => setShowSessionDetail(s)}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-sm text-foreground">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
-                        {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
-                        {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
-                        {s.week_at_session != null && <span className="text-xs text-muted-foreground">Semana {s.week_at_session} POP/PL</span>}
-                      </div>
-                      <Eye className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            <SessionTimeline sessions={sessions} analEvals={analEvals} />
           )}
         </TabsContent>
 
