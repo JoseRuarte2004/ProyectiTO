@@ -216,16 +216,7 @@ export default function PatientProfile() {
                 <Button onClick={() => setShowNewFuncEval(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Nueva Evaluación</Button>
               </div>
               {funcEvals.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin evaluaciones funcionales.</p> : (
-                <div className="space-y-2">
-                  {funcEvals.map((e) => (
-                    <Card key={e.id} className="border-border/50">
-                      <CardContent className="p-4">
-                        <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
-                        <p className="text-xs text-muted-foreground">Barthel: {e.barthel_score ?? "—"} · Lateralidad: {e.dominance === "right" ? "Diestro" : e.dominance === "left" ? "Zurdo" : e.dominance === "ambidextrous" ? "Ambidiestro" : "—"}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <FuncEvalList evaluations={funcEvals} />
               )}
             </>
           )}
@@ -406,55 +397,229 @@ function NewFuncEvalDialog({ open, onClose, patientId, userId, onSaved }: { open
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     evaluation_date: new Date().toISOString().split("T")[0],
-    barthel_score: "", dominance: "", avd: "", aivd: "", physical_activity: "", sleep_rest: "", notes: "",
+    dominance: "", barthel_score: "", dash_score: "",
+    avd: "", aivd: "", work_education: "", leisure: "",
+    physical_activity: "", sleep_rest: "", health_management: "",
+    observations: "",
   });
+
+  const resetForm = () => setForm({
+    evaluation_date: new Date().toISOString().split("T")[0],
+    dominance: "", barthel_score: "", dash_score: "",
+    avd: "", aivd: "", work_education: "", leisure: "",
+    physical_activity: "", sleep_rest: "", health_management: "",
+    observations: "",
+  });
+
+  const buildNotes = () => {
+    const parts: string[] = [];
+    if (form.work_education.trim()) parts.push(`Trabajo/Educación: ${form.work_education.trim()}`);
+    if (form.leisure.trim()) parts.push(`Ocio: ${form.leisure.trim()}`);
+    if (form.observations.trim()) parts.push(`Observaciones: ${form.observations.trim()}`);
+    return parts.length > 0 ? parts.join("\n\n") : null;
+  };
 
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase.from("functional_evaluations").insert({
       patient_id: patientId, professional_id: userId,
       evaluation_date: form.evaluation_date,
-      barthel_score: form.barthel_score ? parseInt(form.barthel_score) : null,
       dominance: (form.dominance as any) || null,
+      barthel_score: form.barthel_score ? parseInt(form.barthel_score) : null,
+      dash_score: form.dash_score ? parseInt(form.dash_score) : null,
       avd: form.avd || null, aivd: form.aivd || null,
       physical_activity: form.physical_activity || null,
-      sleep_rest: form.sleep_rest || null, notes: form.notes || null,
+      sleep_rest: form.sleep_rest || null,
+      health_management: form.health_management || null,
+      notes: buildNotes(),
     });
     setSaving(false);
-    if (error) { toast.error("Error al guardar evaluación"); return; }
-    toast.success("Evaluación funcional registrada");
+    if (error) { toast.error("Error al guardar la evaluación funcional"); return; }
+    toast.success("Evaluación funcional registrada correctamente");
+    resetForm();
     onSaved(); onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Nueva Evaluación Funcional</DialogTitle></DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2"><Label>Fecha</Label><Input type="date" value={form.evaluation_date} onChange={(e) => setForm({ ...form, evaluation_date: e.target.value })} /></div>
-          <div className="space-y-2"><Label>Score Barthel (0-100)</Label><Input type="number" min={0} max={100} value={form.barthel_score} onChange={(e) => setForm({ ...form, barthel_score: e.target.value })} /></div>
-          <div className="space-y-2"><Label>Lateralidad</Label>
-            <Select value={form.dominance} onValueChange={(v) => setForm({ ...form, dominance: v })}>
-              <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="right">Diestro</SelectItem>
-                <SelectItem value="left">Zurdo</SelectItem>
-                <SelectItem value="ambidextrous">Ambidiestro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2"><Label>AVD</Label><Textarea value={form.avd} onChange={(e) => setForm({ ...form, avd: e.target.value })} rows={2} /></div>
-          <div className="space-y-2"><Label>AIVD</Label><Textarea value={form.aivd} onChange={(e) => setForm({ ...form, aivd: e.target.value })} rows={2} /></div>
-          <div className="space-y-2"><Label>Actividad física</Label><Textarea value={form.physical_activity} onChange={(e) => setForm({ ...form, physical_activity: e.target.value })} rows={2} /></div>
-          <div className="space-y-2"><Label>Sueño y descanso</Label><Textarea value={form.sleep_rest} onChange={(e) => setForm({ ...form, sleep_rest: e.target.value })} rows={2} /></div>
-          <div className="space-y-2"><Label>Notas</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}</Button>
-          </div>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { resetForm(); onClose(); } }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Nueva Evaluación Funcional</DialogTitle>
+          <DialogDescription className="sr-only">Formulario de evaluación funcional</DialogDescription>
+        </DialogHeader>
+        <Accordion type="multiple" defaultValue={["general", "occupational", "health", "notes"]} className="w-full">
+          {/* Section 1 */}
+          <AccordionItem value="general">
+            <AccordionTrigger className="text-sm font-semibold">Datos Generales</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>Fecha de evaluación *</Label>
+                <Input type="date" value={form.evaluation_date} onChange={(e) => setForm({ ...form, evaluation_date: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Lateralidad</Label>
+                <Select value={form.dominance} onValueChange={(v) => setForm({ ...form, dominance: v })}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="right">Derecha</SelectItem>
+                    <SelectItem value="left">Izquierda</SelectItem>
+                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Puntaje Barthel (0-100)</Label>
+                <Input type="number" min={0} max={100} value={form.barthel_score} onChange={(e) => setForm({ ...form, barthel_score: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Puntaje DASH (0-100)</Label>
+                <Input type="number" min={0} max={100} value={form.dash_score} onChange={(e) => setForm({ ...form, dash_score: e.target.value })} />
+                <p className="text-xs text-muted-foreground">0 = sin discapacidad, 100 = máxima discapacidad</p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 2 */}
+          <AccordionItem value="occupational">
+            <AccordionTrigger className="text-sm font-semibold">Desempeño Ocupacional</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>AVD — Actividades de la vida diaria</Label>
+                <Textarea value={form.avd} onChange={(e) => setForm({ ...form, avd: e.target.value })} rows={3} placeholder="Higiene, alimentación, vestido, traslados..." />
+              </div>
+              <div className="space-y-2">
+                <Label>AIVD — Actividades instrumentales</Label>
+                <Textarea value={form.aivd} onChange={(e) => setForm({ ...form, aivd: e.target.value })} rows={3} placeholder="Preparación de comidas, manejo de dinero, uso del teléfono, compras..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Trabajo / Educación</Label>
+                <Textarea value={form.work_education} onChange={(e) => setForm({ ...form, work_education: e.target.value })} rows={3} placeholder="Situación laboral/educativa actual, limitaciones, objetivos..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Ocio y tiempo libre</Label>
+                <Textarea value={form.leisure} onChange={(e) => setForm({ ...form, leisure: e.target.value })} rows={2} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 3 */}
+          <AccordionItem value="health">
+            <AccordionTrigger className="text-sm font-semibold">Hábitos de Salud</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>Actividad física</Label>
+                <Textarea value={form.physical_activity} onChange={(e) => setForm({ ...form, physical_activity: e.target.value })} rows={2} />
+              </div>
+              <div className="space-y-2">
+                <Label>Descanso y sueño</Label>
+                <Textarea value={form.sleep_rest} onChange={(e) => setForm({ ...form, sleep_rest: e.target.value })} rows={2} />
+              </div>
+              <div className="space-y-2">
+                <Label>Gestión de la salud</Label>
+                <Textarea value={form.health_management} onChange={(e) => setForm({ ...form, health_management: e.target.value })} rows={2} placeholder="Adherencia a turnos médicos, automedicación, hábitos preventivos..." />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 4 */}
+          <AccordionItem value="notes">
+            <AccordionTrigger className="text-sm font-semibold">Notas de Evaluación</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>Observaciones adicionales</Label>
+                <Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} rows={3} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={() => { resetForm(); onClose(); }}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={saving || !form.evaluation_date}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}</Button>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FuncEvalList({ evaluations }: { evaluations: any[] }) {
+  const [detail, setDetail] = useState<any>(null);
+  const dominanceMap: Record<string, string> = { right: "Derecha", left: "Izquierda", ambidextrous: "Ambidiestro/a" };
+
+  const ScoreBadge = ({ label, value, max }: { label: string; value: number | null; max: number }) => {
+    if (value === null || value === undefined) return null;
+    const pct = value / max;
+    const color = pct <= 0.33 ? "bg-green-100 text-green-800" : pct <= 0.66 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800";
+    return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${color}`}>{label}: {value}/{max}</span>;
+  };
+
+  return (
+    <>
+      <div className="space-y-2">
+        {evaluations.map((e) => (
+          <Card key={e.id} className="border-border/50">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
+                <ScoreBadge label="Barthel" value={e.barthel_score} max={100} />
+                <ScoreBadge label="DASH" value={e.dash_score} max={100} />
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setDetail(e)}><Eye className="h-4 w-4" /></Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={!!detail} onOpenChange={() => setDetail(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Evaluación Funcional — {detail && format(new Date(detail.evaluation_date), "dd/MM/yyyy")}</DialogTitle>
+            <DialogDescription className="sr-only">Detalle de evaluación funcional</DialogDescription>
+          </DialogHeader>
+          {detail && (
+            <div className="space-y-5 text-sm">
+              {/* General */}
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Datos Generales</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {detail.dominance && <div><p className="text-muted-foreground text-xs font-medium">Lateralidad</p><p>{dominanceMap[detail.dominance] || detail.dominance}</p></div>}
+                  {detail.barthel_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje Barthel</p><p>{detail.barthel_score}/100</p></div>}
+                  {detail.dash_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje DASH</p><p>{detail.dash_score}/100</p></div>}
+                </div>
+              </div>
+              {/* Occupational */}
+              {(detail.avd || detail.aivd || (detail.notes && (detail.notes.includes("Trabajo/Educación:") || detail.notes.includes("Ocio:")))) && (
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Desempeño Ocupacional</h3>
+                  <div className="space-y-2">
+                    {detail.avd && <div><p className="text-muted-foreground text-xs font-medium">AVD</p><p className="whitespace-pre-wrap">{detail.avd}</p></div>}
+                    {detail.aivd && <div><p className="text-muted-foreground text-xs font-medium">AIVD</p><p className="whitespace-pre-wrap">{detail.aivd}</p></div>}
+                  </div>
+                </div>
+              )}
+              {/* Health */}
+              {(detail.physical_activity || detail.sleep_rest || detail.health_management) && (
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Hábitos de Salud</h3>
+                  <div className="space-y-2">
+                    {detail.physical_activity && <div><p className="text-muted-foreground text-xs font-medium">Actividad física</p><p className="whitespace-pre-wrap">{detail.physical_activity}</p></div>}
+                    {detail.sleep_rest && <div><p className="text-muted-foreground text-xs font-medium">Descanso y sueño</p><p className="whitespace-pre-wrap">{detail.sleep_rest}</p></div>}
+                    {detail.health_management && <div><p className="text-muted-foreground text-xs font-medium">Gestión de la salud</p><p className="whitespace-pre-wrap">{detail.health_management}</p></div>}
+                  </div>
+                </div>
+              )}
+              {/* Notes */}
+              {detail.notes && (
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Notas</h3>
+                  <p className="whitespace-pre-wrap">{detail.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
