@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "./Dashboard";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { NewPatientForm } from "@/components/patients/NewPatientForm";
 import { format } from "date-fns";
 
@@ -122,11 +122,8 @@ export default function Patients() {
         </div>
       )}
 
-      <Dialog open={showNew} onOpenChange={setShowNew}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nuevo Paciente</DialogTitle>
-          </DialogHeader>
+      <Sheet open={showNew} onOpenChange={setShowNew}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl p-6 flex flex-col">
           <NewPatientForm
             onSuccess={() => {
               setShowNew(false);
@@ -134,8 +131,8 @@ export default function Patients() {
             }}
             onCancel={() => setShowNew(false)}
           />
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
