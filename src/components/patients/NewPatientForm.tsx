@@ -104,7 +104,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   // Step 6 — Admission session
   const [interventions, setInterventions] = useState("");
   const [homeInstructions, setHomeInstructions] = useState("");
-  const [nextAppointment, setNextAppointment] = useState("");
+  const [sessionNotes, setSessionNotes] = useState("");
   const [sessionNotes, setSessionNotes] = useState("");
 
   const or = (v: string) => v.trim() || null;
@@ -260,7 +260,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         session_number: 1,
         interventions: or(interventions),
         home_instructions_sent: or(homeInstructions),
-        next_appointment: or(nextAppointment),
         notes: or(sessionNotes),
         is_deleted: false,
       });
