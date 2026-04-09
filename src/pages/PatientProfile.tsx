@@ -208,10 +208,21 @@ export default function PatientProfile() {
 
         <TabsContent value="sessions" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-foreground">Sesiones de Terapia</h2>
-            <Button onClick={() => setShowNewSession(true)} size="sm"><Plus className="h-4 w-4 mr-1" />Registrar visita</Button>
+            <div>
+              <h2 className="font-semibold text-foreground">Historial de visitas</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{sessions.length} {sessions.length === 1 ? "visita registrada" : "visitas registradas"}</p>
+            </div>
+            <Button onClick={() => setShowNewSession(true)} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
           </div>
-          {sessions.length === 0 ? <p className="text-muted-foreground text-sm text-center py-8">Sin sesiones registradas.</p> : (
+          {sessions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4">
+                <Activity className="h-8 w-8 text-teal-400" />
+              </div>
+              <p className="font-medium text-foreground">Sin visitas registradas</p>
+              <p className="text-sm text-muted-foreground mt-1">Registrá la primera visita con el botón de arriba</p>
+            </div>
+          ) : (
             <SessionTimeline sessions={sessions} analEvals={analEvals} />
           )}
         </TabsContent>
