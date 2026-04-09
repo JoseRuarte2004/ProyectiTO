@@ -11,6 +11,7 @@ import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
 import Appointments from "./pages/Appointments";
 import Exercises from "./pages/Exercises";
+import SessionForm from "./pages/SessionForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientProfile />} />
+              <Route path="patients/:patientId/sessions/new" element={<SessionForm />} />
               <Route path="appointments" element={<Appointments />} />
               <Route path="exercises" element={<Exercises />} />
             </Route>
