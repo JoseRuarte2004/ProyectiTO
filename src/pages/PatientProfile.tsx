@@ -41,6 +41,9 @@ export default function PatientProfile() {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [loadingUrls, setLoadingUrls] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [episodes, setEpisodes] = useState<any[]>([]);
+  const [activeEpisodeId, setActiveEpisodeId] = useState<string | null>(null);
+  const [showNewEpisode, setShowNewEpisode] = useState(false);
 
   // Dialog states
   
