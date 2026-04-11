@@ -194,6 +194,35 @@ export default function PatientProfile() {
         </CardContent>
       </Card>
 
+      {/* Episode selector */}
+      {episodes.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {episodes.map((ep: any) => (
+            <button
+              key={ep.id}
+              onClick={() => setActiveEpisodeId(ep.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                ep.id === activeEpisodeId
+                  ? "bg-teal-600 text-white border-teal-600"
+                  : "bg-background text-foreground border-border hover:bg-muted"
+              }`}
+            >
+              Episodio {ep.episode_number}{ep.diagnosis ? ` — ${ep.diagnosis}` : ""} · {format(new Date(ep.admission_date + "T12:00:00"), "dd/MM/yyyy")}
+            </button>
+          ))}
+          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
+            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
+          </Button>
+        </div>
+      )}
+      {episodes.length <= 1 && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
+            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
+          </Button>
+        </div>
+      )}
+
       {/* Tabs */}
       <Tabs defaultValue="resumen" className="space-y-4">
         <TabsList className="bg-muted">
