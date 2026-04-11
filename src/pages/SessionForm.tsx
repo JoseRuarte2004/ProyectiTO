@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInYears } from "date-fns";
@@ -19,11 +19,14 @@ import { Badge } from "@/components/ui/badge";
 
 export default function SessionForm() {
   const { patientId } = useParams<{ patientId: string }>();
+  const [searchParams] = useSearchParams();
+  const episodeIdParam = searchParams.get("episode");
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [patient, setPatient] = useState<any>(null);
   const [clinical, setClinical] = useState<any>(null);
+  const [activeEpisodeId, setActiveEpisodeId] = useState<string | null>(episodeIdParam);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -110,6 +113,21 @@ export default function SessionForm() {
       setPatient(p.data);
       setClinical(c.data);
       if (sc.count != null) setSessionNumber(String(sc.count + 1));
+
+      // Resolve episode: use URL param or fetch active episode
+      if (!episodeIdParam) {
+        const { data: ep } = await supabase
+          .from("treatment_episodes")
+          .select("id")
+          .eq("patient_id", patientId)
+          .eq("status", "active")
+          .eq("is_deleted", false)
+          .order("episode_number", { ascending: false })
+          .limit(1)
+          .single();
+        if (ep) setActiveEpisodeId(ep.id);
+      }
+
       setLoading(false);
     };
     load();
@@ -153,6 +171,7 @@ export default function SessionForm() {
     // Step 2: Insert session
     const { data: session, error } = await supabase.from("therapy_sessions").insert({
       patient_id: patientId!, professional_id: user.id, is_deleted: false,
+      episode_id: activeEpisodeId,
       session_date, session_type: session_type || null,
       session_number: session_number ? parseInt(session_number) : null,
       week_at_session: week_at_session ? parseInt(week_at_session) : null,
@@ -170,6 +189,7 @@ export default function SessionForm() {
     if (session_type === "admission" && [func_dominance, func_avd, func_aivd, func_sleep, func_health].some(v => v)) {
       const { error: feErr } = await supabase.from("functional_evaluations").insert({
         patient_id: patientId!, professional_id: user.id,
+        episode_id: activeEpisodeId,
         evaluation_date: session_date,
         dominance: (func_dominance || null) as any,
         avd: func_avd || null, aivd: func_aivd || null,
@@ -189,6 +209,7 @@ export default function SessionForm() {
     if (hasMeasurements) {
       const { error: aeErr } = await supabase.from("analytical_evaluations").insert({
         patient_id: patientId!, professional_id: user.id,
+        episode_id: activeEpisodeId,
         session_id: session.id, evaluation_date: session_date,
         pain_score: pain_touched ? pain_score : null,
         pain_location: painLocFinal,
@@ -248,7 +269,6 @@ export default function SessionForm() {
                 <Select value={session_type} onValueChange={setSessionType}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admission">Admisión</SelectItem>
                     <SelectItem value="follow_up">Seguimiento</SelectItem>
                     <SelectItem value="discharge">Alta</SelectItem>
                   </SelectContent>
