@@ -1848,3 +1848,122 @@ function DeleteFileConfirm({ file, onClose, onDeleted }: { file: any; onClose: (
     </AlertDialog>
   );
 }
+
+function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved }: {
+  open: boolean; onClose: () => void; patientId: string; userId: string; episodes: any[]; onSaved: (newEpId: string) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    admission_date: new Date().toISOString().split("T")[0],
+    diagnosis: "",
+    treatment_type: "",
+    doctor_name: "",
+    injury_mechanism: "",
+    weeks_post_injury: "",
+  });
+
+  const resetForm = () => setForm({
+    admission_date: new Date().toISOString().split("T")[0],
+    diagnosis: "", treatment_type: "", doctor_name: "", injury_mechanism: "", weeks_post_injury: "",
+  });
+
+  const handleSave = async () => {
+    if (!form.diagnosis.trim()) return;
+    setSaving(true);
+    try {
+      const maxEpNum = Math.max(...episodes.map((e: any) => e.episode_number), 0);
+
+      // 1. Insert new episode
+      const { data: newEp, error: epErr } = await supabase
+        .from("treatment_episodes")
+        .insert({
+          patient_id: patientId,
+          professional_id: userId,
+          episode_number: maxEpNum + 1,
+          admission_date: form.admission_date,
+          status: "active",
+          diagnosis: form.diagnosis.trim(),
+        })
+        .select("id")
+        .single();
+
+      if (epErr || !newEp) throw epErr || new Error("Failed to create episode");
+
+      // 2. Insert clinical record for this episode
+      await supabase.from("patient_clinical_records").insert({
+        patient_id: patientId,
+        episode_id: newEp.id,
+        diagnosis: form.diagnosis.trim(),
+        treatment_type: form.treatment_type || null,
+        doctor_name: form.doctor_name || null,
+        injury_mechanism: form.injury_mechanism || null,
+        weeks_post_injury: form.weeks_post_injury ? parseInt(form.weeks_post_injury) : null,
+      });
+
+      // 3. Set previous active episodes to discharged
+      const activeEps = episodes.filter((e: any) => e.status === "active");
+      for (const ep of activeEps) {
+        await supabase.from("treatment_episodes").update({ status: "discharged", discharge_date: form.admission_date }).eq("id", ep.id);
+      }
+
+      toast.success("Nuevo episodio creado correctamente");
+      resetForm();
+      onClose();
+      onSaved(newEp.id);
+    } catch (err: any) {
+      toast.error("Error al crear el episodio", { description: err?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { resetForm(); onClose(); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Nuevo Episodio de Tratamiento</DialogTitle>
+          <DialogDescription className="sr-only">Crear un nuevo episodio de tratamiento</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Fecha de admisión *</Label>
+            <Input type="date" value={form.admission_date} onChange={e => setForm({ ...form, admission_date: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Diagnóstico *</Label>
+            <Input value={form.diagnosis} onChange={e => setForm({ ...form, diagnosis: e.target.value })} placeholder="Ej: Fx distal de radio D°" />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de tratamiento</Label>
+            <Select value={form.treatment_type} onValueChange={v => setForm({ ...form, treatment_type: v })}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="conservative">Conservador</SelectItem>
+                <SelectItem value="surgery">Quirúrgico</SelectItem>
+                <SelectItem value="mixed">Mixto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Médico derivante</Label>
+            <Input value={form.doctor_name} onChange={e => setForm({ ...form, doctor_name: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Mecanismo de lesión</Label>
+            <Input value={form.injury_mechanism} onChange={e => setForm({ ...form, injury_mechanism: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Semanas post lesión</Label>
+            <Input type="number" min={0} value={form.weeks_post_injury} onChange={e => setForm({ ...form, weeks_post_injury: e.target.value })} />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => { resetForm(); onClose(); }}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving || !form.diagnosis.trim()}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear episodio"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
