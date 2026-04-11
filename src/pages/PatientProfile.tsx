@@ -639,6 +639,13 @@ export default function PatientProfile() {
         </TabsContent>
       </Tabs>
 
+      {/* New Episode Dialog */}
+      <NewEpisodeDialog open={showNewEpisode} onClose={() => setShowNewEpisode(false)} patientId={id!} userId={user!.id} episodes={episodes} onSaved={async (newEpId: string) => {
+        setActiveEpisodeId(newEpId);
+        await fetchPatientBase();
+        await fetchEpisodeData(newEpId);
+      }} />
+
 
       {/* New Functional Eval Dialog */}
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
