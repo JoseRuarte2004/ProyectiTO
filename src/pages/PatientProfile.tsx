@@ -59,22 +59,62 @@ export default function PatientProfile() {
   const [showUploadFile, setShowUploadFile] = useState(false);
   const [deleteFile, setDeleteFile] = useState<any>(null);
 
-  const fetchAll = async () => {
+  const fetchPatientBase = async () => {
     if (!id) return;
-    const [p, c, o, s, fe, ae, pl, ap, cf] = await Promise.all([
+    const [p, o, ep] = await Promise.all([
       supabase.from("patients").select("*").eq("id", id).single(),
-      supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
       supabase.from("patient_occupational_profiles").select("*").eq("patient_id", id).single(),
-      supabase.from("therapy_sessions").select("*").eq("patient_id", id).order("session_date", { ascending: false }),
-      supabase.from("functional_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
-      supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
-      supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
-      supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false }),
-      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
+      supabase.from("treatment_episodes").select("*").eq("patient_id", id).eq("is_deleted", false).order("episode_number", { ascending: true }),
     ]);
     setPatient(p.data);
-    setClinical(c.data);
     setOccupational(o.data);
+    const eps = ep.data || [];
+    setEpisodes(eps);
+    // Default to active episode or last one
+    const activeEp = eps.find((e: any) => e.status === "active") || eps[eps.length - 1];
+    const epId = activeEp?.id || null;
+    if (!activeEpisodeId) setActiveEpisodeId(epId);
+    return epId;
+  };
+
+  const fetchEpisodeData = async (episodeId: string | null) => {
+    if (!id) return;
+    const apptPromise = supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false });
+    
+    if (!episodeId) {
+      // No episode: fallback to patient-level queries
+      const [c, s, fe, ae, pl, cf, ap] = await Promise.all([
+        supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
+        supabase.from("therapy_sessions").select("*").eq("patient_id", id).eq("is_deleted", false).order("session_date", { ascending: false }),
+        supabase.from("functional_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
+        supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
+        supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
+        supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
+        apptPromise,
+      ]);
+      setClinical(c.data);
+      setSessions(s.data || []);
+      setFuncEvals(fe.data || []);
+      setAnalEvals(ae.data || []);
+      setPlans(pl.data || []);
+      setAppointments(ap.data || []);
+      const files = cf.data || [];
+      setClinicalFiles(files);
+      setLoading(false);
+      fetchSignedUrls(files);
+      return;
+    }
+
+    const [c, s, fe, ae, pl, cf, ap] = await Promise.all([
+      supabase.from("patient_clinical_records").select("*").eq("patient_id", id).eq("episode_id", episodeId).single(),
+      supabase.from("therapy_sessions").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("session_date", { ascending: false }),
+      supabase.from("functional_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
+      supabase.from("analytical_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
+      supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("created_at", { ascending: false }),
+      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("photo_date", { ascending: false }),
+      apptPromise,
+    ]);
+    setClinical(c.data);
     setSessions(s.data || []);
     setFuncEvals(fe.data || []);
     setAnalEvals(ae.data || []);
@@ -83,8 +123,12 @@ export default function PatientProfile() {
     const files = cf.data || [];
     setClinicalFiles(files);
     setLoading(false);
-    // Fetch signed URLs for all files
     fetchSignedUrls(files);
+  };
+
+  const fetchAll = async () => {
+    const epId = await fetchPatientBase();
+    await fetchEpisodeData(activeEpisodeId || epId || null);
   };
 
   const fetchSignedUrls = async (files: any[]) => {
