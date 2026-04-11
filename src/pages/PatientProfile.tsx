@@ -147,6 +147,13 @@ export default function PatientProfile() {
 
   useEffect(() => { fetchAll(); }, [id]);
 
+  // Re-fetch episode-scoped data when switching episodes
+  useEffect(() => {
+    if (activeEpisodeId && !loading) {
+      fetchEpisodeData(activeEpisodeId);
+    }
+  }, [activeEpisodeId]);
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!patient) return <p className="text-center text-muted-foreground py-12">Paciente no encontrado.</p>;
 
