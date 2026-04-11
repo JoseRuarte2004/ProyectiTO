@@ -41,6 +41,9 @@ export default function PatientProfile() {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [loadingUrls, setLoadingUrls] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [episodes, setEpisodes] = useState<any[]>([]);
+  const [activeEpisodeId, setActiveEpisodeId] = useState<string | null>(null);
+  const [showNewEpisode, setShowNewEpisode] = useState(false);
 
   // Dialog states
   
@@ -56,22 +59,62 @@ export default function PatientProfile() {
   const [showUploadFile, setShowUploadFile] = useState(false);
   const [deleteFile, setDeleteFile] = useState<any>(null);
 
-  const fetchAll = async () => {
+  const fetchPatientBase = async () => {
     if (!id) return;
-    const [p, c, o, s, fe, ae, pl, ap, cf] = await Promise.all([
+    const [p, o, ep] = await Promise.all([
       supabase.from("patients").select("*").eq("id", id).single(),
-      supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
       supabase.from("patient_occupational_profiles").select("*").eq("patient_id", id).single(),
-      supabase.from("therapy_sessions").select("*").eq("patient_id", id).order("session_date", { ascending: false }),
-      supabase.from("functional_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
-      supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
-      supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
-      supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false }),
-      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
+      supabase.from("treatment_episodes").select("*").eq("patient_id", id).eq("is_deleted", false).order("episode_number", { ascending: true }),
     ]);
     setPatient(p.data);
-    setClinical(c.data);
     setOccupational(o.data);
+    const eps = ep.data || [];
+    setEpisodes(eps);
+    // Default to active episode or last one
+    const activeEp = eps.find((e: any) => e.status === "active") || eps[eps.length - 1];
+    const epId = activeEp?.id || null;
+    if (!activeEpisodeId) setActiveEpisodeId(epId);
+    return epId;
+  };
+
+  const fetchEpisodeData = async (episodeId: string | null) => {
+    if (!id) return;
+    const apptPromise = supabase.from("appointments").select("*").eq("patient_id", id).order("appointment_date", { ascending: false });
+    
+    if (!episodeId) {
+      // No episode: fallback to patient-level queries
+      const [c, s, fe, ae, pl, cf, ap] = await Promise.all([
+        supabase.from("patient_clinical_records").select("*").eq("patient_id", id).single(),
+        supabase.from("therapy_sessions").select("*").eq("patient_id", id).eq("is_deleted", false).order("session_date", { ascending: false }),
+        supabase.from("functional_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
+        supabase.from("analytical_evaluations").select("*").eq("patient_id", id).order("evaluation_date", { ascending: false }),
+        supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("is_deleted", false).order("created_at", { ascending: false }),
+        supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
+        apptPromise,
+      ]);
+      setClinical(c.data);
+      setSessions(s.data || []);
+      setFuncEvals(fe.data || []);
+      setAnalEvals(ae.data || []);
+      setPlans(pl.data || []);
+      setAppointments(ap.data || []);
+      const files = cf.data || [];
+      setClinicalFiles(files);
+      setLoading(false);
+      fetchSignedUrls(files);
+      return;
+    }
+
+    const [c, s, fe, ae, pl, cf, ap] = await Promise.all([
+      supabase.from("patient_clinical_records").select("*").eq("patient_id", id).eq("episode_id", episodeId).single(),
+      supabase.from("therapy_sessions").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("session_date", { ascending: false }),
+      supabase.from("functional_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
+      supabase.from("analytical_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
+      supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("created_at", { ascending: false }),
+      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("photo_date", { ascending: false }),
+      apptPromise,
+    ]);
+    setClinical(c.data);
     setSessions(s.data || []);
     setFuncEvals(fe.data || []);
     setAnalEvals(ae.data || []);
@@ -80,8 +123,12 @@ export default function PatientProfile() {
     const files = cf.data || [];
     setClinicalFiles(files);
     setLoading(false);
-    // Fetch signed URLs for all files
     fetchSignedUrls(files);
+  };
+
+  const fetchAll = async () => {
+    const epId = await fetchPatientBase();
+    await fetchEpisodeData(activeEpisodeId || epId || null);
   };
 
   const fetchSignedUrls = async (files: any[]) => {
@@ -99,6 +146,13 @@ export default function PatientProfile() {
   };
 
   useEffect(() => { fetchAll(); }, [id]);
+
+  // Re-fetch episode-scoped data when switching episodes
+  useEffect(() => {
+    if (activeEpisodeId && !loading) {
+      fetchEpisodeData(activeEpisodeId);
+    }
+  }, [activeEpisodeId]);
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!patient) return <p className="text-center text-muted-foreground py-12">Paciente no encontrado.</p>;
@@ -139,6 +193,35 @@ export default function PatientProfile() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Episode selector */}
+      {episodes.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {episodes.map((ep: any) => (
+            <button
+              key={ep.id}
+              onClick={() => setActiveEpisodeId(ep.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                ep.id === activeEpisodeId
+                  ? "bg-teal-600 text-white border-teal-600"
+                  : "bg-background text-foreground border-border hover:bg-muted"
+              }`}
+            >
+              Episodio {ep.episode_number}{ep.diagnosis ? ` — ${ep.diagnosis}` : ""} · {format(new Date(ep.admission_date + "T12:00:00"), "dd/MM/yyyy")}
+            </button>
+          ))}
+          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
+            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
+          </Button>
+        </div>
+      )}
+      {episodes.length <= 1 && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
+            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
+          </Button>
+        </div>
+      )}
 
       {/* Tabs */}
       <Tabs defaultValue="resumen" className="space-y-4">
@@ -357,7 +440,7 @@ export default function PatientProfile() {
               <h2 className="font-semibold text-foreground">Historial de visitas</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{sessions.length} {sessions.length === 1 ? "visita registrada" : "visitas registradas"}</p>
             </div>
-            <Button onClick={() => navigate(`/patients/${id}/sessions/new`)} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
+            <Button onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
           </div>
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -555,6 +638,13 @@ export default function PatientProfile() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* New Episode Dialog */}
+      <NewEpisodeDialog open={showNewEpisode} onClose={() => setShowNewEpisode(false)} patientId={id!} userId={user!.id} episodes={episodes} onSaved={async (newEpId: string) => {
+        setActiveEpisodeId(newEpId);
+        await fetchPatientBase();
+        await fetchEpisodeData(newEpId);
+      }} />
 
 
       {/* New Functional Eval Dialog */}
@@ -1756,5 +1846,124 @@ function DeleteFileConfirm({ file, onClose, onDeleted }: { file: any; onClose: (
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved }: {
+  open: boolean; onClose: () => void; patientId: string; userId: string; episodes: any[]; onSaved: (newEpId: string) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    admission_date: new Date().toISOString().split("T")[0],
+    diagnosis: "",
+    treatment_type: "",
+    doctor_name: "",
+    injury_mechanism: "",
+    weeks_post_injury: "",
+  });
+
+  const resetForm = () => setForm({
+    admission_date: new Date().toISOString().split("T")[0],
+    diagnosis: "", treatment_type: "", doctor_name: "", injury_mechanism: "", weeks_post_injury: "",
+  });
+
+  const handleSave = async () => {
+    if (!form.diagnosis.trim()) return;
+    setSaving(true);
+    try {
+      const maxEpNum = Math.max(...episodes.map((e: any) => e.episode_number), 0);
+
+      // 1. Insert new episode
+      const { data: newEp, error: epErr } = await supabase
+        .from("treatment_episodes")
+        .insert({
+          patient_id: patientId,
+          professional_id: userId,
+          episode_number: maxEpNum + 1,
+          admission_date: form.admission_date,
+          status: "active",
+          diagnosis: form.diagnosis.trim(),
+        })
+        .select("id")
+        .single();
+
+      if (epErr || !newEp) throw epErr || new Error("Failed to create episode");
+
+      // 2. Insert clinical record for this episode
+      await supabase.from("patient_clinical_records").insert({
+        patient_id: patientId,
+        episode_id: newEp.id,
+        diagnosis: form.diagnosis.trim(),
+        treatment_type: form.treatment_type || null,
+        doctor_name: form.doctor_name || null,
+        injury_mechanism: form.injury_mechanism || null,
+        weeks_post_injury: form.weeks_post_injury ? parseInt(form.weeks_post_injury) : null,
+      });
+
+      // 3. Set previous active episodes to discharged
+      const activeEps = episodes.filter((e: any) => e.status === "active");
+      for (const ep of activeEps) {
+        await supabase.from("treatment_episodes").update({ status: "discharged", discharge_date: form.admission_date }).eq("id", ep.id);
+      }
+
+      toast.success("Nuevo episodio creado correctamente");
+      resetForm();
+      onClose();
+      onSaved(newEp.id);
+    } catch (err: any) {
+      toast.error("Error al crear el episodio", { description: err?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { resetForm(); onClose(); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Nuevo Episodio de Tratamiento</DialogTitle>
+          <DialogDescription className="sr-only">Crear un nuevo episodio de tratamiento</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Fecha de admisión *</Label>
+            <Input type="date" value={form.admission_date} onChange={e => setForm({ ...form, admission_date: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Diagnóstico *</Label>
+            <Input value={form.diagnosis} onChange={e => setForm({ ...form, diagnosis: e.target.value })} placeholder="Ej: Fx distal de radio D°" />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de tratamiento</Label>
+            <Select value={form.treatment_type} onValueChange={v => setForm({ ...form, treatment_type: v })}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="conservative">Conservador</SelectItem>
+                <SelectItem value="surgery">Quirúrgico</SelectItem>
+                <SelectItem value="mixed">Mixto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Médico derivante</Label>
+            <Input value={form.doctor_name} onChange={e => setForm({ ...form, doctor_name: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Mecanismo de lesión</Label>
+            <Input value={form.injury_mechanism} onChange={e => setForm({ ...form, injury_mechanism: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Semanas post lesión</Label>
+            <Input type="number" min={0} value={form.weeks_post_injury} onChange={e => setForm({ ...form, weeks_post_injury: e.target.value })} />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => { resetForm(); onClose(); }}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving || !form.diagnosis.trim()}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear episodio"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

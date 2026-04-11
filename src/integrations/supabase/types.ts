@@ -23,6 +23,7 @@ export type Database = {
           edema: string | null
           edema_circummetry: string | null
           emotional_state: string | null
+          episode_id: string | null
           evaluation_date: string
           godet_test: string | null
           goniometry: Json | null
@@ -64,6 +65,7 @@ export type Database = {
           edema?: string | null
           edema_circummetry?: string | null
           emotional_state?: string | null
+          episode_id?: string | null
           evaluation_date?: string
           godet_test?: string | null
           goniometry?: Json | null
@@ -105,6 +107,7 @@ export type Database = {
           edema?: string | null
           edema_circummetry?: string | null
           emotional_state?: string | null
+          episode_id?: string | null
           evaluation_date?: string
           godet_test?: string | null
           goniometry?: Json | null
@@ -139,6 +142,13 @@ export type Database = {
           vancouver_score?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "analytical_evaluations_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "analytical_evaluations_patient_id_fkey"
             columns: ["patient_id"]
@@ -263,6 +273,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           description: string | null
+          episode_id: string | null
           file_name: string
           file_path: string
           file_type: string | null
@@ -279,6 +290,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
+          episode_id?: string | null
           file_name: string
           file_path: string
           file_type?: string | null
@@ -295,6 +307,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
+          episode_id?: string | null
           file_name?: string
           file_path?: string
           file_type?: string | null
@@ -307,6 +320,13 @@ export type Database = {
           uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "clinical_files_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clinical_files_patient_id_fkey"
             columns: ["patient_id"]
@@ -491,6 +511,7 @@ export type Database = {
           created_at: string
           dash_score: number | null
           dominance: Database["public"]["Enums"]["dominance_type"] | null
+          episode_id: string | null
           evaluation_date: string
           health_management: string | null
           id: string
@@ -509,6 +530,7 @@ export type Database = {
           created_at?: string
           dash_score?: number | null
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
+          episode_id?: string | null
           evaluation_date?: string
           health_management?: string | null
           id?: string
@@ -527,6 +549,7 @@ export type Database = {
           created_at?: string
           dash_score?: number | null
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
+          episode_id?: string | null
           evaluation_date?: string
           health_management?: string | null
           id?: string
@@ -539,6 +562,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "functional_evaluations_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "functional_evaluations_patient_id_fkey"
             columns: ["patient_id"]
@@ -568,6 +598,7 @@ export type Database = {
           current_treatment: string | null
           diagnosis: string | null
           doctor_name: string | null
+          episode_id: string | null
           id: string
           immobilization_weeks: number | null
           injury_date: string | null
@@ -589,6 +620,7 @@ export type Database = {
           current_treatment?: string | null
           diagnosis?: string | null
           doctor_name?: string | null
+          episode_id?: string | null
           id?: string
           immobilization_weeks?: number | null
           injury_date?: string | null
@@ -610,6 +642,7 @@ export type Database = {
           current_treatment?: string | null
           diagnosis?: string | null
           doctor_name?: string | null
+          episode_id?: string | null
           id?: string
           immobilization_weeks?: number | null
           injury_date?: string | null
@@ -628,9 +661,16 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "patient_clinical_records_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "patient_clinical_records_patient_id_fkey"
             columns: ["patient_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
@@ -830,6 +870,7 @@ export type Database = {
           clinical_changes: string | null
           created_at: string
           deleted_at: string | null
+          episode_id: string | null
           evolution: string | null
           general_observations: string | null
           home_instructions_sent: string | null
@@ -852,6 +893,7 @@ export type Database = {
           clinical_changes?: string | null
           created_at?: string
           deleted_at?: string | null
+          episode_id?: string | null
           evolution?: string | null
           general_observations?: string | null
           home_instructions_sent?: string | null
@@ -874,6 +916,7 @@ export type Database = {
           clinical_changes?: string | null
           created_at?: string
           deleted_at?: string | null
+          episode_id?: string | null
           evolution?: string | null
           general_observations?: string | null
           home_instructions_sent?: string | null
@@ -894,6 +937,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "therapy_sessions_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "therapy_sessions_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
@@ -902,6 +952,69 @@ export type Database = {
           },
           {
             foreignKeyName: "therapy_sessions_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatment_episodes: {
+        Row: {
+          admission_date: string
+          created_at: string
+          deleted_at: string | null
+          diagnosis: string | null
+          discharge_date: string | null
+          episode_number: number
+          id: string
+          is_deleted: boolean
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          diagnosis?: string | null
+          discharge_date?: string | null
+          episode_number?: number
+          id?: string
+          is_deleted?: boolean
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          diagnosis?: string | null
+          discharge_date?: string | null
+          episode_number?: number
+          id?: string
+          is_deleted?: boolean
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_episodes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_episodes_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -977,6 +1090,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           end_date: string | null
+          episode_id: string | null
           home_item_recommendations: string | null
           id: string
           indications: string | null
@@ -996,6 +1110,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           end_date?: string | null
+          episode_id?: string | null
           home_item_recommendations?: string | null
           id?: string
           indications?: string | null
@@ -1015,6 +1130,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           end_date?: string | null
+          episode_id?: string | null
           home_item_recommendations?: string | null
           id?: string
           indications?: string | null
@@ -1031,6 +1147,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "treatment_plans_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_episodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "treatment_plans_patient_id_fkey"
             columns: ["patient_id"]

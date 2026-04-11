@@ -157,9 +157,27 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
       if (patErr) throw patErr;
       const pid = patient.id;
 
+      // 1b. Insert treatment episode
+      const { data: episode, error: epErr } = await supabase
+        .from("treatment_episodes")
+        .insert({
+          patient_id: pid,
+          professional_id: user!.id,
+          episode_number: 1,
+          admission_date: admissionDate,
+          status: "active",
+          diagnosis: or(diagnosis),
+        })
+        .select("id")
+        .single();
+
+      if (epErr) throw epErr;
+      const episodeId = episode.id;
+
       // 2. Clinical records
       await supabase.from("patient_clinical_records").insert({
         patient_id: pid,
+        episode_id: episodeId,
         diagnosis: or(diagnosis),
         doctor_name: or(doctorName),
         injury_date: or(injuryDate),
@@ -195,6 +213,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
+          episode_id: episodeId,
           evaluation_date: admissionDate,
           dominance: or(dominance) as any,
           avd: or(avd),
@@ -221,6 +240,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
+          episode_id: episodeId,
           evaluation_date: admissionDate,
           pain_score: painScore,
           pain_appearance: or(painAppearance),
@@ -254,6 +274,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
       await supabase.from("therapy_sessions").insert({
         patient_id: pid,
         professional_id: user!.id,
+        episode_id: episodeId,
         session_date: admissionDate,
         session_type: "admission",
         session_number: 1,
