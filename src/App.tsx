@@ -12,6 +12,7 @@ import PatientProfile from "./pages/PatientProfile";
 import Appointments from "./pages/Appointments";
 import Exercises from "./pages/Exercises";
 import SessionForm from "./pages/SessionForm";
+import NewPatientForm from "./components/patients/NewPatientForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
