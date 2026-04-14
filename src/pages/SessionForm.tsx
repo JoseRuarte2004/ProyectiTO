@@ -21,6 +21,7 @@ export default function SessionForm() {
   const { patientId } = useParams<{ patientId: string }>();
   const [searchParams] = useSearchParams();
   const episodeIdParam = searchParams.get("episode");
+  const typeParam = searchParams.get("type");
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -32,7 +33,7 @@ export default function SessionForm() {
 
   // Form state
   const [session_date, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
-  const [session_type, setSessionType] = useState("follow_up");
+  const [session_type, setSessionType] = useState(typeParam === "admission" ? "admission" : "follow_up");
   const [session_number, setSessionNumber] = useState("");
   const [week_at_session, setWeekAtSession] = useState("");
   const [general_observations, setGeneralObservations] = useState("");
@@ -266,9 +267,10 @@ export default function SessionForm() {
               </div>
               <div className="space-y-2">
                 <Label>Tipo de sesión</Label>
-                <Select value={session_type} onValueChange={setSessionType}>
+                <Select value={session_type} onValueChange={setSessionType} disabled={typeParam === "admission"}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    {typeParam === "admission" && <SelectItem value="admission">Admisión</SelectItem>}
                     <SelectItem value="follow_up">Seguimiento</SelectItem>
                     <SelectItem value="discharge">Alta</SelectItem>
                   </SelectContent>
