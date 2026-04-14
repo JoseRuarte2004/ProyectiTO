@@ -303,6 +303,13 @@ export default function PatientProfile() {
                             </div>
                           )}
 
+                          {s.avd_followup && (
+                            <div className="mb-3 space-y-1">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">AVD en sesión</p>
+                              <p className="whitespace-pre-wrap">{s.avd_followup}</p>
+                            </div>
+                          )}
+
                           {linkedEval && (
                             <div className="mb-3 bg-blue-50/40 rounded-lg p-3 space-y-1 border border-blue-100/60">
                               <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Mediciones del día</p>
@@ -319,6 +326,17 @@ export default function PatientProfile() {
                               {linkedEval.godet_test && <p><span className="font-medium">Godet:</span> {linkedEval.godet_test}</p>}
                               {linkedEval.arom && <p><span className="font-medium">Goniometría PRE:</span> {linkedEval.arom}</p>}
                               {linkedEval.prom && <p><span className="font-medium">Goniometría POST:</span> {linkedEval.prom}</p>}
+                              {linkedEval.goniometry && typeof linkedEval.goniometry === "object" && (() => {
+                                const g = linkedEval.goniometry as any;
+                                const partNames: Record<string, string> = { shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar" };
+                                const renderPart = (label: string, data: any) => {
+                                  if (!data || !data.values || typeof data.values !== "object") return null;
+                                  const vals = Object.entries(data.values).filter(([,v]) => v != null).map(([k,v]) => `${k}: ${v}°`);
+                                  if (vals.length === 0) return null;
+                                  return <p key={label}><span className="font-medium">{label} ({partNames[data.body_part] || data.body_part}):</span> {vals.join(" · ")}</p>;
+                                };
+                                return <>{renderPart("Goniometría PRE", g.pre)}{renderPart("Goniometría POST", g.post)}</>;
+                              })()}
                               {linkedEval.kapandji && <p><span className="font-medium">Kapandji:</span> {linkedEval.kapandji}</p>}
                               {(linkedEval.dynamometer_msd || linkedEval.dynamometer_msi) && (
                                 <p><span className="font-medium">Dinamómetro:</span>
@@ -327,6 +345,36 @@ export default function PatientProfile() {
                                 </p>
                               )}
                               {linkedEval.muscle_strength && <p><span className="font-medium">Fuerza:</span> {linkedEval.muscle_strength}</p>}
+                              {(linkedEval.muscle_strength_median || linkedEval.muscle_strength_cubital || linkedEval.muscle_strength_radial) && (() => {
+                                const renderNerve = (label: string, raw: string) => {
+                                  try {
+                                    const obj = JSON.parse(raw);
+                                    const entries = Object.entries(obj).filter(([,v]) => v);
+                                    if (entries.length === 0) return null;
+                                    return <p key={label}><span className="font-medium">{label}:</span> {entries.map(([k,v]) => `${k.replace(/_/g," ")}: ${v}`).join(", ")}</p>;
+                                  } catch { return <p><span className="font-medium">{label}:</span> {raw}</p>; }
+                                };
+                                return <>
+                                  {linkedEval.muscle_strength_median && renderNerve("N. Mediano", linkedEval.muscle_strength_median)}
+                                  {linkedEval.muscle_strength_cubital && renderNerve("N. Cubital", linkedEval.muscle_strength_cubital)}
+                                  {linkedEval.muscle_strength_radial && renderNerve("N. Radial", linkedEval.muscle_strength_radial)}
+                                </>;
+                              })()}
+                              {linkedEval.specific_tests && typeof linkedEval.specific_tests === "object" && (() => {
+                                const tests = linkedEval.specific_tests as Record<string, string | null>;
+                                const filled = Object.entries(tests).filter(([,v]) => v != null);
+                                if (filled.length === 0) return null;
+                                return (
+                                  <div>
+                                    <span className="font-medium">Pruebas específicas: </span>
+                                    {filled.map(([name, result]) => (
+                                      <span key={name} className={`inline-block text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5 ${result === "positive" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                                        {name} {result === "positive" ? "+" : "−"}
+                                      </span>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
                               {linkedEval.sensitivity_functional && <p><span className="font-medium">Sensibilidad epicrítica:</span> {linkedEval.sensitivity_functional}</p>}
                               {linkedEval.sensitivity_protective && <p><span className="font-medium">Sensibilidad protopática:</span> {linkedEval.sensitivity_protective}</p>}
                               {linkedEval.sensitivity && <p><span className="font-medium">Sensibilidad:</span> {linkedEval.sensitivity}</p>}
@@ -385,9 +433,21 @@ export default function PatientProfile() {
                     ["Inicio de síntomas", clinical.symptom_start_date ? format(new Date(clinical.symptom_start_date + "T12:00:00"), "dd/MM/yyyy") : null],
                     ["Mecanismo de lesión", clinical.injury_mechanism],
                     ["Tratamiento actual", clinical.current_treatment],
-                    ["Semanas post lesión", clinical.weeks_post_injury != null ? `${clinical.weeks_post_injury} semanas` : null],
-                    ["Semanas post cirugía", clinical.weeks_post_surgery != null ? `${clinical.weeks_post_surgery} semanas` : null],
-                    ["Semanas de inmovilización", clinical.immobilization_weeks != null ? `${clinical.immobilization_weeks} semanas` : null],
+                    ["Semanas post lesión", (() => {
+                      const w = clinical.weeks_post_injury; const d = clinical.days_post_injury;
+                      if (w == null && d == null) return null;
+                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
+                    })()],
+                    ["Semanas post cirugía", (() => {
+                      const w = clinical.weeks_post_surgery; const d = clinical.days_post_surgery;
+                      if (w == null && d == null) return null;
+                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
+                    })()],
+                    ["Semanas de inmovilización", (() => {
+                      const w = clinical.immobilization_weeks; const d = clinical.immobilization_days;
+                      if (w == null && d == null) return null;
+                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
+                    })()],
                     ["Médico derivante", clinical.doctor_name],
                     ["Próximo OyT", clinical.next_oyt_appointment ? format(new Date(clinical.next_oyt_appointment + "T12:00:00"), "dd/MM/yyyy") : null],
                     ["Estudios", clinical.studies],
@@ -703,24 +763,51 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
 
   const nn = (v: any) => v != null && v !== "";
 
-  const renderGoniometry = (g: any) => {
+  const partNames: Record<string, string> = { shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar" };
+
+  const renderGonioJsonb = (g: any) => {
     if (!g || typeof g !== "object") return null;
-    const lines: string[] = [];
-    Object.entries(g).forEach(([joint, movements]: [string, any]) => {
-      if (!movements || typeof movements !== "object") return;
-      const parts = Object.entries(movements)
-        .filter(([, val]) => nn(val))
-        .map(([mov, val]) => `${mov} ${val}°`);
-      if (parts.length > 0) lines.push(`${joint}: ${parts.join(" · ")}`);
-    });
-    return lines.length > 0 ? <Line>{lines.join("\n")}</Line> : null;
+    const renderPart = (label: string, data: any) => {
+      if (!data || !data.values || typeof data.values !== "object") return null;
+      const vals = Object.entries(data.values).filter(([,v]) => v != null).map(([k,v]) => `${k}: ${v}°`);
+      if (vals.length === 0) return null;
+      return <Line key={label}>{label} ({partNames[data.body_part] || data.body_part}): {vals.join(" · ")}</Line>;
+    };
+    return <>{renderPart("Goniometría PRE", g.pre)}{renderPart("Goniometría POST", g.post)}</>;
   };
 
   const renderSpecificTests = (tests: any) => {
     if (!tests || typeof tests !== "object") return null;
-    const entries = Object.entries(tests).filter(([, v]) => nn(v));
-    if (entries.length === 0) return null;
-    return <>{entries.map(([name, result]) => <Line key={name}>{name}: {String(result)}</Line>)}</>;
+    const filled = Object.entries(tests).filter(([, v]) => nn(v));
+    if (filled.length === 0) return null;
+    return (
+      <div>
+        <span className="font-medium text-sm">Pruebas específicas: </span>
+        {filled.map(([name, result]) => (
+          <span key={name} className={`inline-block text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5 ${result === "positive" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+            {name} {result === "positive" ? "+" : "−"}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  const renderNerveStrength = (e: any) => {
+    const hasAny = nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
+    if (!hasAny) return null;
+    const renderNerve = (label: string, raw: string) => {
+      try {
+        const obj = JSON.parse(raw);
+        const entries = Object.entries(obj).filter(([,v]) => v);
+        if (entries.length === 0) return null;
+        return <Line key={label}>{label}: {entries.map(([k,v]) => `${k.replace(/_/g," ")}: ${v}`).join(", ")}</Line>;
+      } catch { return <Line>{label}: {raw}</Line>; }
+    };
+    return <>
+      {nn(e.muscle_strength_median) && renderNerve("N. Mediano", e.muscle_strength_median)}
+      {nn(e.muscle_strength_cubital) && renderNerve("N. Cubital", e.muscle_strength_cubital)}
+      {nn(e.muscle_strength_radial) && renderNerve("N. Radial", e.muscle_strength_radial)}
+    </>;
   };
 
   return (
