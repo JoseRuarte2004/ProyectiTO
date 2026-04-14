@@ -596,10 +596,13 @@ export type Database = {
         Row: {
           created_at: string
           current_treatment: string | null
+          days_post_injury: number | null
+          days_post_surgery: number | null
           diagnosis: string | null
           doctor_name: string | null
           episode_id: string | null
           id: string
+          immobilization_days: number | null
           immobilization_weeks: number | null
           injury_date: string | null
           injury_mechanism: string | null
@@ -618,10 +621,13 @@ export type Database = {
         Insert: {
           created_at?: string
           current_treatment?: string | null
+          days_post_injury?: number | null
+          days_post_surgery?: number | null
           diagnosis?: string | null
           doctor_name?: string | null
           episode_id?: string | null
           id?: string
+          immobilization_days?: number | null
           immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
@@ -640,10 +646,13 @@ export type Database = {
         Update: {
           created_at?: string
           current_treatment?: string | null
+          days_post_injury?: number | null
+          days_post_surgery?: number | null
           diagnosis?: string | null
           doctor_name?: string | null
           episode_id?: string | null
           id?: string
+          immobilization_days?: number | null
           immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
@@ -867,6 +876,7 @@ export type Database = {
       }
       therapy_sessions: {
         Row: {
+          avd_followup: string | null
           clinical_changes: string | null
           created_at: string
           deleted_at: string | null
@@ -890,6 +900,7 @@ export type Database = {
           week_at_session: number | null
         }
         Insert: {
+          avd_followup?: string | null
           clinical_changes?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -913,6 +924,7 @@ export type Database = {
           week_at_session?: number | null
         }
         Update: {
+          avd_followup?: string | null
           clinical_changes?: string | null
           created_at?: string
           deleted_at?: string | null
