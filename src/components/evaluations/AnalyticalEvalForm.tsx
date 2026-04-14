@@ -364,19 +364,61 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
                 <Row label="PROM" value={e.prom} />
                 <Row label="Kapandji" value={e.kapandji} />
               </div>
-              {gonioData && Object.values(gonioData).some(v => v !== "") && (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground">Goniometría</p>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                    {Object.entries(gonioData).filter(([, v]) => v !== "").map(([key, val]) => (
-                      <div key={key} className="bg-muted/50 rounded px-2 py-1">
-                        <p className="text-[10px] text-muted-foreground">{key}</p>
-                        <p className="text-xs font-medium">{val}°</p>
+              {(() => {
+                // Helper to render structured goniometry
+                const renderGonio = (data: any, label: string) => {
+                  if (!data || !data.body_part) return null;
+                  const partMap: Record<string, string> = {
+                    shoulder: "Hombro",
+                    elbow: "Codo",
+                    wrist: "Muñeca",
+                    hand: "Mano",
+                    thumb: "Pulgar",
+                  };
+                  const partName = partMap[data.body_part] || data.body_part;
+                  const values = data.values || {};
+                  const entries = Object.entries(values).filter(([, v]) => v !== "" && v != null);
+                  if (entries.length === 0) return null;
+                  const valuesStr = entries.map(([k, v]) => `${k}: ${v}°`).join(" · ");
+                  return (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">{label} — {partName}</p>
+                      <p className="text-sm">{valuesStr}</p>
+                    </div>
+                  );
+                };
+
+                // Check if new format (has pre/post)
+                const hasPre = gonioData && "pre" in gonioData && gonioData.pre;
+                const hasPost = gonioData && "post" in gonioData && gonioData.post;
+
+                if (hasPre || hasPost) {
+                  return (
+                    <div className="space-y-3">
+                      {renderGonio(gonioData?.pre, "Goniometría PRE")}
+                      {renderGonio(gonioData?.post, "Goniometría POST")}
+                    </div>
+                  );
+                }
+
+                // Fallback to old flat format
+                if (gonioData && Object.values(gonioData).some(v => v !== "" && v != null)) {
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground">Goniometría</p>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                        {Object.entries(gonioData).filter(([, v]) => v !== "" && v != null).map(([key, val]) => (
+                          <div key={key} className="bg-muted/50 rounded px-2 py-1">
+                            <p className="text-[10px] text-muted-foreground">{key}</p>
+                            <p className="text-xs font-medium">{val}°</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </AccordionContent>
           </AccordionItem>
 
