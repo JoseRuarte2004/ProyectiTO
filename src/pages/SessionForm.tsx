@@ -166,6 +166,8 @@ export default function SessionForm() {
   const [func_aivd, setFuncAivd] = useState("");
   const [func_sleep, setFuncSleep] = useState("");
   const [func_health, setFuncHealth] = useState("");
+  const [func_barthel, setFuncBarthel] = useState("");
+  const [func_dash, setFuncDash] = useState("");
 
   // Measurements toggle
   const [show_measurements, setShowMeasurements] = useState(false);
@@ -178,6 +180,12 @@ export default function SessionForm() {
   const [pain_aggravating_factors, setPainAggravatingFactors] = useState("");
   const [pain_radiates, setPainRadiates] = useState(false);
   const [pain_radiation, setPainRadiation] = useState("");
+  const [pain_appearance, setPainAppearance] = useState("");
+  const [pain_free, setPainFree] = useState("");
+
+  // Edema
+  const [edema_obs, setEdemaObs] = useState("");
+  const [godet_test, setGodetTest] = useState("");
 
   // Circummetry
   const [circ_wrist_msd, setCircWristMsd] = useState("");
@@ -191,6 +199,9 @@ export default function SessionForm() {
   const [show_post_gonio, setShowPostGonio] = useState(false);
   const [gonio_part_post, setGonioPartPost] = useState<GonioPartKey>("wrist");
   const [post_gonio, setPostGonio] = useState<Record<string, string>>({});
+
+  // Fist closure
+  const [fist_closure, setFistClosure] = useState("");
 
   // Strength
   const [dyn_msd, setDynMsd] = useState("");
@@ -211,10 +222,16 @@ export default function SessionForm() {
     Object.fromEntries(SPECIFIC_TESTS.map(t => [t.key, null]))
   );
 
-  // Sensitivity & trophic
+  // Sensitivity
   const [sensitivity, setSensitivity] = useState("");
+  const [sensitivity_functional, setSensitivityFunctional] = useState("");
+  const [sensitivity_protective, setSensitivityProtective] = useState("");
+
+  // Trophic & others
   const [trophic_state, setTrophicState] = useState("");
   const [scar, setScar] = useState("");
+  const [vancouver_score, setVancouverScore] = useState("");
+  const [osas_score, setOsasScore] = useState("");
   const [posture, setPosture] = useState("");
   const [emotional_state, setEmotionalState] = useState("");
 
@@ -296,6 +313,7 @@ export default function SessionForm() {
     const kapandjiFinal = kapandji_val ? `${kapandji_val}/10${kapandji_pain ? " con dolor" : ""}` : null;
 
     const msParts: string[] = [];
+    if (fist_closure) msParts.push(`Cierre de puño: ${fist_closure}`);
     if (dppd) msParts.push(`DPPD: ${dppd}cm`);
     if (muscle_strength) msParts.push(muscle_strength);
     const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
@@ -337,7 +355,7 @@ export default function SessionForm() {
     if (error || !session) { setSaving(false); toast.error("Error al guardar la sesión"); return; }
 
     // Functional eval for admission
-    if (session_type === "admission" && [func_dominance, func_avd, func_aivd, func_sleep, func_health].some(v => v)) {
+    if (session_type === "admission" && [func_dominance, func_avd, func_aivd, func_sleep, func_health, func_barthel, func_dash].some(v => v)) {
       const { error: feErr } = await supabase.from("functional_evaluations").insert({
         patient_id: patientId!, professional_id: user.id,
         episode_id: activeEpisodeId,
@@ -345,6 +363,8 @@ export default function SessionForm() {
         dominance: (func_dominance || null) as any,
         avd: func_avd || null, aivd: func_aivd || null,
         sleep_rest: func_sleep || null, health_management: func_health || null,
+        barthel_score: func_barthel ? parseInt(func_barthel) : null,
+        dash_score: func_dash ? parseInt(func_dash) : null,
       } as any);
       if (feErr) console.error("Error inserting func eval:", feErr);
     }
@@ -352,9 +372,12 @@ export default function SessionForm() {
     // Analytical eval if measurements
     const hasMeasurements = show_measurements && [
       pain_touched && pain_score > 0, painLocFinal, pain_characteristics,
-      pain_aggravating_factors, edemaCirc, aromVal, promVal,
+      pain_aggravating_factors, pain_appearance, pain_free, edema_obs, godet_test,
+      edemaCirc, aromVal, promVal, fist_closure,
       dyn_msd, dyn_msi, kapandjiFinal, msVal,
-      sensitivity, trophic_state, scar, posture, emotional_state,
+      sensitivity, sensitivity_functional, sensitivity_protective,
+      trophic_state, scar, vancouver_score, osas_score,
+      posture, emotional_state,
       specificTestsJson, medianJson, cubitalJson, radialJson, gonioJsonb,
     ].some(v => v !== "" && v !== null && v !== undefined && v !== false);
 
@@ -364,9 +387,13 @@ export default function SessionForm() {
         episode_id: activeEpisodeId,
         session_id: session.id, evaluation_date: session_date,
         pain_score: pain_touched ? pain_score : null,
+        pain_appearance: pain_appearance || null,
         pain_location: painLocFinal,
         pain_characteristics: pain_characteristics || null,
         pain_aggravating_factors: pain_aggravating_factors || null,
+        pain: pain_free || null,
+        edema: edema_obs || null,
+        godet_test: godet_test || null,
         edema_circummetry: edemaCirc,
         arom: aromVal, prom: promVal,
         goniometry: gonioJsonb,
@@ -379,8 +406,12 @@ export default function SessionForm() {
         muscle_strength_radial: radialJson,
         specific_tests: specificTestsJson,
         sensitivity: sensitivity || null,
+        sensitivity_functional: sensitivity_functional || null,
+        sensitivity_protective: sensitivity_protective || null,
         trophic_state: trophic_state || null,
         scar: scar || null,
+        vancouver_score: vancouver_score ? parseInt(vancouver_score) : null,
+        osas_score: osas_score ? parseInt(osas_score) : null,
         posture: posture || null,
         emotional_state: emotional_state || null,
       });
@@ -510,6 +541,17 @@ export default function SessionForm() {
                 <Label>Gestión de la salud</Label>
                 <Textarea rows={2} value={func_health} onChange={e => setFuncHealth(e.target.value)} />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Puntaje Barthel (0-100)</Label>
+                  <Input type="number" min={0} max={100} value={func_barthel} onChange={e => setFuncBarthel(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Puntaje DASH (0-100)</Label>
+                  <Input type="number" min={0} max={100} value={func_dash} onChange={e => setFuncDash(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">0 = sin discapacidad · 100 = máxima discapacidad</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -559,6 +601,7 @@ export default function SessionForm() {
                   <Slider min={0} max={10} step={1} value={[pain_score]} onValueChange={([v]) => { setPainScore(v); setPainTouched(true); }} className="flex-1" />
                   <Badge variant="outline" className="text-sm font-semibold w-8 justify-center">{pain_score}</Badge>
                 </div>
+                <div className="space-y-2"><Label>Aparición</Label><Input value={pain_appearance} onChange={e => setPainAppearance(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Localización</Label><Input value={pain_location} onChange={e => setPainLocation(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Características (urente, punzante, etc.)</Label><Input value={pain_characteristics} onChange={e => setPainCharacteristics(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Agravantes / atenuantes</Label><Textarea rows={2} value={pain_aggravating_factors} onChange={e => setPainAggravatingFactors(e.target.value)} /></div>
@@ -569,6 +612,28 @@ export default function SessionForm() {
                 {pain_radiates && (
                   <div className="space-y-2"><Label>¿Hacia dónde?</Label><Input value={pain_radiation} onChange={e => setPainRadiation(e.target.value)} /></div>
                 )}
+                <div className="space-y-2"><Label>Descripción libre del dolor</Label><Textarea rows={2} value={pain_free} onChange={e => setPainFree(e.target.value)} /></div>
+              </div>
+
+              {/* Edema */}
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground">Edema</h4>
+                <div className="space-y-2"><Label>Observación de edema</Label><Textarea rows={2} value={edema_obs} onChange={e => setEdemaObs(e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Test de Godet</Label>
+                  <Select value={godet_test} onValueChange={setGodetTest}>
+                    <SelectTrigger><SelectValue placeholder="No evaluado" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_evaluated">No evaluado</SelectItem>
+                      <SelectItem value="negative">Negativo</SelectItem>
+                      <SelectItem value="1+">1+</SelectItem>
+                      <SelectItem value="2+">2+</SelectItem>
+                      <SelectItem value="3+">3+</SelectItem>
+                      <SelectItem value="4+">4+</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Circummetry */}
@@ -604,6 +669,16 @@ export default function SessionForm() {
                     <GonioGrid partKey={gonio_part_post} values={post_gonio} setValues={setPostGonio} />
                   </>
                 )}
+              </div>
+
+              {/* Fist closure */}
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground">Movilidad complementaria</h4>
+                <div className="space-y-2">
+                  <Label>Cierre de puño</Label>
+                  <Input value={fist_closure} onChange={e => setFistClosure(e.target.value)} placeholder="Completo / Incompleto con tirantez por edema" />
+                </div>
               </div>
 
               {/* Strength & Kapandji */}
@@ -676,13 +751,25 @@ export default function SessionForm() {
                 <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
               </div>
 
-              {/* Sensitivity & trophic */}
+              {/* Sensitivity */}
               <Separator />
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-foreground">Sensibilidad y estado trófico</h4>
-                <div className="space-y-2"><Label>Sensibilidad</Label><Textarea rows={2} value={sensitivity} onChange={e => setSensitivity(e.target.value)} /></div>
+                <h4 className="text-sm font-medium text-foreground">Sensibilidad</h4>
+                <div className="space-y-2"><Label>Sensibilidad epicrítica (funcional)</Label><Textarea rows={2} placeholder="Tacto ligero, discriminación 2 puntos, picking up test..." value={sensitivity_functional} onChange={e => setSensitivityFunctional(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Sensibilidad protopática (protectora)</Label><Textarea rows={2} placeholder="Toco-pincho, temperatura frío-calor..." value={sensitivity_protective} onChange={e => setSensitivityProtective(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Observaciones de sensibilidad</Label><Textarea rows={2} value={sensitivity} onChange={e => setSensitivity(e.target.value)} /></div>
+              </div>
+
+              {/* Trophic & others */}
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground">Estado trófico y otros</h4>
                 <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={trophic_state} onChange={e => setTrophicState(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={scar} onChange={e => setScar(e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Vancouver VSS (0-15)</Label><Input type="number" min={0} max={15} value={vancouver_score} onChange={e => setVancouverScore(e.target.value)} /></div>
+                  <div className="space-y-2"><Label>OSAS (0-60)</Label><Input type="number" min={0} max={60} value={osas_score} onChange={e => setOsasScore(e.target.value)} /></div>
+                </div>
                 <div className="space-y-2"><Label>Postura</Label><Textarea rows={2} value={posture} onChange={e => setPosture(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Emotividad</Label><Textarea rows={2} value={emotional_state} onChange={e => setEmotionalState(e.target.value)} /></div>
               </div>
