@@ -365,52 +365,71 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
                 <Row label="Kapandji" value={e.kapandji} />
               </div>
               {(() => {
-                // Helper to render structured goniometry
-                const renderGonio = (data: any, label: string) => {
+                const partMap: Record<string, string> = {
+                  shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar",
+                };
+
+                const renderPart = (data: any) => {
                   if (!data || !data.body_part) return null;
-                  const partMap: Record<string, string> = {
-                    shoulder: "Hombro",
-                    elbow: "Codo",
-                    wrist: "Muñeca",
-                    hand: "Mano",
-                    thumb: "Pulgar",
-                  };
                   const partName = partMap[data.body_part] || data.body_part;
                   const values = data.values || {};
                   const entries = Object.entries(values).filter(([, v]) => v !== "" && v != null);
                   if (entries.length === 0) return null;
                   const valuesStr = entries.map(([k, v]) => `${k}: ${v}°`).join(" · ");
-                  return (
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-muted-foreground">{label} — {partName}</p>
-                      <p className="text-sm">{valuesStr}</p>
-                    </div>
-                  );
+                  return <span key={data.body_part}>{partName}: {valuesStr}</span>;
                 };
 
-                // Check if new format (has pre/post)
+                const renderGroup = (group: any, label: string) => {
+                  if (!group) return null;
+                  // Array format (new)
+                  if (Array.isArray(group)) {
+                    const rendered = group.map(renderPart).filter(Boolean);
+                    if (rendered.length === 0) return null;
+                    return (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+                        <div className="text-sm space-y-0.5">{rendered.map((r, i) => <p key={i}>{r}</p>)}</div>
+                      </div>
+                    );
+                  }
+                  // Single object format (old — has body_part)
+                  if (group.body_part) {
+                    const r = renderPart(group);
+                    if (!r) return null;
+                    return (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+                        <p className="text-sm">{r}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                };
+
+                if (!gonioData) return null;
+
                 const hasPre = gonioData && "pre" in gonioData && gonioData.pre;
                 const hasPost = gonioData && "post" in gonioData && gonioData.post;
 
                 if (hasPre || hasPost) {
                   return (
                     <div className="space-y-3">
-                      {renderGonio(gonioData?.pre, "Goniometría PRE")}
-                      {renderGonio(gonioData?.post, "Goniometría POST")}
+                      {renderGroup((gonioData as any).pre, "Goniometría PRE")}
+                      {renderGroup((gonioData as any).post, "Goniometría POST")}
                     </div>
                   );
                 }
 
-                // Fallback to old flat format
-                if (gonioData && Object.values(gonioData).some(v => v !== "" && v != null)) {
+                // Fallback to flat key-value (very old format)
+                if (Object.values(gonioData).some(v => v !== "" && v != null && typeof v !== "object")) {
                   return (
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-muted-foreground">Goniometría</p>
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                        {Object.entries(gonioData).filter(([, v]) => v !== "" && v != null).map(([key, val]) => (
+                        {Object.entries(gonioData).filter(([, v]) => v !== "" && v != null && typeof v !== "object").map(([key, val]) => (
                           <div key={key} className="bg-muted/50 rounded px-2 py-1">
                             <p className="text-[10px] text-muted-foreground">{key}</p>
-                            <p className="text-xs font-medium">{val}°</p>
+                            <p className="text-xs font-medium">{String(val)}°</p>
                           </div>
                         ))}
                       </div>
@@ -428,9 +447,25 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
               <Row label="Dinamómetro MSD" value={e.dynamometer_msd != null ? `${e.dynamometer_msd} kgf` : null} />
               <Row label="Dinamómetro MSI" value={e.dynamometer_msi != null ? `${e.dynamometer_msi} kgf` : null} />
               <Row label="Fuerza general" value={e.muscle_strength} />
-              <Row label="N. Mediano (Daniels)" value={e.muscle_strength_median} />
-              <Row label="N. Cubital (Daniels)" value={e.muscle_strength_cubital} />
-              <Row label="N. Radial (Daniels)" value={e.muscle_strength_radial} />
+              {[
+                { label: "N. Mediano (Daniels)", val: e.muscle_strength_median },
+                { label: "N. Cubital (Daniels)", val: e.muscle_strength_cubital },
+                { label: "N. Radial (Daniels)", val: e.muscle_strength_radial },
+              ].map(({ label, val }) => {
+                if (!val) return null;
+                let display: string;
+                try {
+                  const parsed = JSON.parse(val);
+                  display = Object.entries(parsed)
+                    .filter(([, v]) => v)
+                    .map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`)
+                    .join(", ");
+                } catch {
+                  display = val;
+                }
+                if (!display) return null;
+                return <Row key={label} label={label} value={display} />;
+              })}
             </AccordionContent>
           </AccordionItem>
 

@@ -193,12 +193,13 @@ export default function SessionForm() {
   const [circ_global_msd, setCircGlobalMsd] = useState("");
   const [circ_global_msi, setCircGlobalMsi] = useState("");
 
-  // Goniometry PRE/POST with body part selector
+  // Goniometry PRE/POST with body part selector — nested by part
+  const emptyGonio = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
   const [gonio_part, setGonioPart] = useState<GonioPartKey>("wrist");
-  const [pre_gonio, setPreGonio] = useState<Record<string, string>>({});
+  const [all_pre_gonio, setAllPreGonio] = useState(emptyGonio);
   const [show_post_gonio, setShowPostGonio] = useState(false);
   const [gonio_part_post, setGonioPartPost] = useState<GonioPartKey>("wrist");
-  const [post_gonio, setPostGonio] = useState<Record<string, string>>({});
+  const [all_post_gonio, setAllPostGonio] = useState(emptyGonio);
 
   // Fist closure
   const [fist_closure, setFistClosure] = useState("");
@@ -269,18 +270,28 @@ export default function SessionForm() {
 
   const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
 
-  // ── Gonio helpers ──
-  const buildGonioText = (part: GonioPartKey, vals: Record<string, string>) => {
-    const fields = GONIO_PARTS[part].fields;
-    const parts = fields.map(f => vals[f.key] ? `${f.label}:${vals[f.key]}°` : "").filter(Boolean);
-    return parts.length > 0 ? `[${GONIO_PARTS[part].label}] ${parts.join(" ")}` : null;
+  // ── Gonio helpers (nested per-part) ──
+  const buildAllGonioText = (allVals: Record<GonioPartKey, Record<string, string>>) => {
+    const parts: string[] = [];
+    for (const pk of Object.keys(GONIO_PARTS) as GonioPartKey[]) {
+      const vals = allVals[pk];
+      const fields = GONIO_PARTS[pk].fields;
+      const entries = fields.map(f => vals[f.key] ? `${f.label}:${vals[f.key]}°` : "").filter(Boolean);
+      if (entries.length > 0) parts.push(`[${GONIO_PARTS[pk].label}] ${entries.join(" ")}`);
+    }
+    return parts.length > 0 ? parts.join(" ") : null;
   };
 
-  const buildGonioJson = (part: GonioPartKey, vals: Record<string, string>) => {
-    const filled = Object.fromEntries(
-      GONIO_PARTS[part].fields.map(f => [f.key, vals[f.key] ? Number(vals[f.key]) : null]).filter(([, v]) => v != null)
-    );
-    return Object.keys(filled).length > 0 ? { body_part: part, values: filled } : null;
+  const buildAllGonioJsonArray = (allVals: Record<GonioPartKey, Record<string, string>>) => {
+    const arr: { body_part: string; values: Record<string, number> }[] = [];
+    for (const pk of Object.keys(GONIO_PARTS) as GonioPartKey[]) {
+      const vals = allVals[pk];
+      const filled = Object.fromEntries(
+        GONIO_PARTS[pk].fields.map(f => [f.key, vals[f.key] ? Number(vals[f.key]) : null]).filter(([, v]) => v != null)
+      );
+      if (Object.keys(filled).length > 0) arr.push({ body_part: pk, values: filled as Record<string, number> });
+    }
+    return arr.length > 0 ? arr : null;
   };
 
   const cycleTest = (key: string) => {
@@ -303,12 +314,12 @@ export default function SessionForm() {
     if (circ_wrist_msi || circ_global_msi) circParts.push(`MSI: ${circ_wrist_msi || "-"}cm muñeca / ${circ_global_msi || "-"}cm global`);
     const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
 
-    const aromVal = buildGonioText(gonio_part, pre_gonio);
-    const promVal = show_post_gonio ? buildGonioText(gonio_part_post, post_gonio) : null;
+    const aromVal = buildAllGonioText(all_pre_gonio);
+    const promVal = show_post_gonio ? buildAllGonioText(all_post_gonio) : null;
 
-    const preJson = buildGonioJson(gonio_part, pre_gonio);
-    const postJson = show_post_gonio ? buildGonioJson(gonio_part_post, post_gonio) : null;
-    const gonioJsonb = preJson || postJson ? { pre: preJson, post: postJson } : null;
+    const preJsonArr = buildAllGonioJsonArray(all_pre_gonio);
+    const postJsonArr = show_post_gonio ? buildAllGonioJsonArray(all_post_gonio) : null;
+    const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
     const kapandjiFinal = kapandji_val ? `${kapandji_val}/10${kapandji_pain ? " con dolor" : ""}` : null;
 
@@ -596,7 +607,7 @@ export default function SessionForm() {
             <CardContent className="space-y-6">
               {/* Pain */}
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-foreground">Dolor END</h4>
+                <h4 className="text-sm font-medium text-foreground">Dolor EVA</h4>
                 <div className="flex items-center gap-3">
                   <Slider min={0} max={10} step={1} value={[pain_score]} onValueChange={([v]) => { setPainScore(v); setPainTouched(true); }} className="flex-1" />
                   <Badge variant="outline" className="text-sm font-semibold w-8 justify-center">{pain_score}</Badge>
@@ -653,7 +664,7 @@ export default function SessionForm() {
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Goniometría PRE tratamiento</h4>
                 <GonioPartSelector value={gonio_part} onChange={setGonioPart} />
-                <GonioGrid partKey={gonio_part} values={pre_gonio} setValues={setPreGonio} />
+                <GonioGrid partKey={gonio_part} values={all_pre_gonio[gonio_part]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonio_part]: v }))} />
               </div>
 
               {/* Goniometry POST */}
@@ -666,7 +677,7 @@ export default function SessionForm() {
                 {show_post_gonio && (
                   <>
                     <GonioPartSelector value={gonio_part_post} onChange={setGonioPartPost} />
-                    <GonioGrid partKey={gonio_part_post} values={post_gonio} setValues={setPostGonio} />
+                    <GonioGrid partKey={gonio_part_post} values={all_post_gonio[gonio_part_post]} setValues={v => setAllPostGonio(prev => ({ ...prev, [gonio_part_post]: v }))} />
                   </>
                 )}
               </div>

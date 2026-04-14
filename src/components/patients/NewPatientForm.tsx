@@ -212,12 +212,13 @@ export function NewPatientForm() {
   const [emotionalState, setEmotionalState] = useState("");
   const [analNotes, setAnalNotes] = useState("");
 
-  // Structured goniometry
+  // Structured goniometry — nested by body part
+  const emptyGonio = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
   const [gonioPart, setGonioPart] = useState<GonioPartKey>("wrist");
-  const [preGonio, setPreGonio] = useState<Record<string, string>>({});
+  const [allPreGonio, setAllPreGonio] = useState(emptyGonio);
   const [showPostGonio, setShowPostGonio] = useState(false);
   const [gonioPartPost, setGonioPartPost] = useState<GonioPartKey>("wrist");
-  const [postGonio, setPostGonio] = useState<Record<string, string>>({});
+  const [allPostGonio, setAllPostGonio] = useState(emptyGonio);
 
   // Circummetry grid
   const [circWristMsd, setCircWristMsd] = useState("");
@@ -294,18 +295,28 @@ export function NewPatientForm() {
     return Object.keys(errs).length === 0;
   };
 
-  // ── Gonio helpers ──
-  const buildGonioText = (part: GonioPartKey, vals: Record<string, string>) => {
-    const fields = GONIO_PARTS[part].fields;
-    const parts = fields.map(f => vals[f.key] ? `${f.label}:${vals[f.key]}°` : "").filter(Boolean);
-    return parts.length > 0 ? `[${GONIO_PARTS[part].label}] ${parts.join(" ")}` : null;
+  // ── Gonio helpers (nested per-part) ──
+  const buildAllGonioText = (allVals: Record<GonioPartKey, Record<string, string>>) => {
+    const parts: string[] = [];
+    for (const pk of Object.keys(GONIO_PARTS) as GonioPartKey[]) {
+      const vals = allVals[pk];
+      const fields = GONIO_PARTS[pk].fields;
+      const entries = fields.map(f => vals[f.key] ? `${f.label}:${vals[f.key]}°` : "").filter(Boolean);
+      if (entries.length > 0) parts.push(`[${GONIO_PARTS[pk].label}] ${entries.join(" ")}`);
+    }
+    return parts.length > 0 ? parts.join(" ") : null;
   };
 
-  const buildGonioJson = (part: GonioPartKey, vals: Record<string, string>) => {
-    const filled = Object.fromEntries(
-      GONIO_PARTS[part].fields.map(f => [f.key, vals[f.key] ? Number(vals[f.key]) : null]).filter(([, v]) => v != null)
-    );
-    return Object.keys(filled).length > 0 ? { body_part: part, values: filled } : null;
+  const buildAllGonioJsonArray = (allVals: Record<GonioPartKey, Record<string, string>>) => {
+    const arr: { body_part: string; values: Record<string, number> }[] = [];
+    for (const pk of Object.keys(GONIO_PARTS) as GonioPartKey[]) {
+      const vals = allVals[pk];
+      const filled = Object.fromEntries(
+        GONIO_PARTS[pk].fields.map(f => [f.key, vals[f.key] ? Number(vals[f.key]) : null]).filter(([, v]) => v != null)
+      );
+      if (Object.keys(filled).length > 0) arr.push({ body_part: pk, values: filled as Record<string, number> });
+    }
+    return arr.length > 0 ? arr : null;
   };
 
   const cycleTest = (key: string) => {
@@ -410,11 +421,11 @@ export function NewPatientForm() {
       }
 
       // 5. Analytical evaluation — build structured fields
-      const aromVal = buildGonioText(gonioPart, preGonio);
-      const promVal = showPostGonio ? buildGonioText(gonioPartPost, postGonio) : null;
-      const preJson = buildGonioJson(gonioPart, preGonio);
-      const postJson = showPostGonio ? buildGonioJson(gonioPartPost, postGonio) : null;
-      const gonioJsonb = preJson || postJson ? { pre: preJson, post: postJson } : null;
+      const aromVal = buildAllGonioText(allPreGonio);
+      const promVal = showPostGonio ? buildAllGonioText(allPostGonio) : null;
+      const preJsonArr = buildAllGonioJsonArray(allPreGonio);
+      const postJsonArr = showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
+      const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
       const circParts: string[] = [];
       if (circWristMsd || circGlobalMsd) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
@@ -847,7 +858,7 @@ export function NewPatientForm() {
               <h3 className="text-sm font-semibold text-foreground">▸ Movilidad</h3>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
-              <GonioGrid partKey={gonioPart} values={preGonio} setValues={setPreGonio} />
+              <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
 
               <div className="flex items-center gap-2 mt-3">
                 <Checkbox checked={showPostGonio} onCheckedChange={v => setShowPostGonio(!!v)} />
@@ -856,7 +867,7 @@ export function NewPatientForm() {
               {showPostGonio && (
                 <>
                   <GonioPartSelector value={gonioPartPost} onChange={setGonioPartPost} />
-                  <GonioGrid partKey={gonioPartPost} values={postGonio} setValues={setPostGonio} />
+                  <GonioGrid partKey={gonioPartPost} values={allPostGonio[gonioPartPost]} setValues={v => setAllPostGonio(prev => ({ ...prev, [gonioPartPost]: v }))} />
                 </>
               )}
 
