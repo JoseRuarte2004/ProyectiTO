@@ -414,12 +414,9 @@ export default function PatientProfile() {
                     ["Red de apoyo", occupational.support_network],
                     ["Educación", occupational.education],
                     ["Trabajo", occupational.job],
-                    ["AVD", occupational.avd],
-                    ["AIVD", occupational.aivd],
                     ["Ocio", occupational.leisure],
                     ["Actividad física", occupational.physical_activity],
                     ["Sueño y descanso", occupational.sleep_rest],
-                    ["Gestión de la salud", occupational.health_management],
                     ["Puntaje DASH", occupational.dash_score != null ? `${occupational.dash_score}/100` : null],
                     ["Notas", occupational.notes],
                   ].filter(([, value]) => value != null && value !== "").map(([label, value]) => (
@@ -1852,6 +1849,7 @@ function DeleteFileConfirm({ file, onClose, onDeleted }: { file: any; onClose: (
 function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved }: {
   open: boolean; onClose: () => void; patientId: string; userId: string; episodes: any[]; onSaved: (newEpId: string) => void;
 }) {
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     admission_date: new Date().toISOString().split("T")[0],
@@ -1907,9 +1905,8 @@ function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved 
       }
 
       toast.success("Nuevo episodio creado correctamente");
-      resetForm();
-      onClose();
       onSaved(newEp.id);
+      navigate(`/patients/${patientId}/sessions/new?episode=${newEp.id}&type=admission`);
     } catch (err: any) {
       toast.error("Error al crear el episodio", { description: err?.message });
     } finally {
