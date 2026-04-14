@@ -930,10 +930,7 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                               {renderNerveStrength(e)}
                             </div>
                           )}
-                              {nn(e.muscle_strength_cubital) && <Line>Nervio cubital: {e.muscle_strength_cubital}</Line>}
-                              {nn(e.muscle_strength_radial) && <Line>Nervio radial: {e.muscle_strength_radial}</Line>}
-                            </div>
-                          )}
+                          {nn(s.avd_followup) && <Line>AVD en sesión: {s.avd_followup}</Line>}
                           {hasSensitivity && (
                             <div>
                               {nn(e.sensitivity_functional) && <Line>Epicrítica: {e.sensitivity_functional}</Line>}
