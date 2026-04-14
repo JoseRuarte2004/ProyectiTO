@@ -47,8 +47,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [injuryMechanism, setInjuryMechanism] = useState("");
   const [treatmentType, setTreatmentType] = useState("");
   const [weeksPostInjury, setWeeksPostInjury] = useState("");
+  const [daysPostInjury, setDaysPostInjury] = useState("");
   const [weeksPostSurgery, setWeeksPostSurgery] = useState("");
+  const [daysPostSurgery, setDaysPostSurgery] = useState("");
   const [immobilizationWeeks, setImmobilizationWeeks] = useState("");
+  const [immobilizationDays, setImmobilizationDays] = useState("");
   const [nextOyt, setNextOyt] = useState("");
   const [studies, setStudies] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
@@ -184,8 +187,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         injury_mechanism: or(injuryMechanism),
         treatment_type: or(treatmentType),
         weeks_post_injury: orNum(weeksPostInjury),
+        days_post_injury: orNum(daysPostInjury),
         weeks_post_surgery: orNum(weeksPostSurgery),
+        days_post_surgery: orNum(daysPostSurgery),
         immobilization_weeks: orNum(immobilizationWeeks),
+        immobilization_days: orNum(immobilizationDays),
         next_oyt_appointment: or(nextOyt),
         studies: or(studies),
         medical_history: or(medicalHistory),
@@ -412,15 +418,24 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               </div>
               <div className="space-y-2">
                 <Label>Semanas post lesión</Label>
-                <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} />
+                <div className="flex gap-2">
+                  <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className="flex-1" />
+                  <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className="w-20" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Semanas post cirugía</Label>
-                <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} />
+                <div className="flex gap-2">
+                  <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className="flex-1" />
+                  <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className="w-20" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Semanas de inmovilización</Label>
-                <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} />
+                <div className="flex gap-2">
+                  <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className="flex-1" />
+                  <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className="w-20" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Próximo turno OyT</Label>
