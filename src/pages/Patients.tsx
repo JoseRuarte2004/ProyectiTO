@@ -8,19 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "./Dashboard";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { NewPatientForm } from "@/components/patients/NewPatientForm";
 import { format } from "date-fns";
 
 type FilterStatus = "all" | "active" | "paused" | "discharged";
 
 export default function Patients() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterStatus>("all");
-  const [showNew, setShowNew] = useState(false);
 
   const fetchPatients = async () => {
     let query = supabase
@@ -60,7 +58,7 @@ export default function Patients() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold text-foreground">Mis Pacientes</h1>
-        <Button onClick={() => setShowNew(true)}>
+        <Button onClick={() => navigate("/patients/new")}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Paciente
         </Button>
@@ -122,17 +120,6 @@ export default function Patients() {
         </div>
       )}
 
-      <Sheet open={showNew} onOpenChange={setShowNew}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl p-6 flex flex-col">
-          <NewPatientForm
-            onSuccess={() => {
-              setShowNew(false);
-              fetchPatients();
-            }}
-            onCancel={() => setShowNew(false)}
-          />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

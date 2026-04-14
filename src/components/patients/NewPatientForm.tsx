@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,41 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
-interface Props {
-  onSuccess: () => void;
-  onCancel: () => void;
-}
-
-const stepNames = [
-  "Datos del paciente",
-  "Datos clínicos",
-  "Perfil ocupacional",
-  "Evaluación funcional",
-  "Evaluación analítica",
-  "Admisión",
-];
-
-export function NewPatientForm({ onSuccess, onCancel }: Props) {
+export function NewPatientForm() {
   const { user } = useAuth();
-  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [evaTouched, setEvaTouched] = useState(false);
 
-  // Step 1 — Patient data
+  // Card 1 — Patient data
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [dni, setDni] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [insurance, setInsurance] = useState("");
   const [admissionDate, setAdmissionDate] = useState(new Date().toISOString().split("T")[0]);
 
-  // Step 2 — Clinical data
+  // Card 2 — Clinical data
   const [diagnosis, setDiagnosis] = useState("");
   const [doctorName, setDoctorName] = useState("");
   const [injuryDate, setInjuryDate] = useState("");
@@ -56,9 +45,8 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [studies, setStudies] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
   const [pharma, setPharma] = useState("");
-  const [clinicalNotes, setClinicalNotes] = useState("");
 
-  // Step 3 — Occupational profile
+  // Card 3 — Occupational profile
   const [dominance, setDominance] = useState("");
   const [supportNetwork, setSupportNetwork] = useState("");
   const [education, setEducation] = useState("");
@@ -67,22 +55,20 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [physicalActivity, setPhysicalActivity] = useState("");
   const [sleepRest, setSleepRest] = useState("");
   const [healthManagement, setHealthManagement] = useState("");
-  const [occNotes, setOccNotes] = useState("");
 
-  // Step 4 — Functional evaluation
+  // Card 4 — Functional evaluation
   const [avd, setAvd] = useState("");
   const [aivd, setAivd] = useState("");
   const [barthelScore, setBarthelScore] = useState("");
   const [dashScore, setDashScore] = useState("");
   const [funcNotes, setFuncNotes] = useState("");
 
-  // Step 5 — Analytical evaluation
-  const [painScore, setPainScore] = useState<number | null>(null);
+  // Card 5 — Analytical evaluation
+  const [painScore, setPainScore] = useState<number>(0);
   const [painAppearance, setPainAppearance] = useState("");
   const [painLocation, setPainLocation] = useState("");
   const [painRadiation, setPainRadiation] = useState("");
   const [painCharacteristics, setPainCharacteristics] = useState("");
-  const [pain, setPain] = useState("");
   const [painAggravating, setPainAggravating] = useState("");
   const [edema, setEdema] = useState("");
   const [edemaCircummetry, setEdemaCircummetry] = useState("");
@@ -104,7 +90,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const [emotionalState, setEmotionalState] = useState("");
   const [analNotes, setAnalNotes] = useState("");
 
-  // Step 6 — Admission session
+  // Card 6 — Admission session
   const [interventions, setInterventions] = useState("");
   const [homeInstructions, setHomeInstructions] = useState("");
   const [sessionNotes, setSessionNotes] = useState("");
@@ -113,30 +99,30 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
   const orNum = (v: string) => (v.trim() ? parseInt(v) : null);
   const orFloat = (v: string) => (v.trim() ? parseFloat(v) : null);
 
-  const validateStep = (s: number): boolean => {
+  const fieldClass = (key: string) =>
+    errors[key] ? "border-destructive ring-1 ring-destructive" : "";
+
+  const validate = (): boolean => {
     const errs: Record<string, boolean> = {};
-    if (s === 1) {
-      if (!lastName.trim()) errs.lastName = true;
-      if (!firstName.trim()) errs.firstName = true;
-      if (!dni.trim()) errs.dni = true;
-      if (!admissionDate) errs.admissionDate = true;
-    } else if (s === 2) {
-      if (!diagnosis.trim()) errs.diagnosis = true;
-      if (!dominance) errs.dominance = true;
-    } else if (s === 6) {
-      if (!interventions.trim()) errs.interventions = true;
-    }
+    if (!lastName.trim()) errs.lastName = true;
+    if (!firstName.trim()) errs.firstName = true;
+    if (!dni.trim()) errs.dni = true;
+    if (!admissionDate) errs.admissionDate = true;
+    if (!diagnosis.trim()) errs.diagnosis = true;
+    if (!dominance) errs.dominance = true;
+    if (!avd.trim()) errs.avd = true;
+    if (!evaTouched) errs.painScore = true;
+    if (!interventions.trim()) errs.interventions = true;
     setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      const first = document.querySelector("[data-field-error]");
+      first?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
     return Object.keys(errs).length === 0;
   };
 
-  const goNext = () => {
-    if (!validateStep(step)) return;
-    setStep(step + 1);
-  };
-
   const handleSave = async () => {
-    if (!validateStep(6)) return;
+    if (!validate()) return;
     setSaving(true);
 
     try {
@@ -196,7 +182,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         studies: or(studies),
         medical_history: or(medicalHistory),
         pharmacological_treatment: or(pharma),
-        notes: or(clinicalNotes),
       });
 
       // 3. Occupational profile
@@ -210,10 +195,9 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         physical_activity: or(physicalActivity),
         sleep_rest: or(sleepRest),
         health_management: or(healthManagement),
-        notes: or(occNotes),
       });
 
-      // 4. Functional evaluation (if any field filled)
+      // 4. Functional evaluation
       const funcFields = [avd, aivd, barthelScore, dashScore, funcNotes];
       if (funcFields.some((f) => f.trim())) {
         await supabase.from("functional_evaluations").insert({
@@ -230,14 +214,14 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         });
       }
 
-      // 5. Analytical evaluation (if any field filled)
+      // 5. Analytical evaluation
       const aromFinal = [arom, fistClosure.trim() ? `Cierre de puño: ${fistClosure}` : ""]
         .filter(Boolean)
         .join("\n") || null;
 
       const analFields = [
-        painScore !== null ? String(painScore) : "", painAppearance, painLocation, painRadiation,
-        painCharacteristics, pain, painAggravating, edema, edemaCircummetry, godetTest,
+        evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
+        painCharacteristics, painAggravating, edema, edemaCircummetry, godetTest,
         arom, prom, kapandji, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
         sensitivityFunctional, sensitivityProtective, trophicState, scar, vancouverScore,
         osasScore, posture, emotionalState, analNotes,
@@ -248,12 +232,11 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
           professional_id: user!.id,
           episode_id: episodeId,
           evaluation_date: admissionDate,
-          pain_score: painScore,
+          pain_score: evaTouched ? painScore : null,
           pain_appearance: or(painAppearance),
           pain_location: or(painLocation),
           pain_radiation: or(painRadiation),
           pain_characteristics: or(painCharacteristics),
-          pain: or(pain),
           pain_aggravating_factors: or(painAggravating),
           edema: or(edema),
           edema_circummetry: or(edemaCircummetry),
@@ -276,7 +259,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
         });
       }
 
-      // 6. Admission session (always)
+      // 6. Admission session
       await supabase.from("therapy_sessions").insert({
         patient_id: pid,
         professional_id: user!.id,
@@ -291,7 +274,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
       });
 
       toast.success("Paciente admitido correctamente");
-      onSuccess();
+      navigate(`/patients/${pid}`);
     } catch (err: any) {
       toast.error("Error al registrar la admisión", { description: err.message });
     } finally {
@@ -299,107 +282,93 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
     }
   };
 
-  const fieldClass = (key: string) =>
-    errors[key] ? "border-destructive ring-1 ring-destructive" : "";
+  const ErrMsg = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-xs text-destructive" data-field-error>Campo obligatorio</p> : null;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Progress bar */}
-      <div className="mb-6 flex-shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">{stepNames[step - 1]}</span>
-          <span className="text-sm text-muted-foreground">Paso {step} de 6</span>
-        </div>
-        <div className="w-full bg-muted rounded-full h-1.5">
-          <div
-            className="bg-teal-500 h-1.5 rounded-full transition-all duration-300"
-            style={{ width: `${(step / 6) * 100}%` }}
-          />
+    <div className="min-h-screen bg-background">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/patients")}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Nueva admisión
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-teal-600 hover:bg-teal-700 text-white"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Guardar admisión
+          </Button>
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-        {/* STEP 1 */}
-        {step === 1 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Nueva admisión</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 1 de 6 — Datos personales</p>
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Card 1 — Datos del paciente */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Datos del paciente</CardTitle></CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Apellido *</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClass("lastName")} />
+              <ErrMsg field="lastName" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Apellido *</Label>
-                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClass("lastName")} />
-                {errors.lastName && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
-              <div className="space-y-2">
-                <Label>Nombre *</Label>
-                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClass("firstName")} />
-                {errors.firstName && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
-              <div className="space-y-2">
-                <Label>DNI *</Label>
-                <Input value={dni} onChange={(e) => setDni(e.target.value)} className={fieldClass("dni")} />
-                {errors.dni && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de nacimiento</Label>
-                <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Domicilio</Label>
-                <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Teléfono</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Obra social</Label>
-                <Input value={insurance} onChange={(e) => setInsurance(e.target.value)} placeholder="OSDE, Swiss Medical, PAMI... o 'No posee'" />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de admisión *</Label>
-                <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={fieldClass("admissionDate")} />
-                {errors.admissionDate && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
+            <div className="space-y-2">
+              <Label>Nombre *</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClass("firstName")} />
+              <ErrMsg field="firstName" />
             </div>
-          </div>
-        )}
+            <div className="space-y-2">
+              <Label>DNI *</Label>
+              <Input value={dni} onChange={(e) => setDni(e.target.value)} className={fieldClass("dni")} />
+              <ErrMsg field="dni" />
+            </div>
+            <div className="space-y-2">
+              <Label>Fecha de nacimiento</Label>
+              <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Teléfono</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Domicilio</Label>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Obra social</Label>
+              <Input value={insurance} onChange={(e) => setInsurance(e.target.value)} placeholder="OSDE, Swiss Medical, PAMI..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Fecha de admisión *</Label>
+              <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={fieldClass("admissionDate")} />
+              <ErrMsg field="admissionDate" />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* STEP 2 */}
-        {step === 2 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Datos clínicos</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 2 de 6 — Datos clínicos</p>
-            </div>
+        {/* Card 2 — Datos clínicos */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Datos clínicos</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 sm:col-span-2">
-                <Label>Diagnóstico (DX) *</Label>
-                <Input value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} placeholder="Ej: Fx distal de radio D°, STC, Reparación tendinosa zona II" className={fieldClass("diagnosis")} />
-                {errors.diagnosis && <p className="text-xs text-destructive">Campo obligatorio</p>}
+                <Label>Diagnóstico *</Label>
+                <Input value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} placeholder="Ej: Fx distal de radio D°, STC" className={fieldClass("diagnosis")} />
+                <ErrMsg field="diagnosis" />
               </div>
               <div className="space-y-2">
-                <Label>Lateralidad *</Label>
-                <Select value={dominance} onValueChange={setDominance}>
-                  <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="right">Diestro/a</SelectItem>
-                    <SelectItem value="left">Zurdo/a</SelectItem>
-                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.dominance && <p className="text-xs text-destructive">Campo obligatorio</p>}
+                <Label>Médico derivante</Label>
+                <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Fecha de lesión</Label>
+                <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} />
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label>Derivado/a por OyT</Label>
-                <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} placeholder="Nombre del médico derivante y fecha" />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de lesión / inicio de síntomas</Label>
-                <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} />
+                <Label>Mecanismo de lesión</Label>
+                <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Caída, accidente laboral..." />
               </div>
               <div className="space-y-2">
                 <Label>Tratamiento</Label>
@@ -408,164 +377,157 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                   <SelectContent>
                     <SelectItem value="conservative">Conservador</SelectItem>
                     <SelectItem value="surgery">Quirúrgico</SelectItem>
-                    <SelectItem value="mixed">Mixto — conservador y quirúrgico</SelectItem>
+                    <SelectItem value="mixed">Mixto</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Mecanismo de lesión</Label>
-                <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Ej: Caída de propia altura, accidente de tránsito, accidente laboral..." />
-              </div>
               <div className="space-y-2">
-                <Label>Semanas post lesión</Label>
+                <Label>Semanas post lesión + Días</Label>
                 <div className="flex gap-2">
                   <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className="flex-1" />
                   <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className="w-20" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Semanas post cirugía</Label>
+                <Label>Semanas post cirugía + Días</Label>
                 <div className="flex gap-2">
                   <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className="flex-1" />
                   <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className="w-20" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Semanas de inmovilización</Label>
+                <Label>Semanas de inmovilización + Días</Label>
                 <div className="flex gap-2">
                   <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className="flex-1" />
                   <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className="w-20" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Próximo turno OyT</Label>
+                <Label>Próx. turno OyT</Label>
                 <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} />
               </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Estudios</Label>
-                <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Ej: Rx muñeca AP y lateral — fractura consolidada. RMN pendiente." />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Antecedentes personales</Label>
-                <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} placeholder="Enfermedades previas, cirugías anteriores, otras lesiones..." />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Tratamiento farmacológico</Label>
-                <Input value={pharma} onChange={(e) => setPharma(e.target.value)} placeholder="Ej: Ibuprofeno 400mg, Pregabalina. O 'Ninguno'" />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Notas clínicas</Label>
-                <Textarea value={clinicalNotes} onChange={(e) => setClinicalNotes(e.target.value)} rows={2} />
-              </div>
             </div>
-          </div>
-        )}
+            <div className="space-y-2">
+              <Label>Estudios</Label>
+              <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Rx, RMN..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Antecedentes personales</Label>
+              <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} />
+            </div>
+            <div className="space-y-2">
+              <Label>Tto farmacológico</Label>
+              <Textarea value={pharma} onChange={(e) => setPharma(e.target.value)} rows={2} />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* STEP 3 */}
-        {step === 3 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Perfil ocupacional</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 3 de 6 — Perfil ocupacional</p>
+        {/* Card 3 — Perfil ocupacional */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Perfil ocupacional</CardTitle></CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Lateralidad *</Label>
+              <Select value={dominance} onValueChange={setDominance}>
+                <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="right">Diestro/a</SelectItem>
+                  <SelectItem value="left">Zurdo/a</SelectItem>
+                  <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+                </SelectContent>
+              </Select>
+              <ErrMsg field="dominance" />
+            </div>
+            <div className="space-y-2">
+              <Label>Red de apoyo</Label>
+              <Input value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Educación</Label>
+              <Select value={education} onValueChange={setEducation}>
+                <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primario_incompleto">Primario incompleto</SelectItem>
+                  <SelectItem value="primario_completo">Primario completo</SelectItem>
+                  <SelectItem value="secundario_incompleto">Secundario incompleto</SelectItem>
+                  <SelectItem value="secundario_completo">Secundario completo</SelectItem>
+                  <SelectItem value="terciario_universitario">Terciario/Universitario</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Trabajo</Label>
+              <Input value={job} onChange={(e) => setJob(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Ocio</Label>
+              <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Actividad física</Label>
+              <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Sueño y descanso</Label>
+              <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Gestión de la salud</Label>
+              <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card 4 — Evaluación funcional */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Evaluación funcional</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>AVD — Actividades de la vida diaria *</Label>
+              <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={fieldClass("avd")} />
+              <ErrMsg field="avd" />
+            </div>
+            <div className="space-y-2">
+              <Label>AIVD — Actividades instrumentales</Label>
+              <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Red de apoyo / Con quién vive</Label>
-                <Textarea value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} rows={2} placeholder="Ej: Vive con sus padres. Pareja como red de apoyo principal." />
+              <div className="space-y-2">
+                <Label>Barthel (0-100)</Label>
+                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Educación</Label>
-                <Input value={education} onChange={(e) => setEducation(e.target.value)} placeholder="Ej: Secundario incompleto, Universitario completo" />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Trabajo</Label>
-                <Textarea value={job} onChange={(e) => setJob(e.target.value)} rows={2} placeholder="Ocupación, situación laboral actual, si está de baja..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Ocio / Tiempo libre</Label>
-                <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} placeholder="Ej: Gym, fútbol, lectura, ciclismo" />
-              </div>
-              <div className="space-y-2">
-                <Label>Actividad física</Label>
-                <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Sueño y descanso</Label>
-                <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} placeholder="Ej: Sin alteraciones. Insomnio previo a la lesión." />
-              </div>
-              <div className="space-y-2">
-                <Label>Gestión de la salud</Label>
-                <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} placeholder="Ej: Controles médicos regulares. Adherente a turnos." />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Notas</Label>
-                <Textarea value={occNotes} onChange={(e) => setOccNotes(e.target.value)} rows={2} />
+                <Label>DASH (0-100)</Label>
+                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} />
+                <p className="text-xs text-muted-foreground">0 = sin discapacidad · 100 = máxima discapacidad</p>
               </div>
             </div>
-          </div>
-        )}
+            <div className="space-y-2">
+              <Label>Notas</Label>
+              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* STEP 4 */}
-        {step === 4 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Evaluación funcional</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 4 de 6 — Evaluación funcional</p>
-              <p className="text-xs text-muted-foreground mt-1">Completá solo los campos relevantes para este paciente</p>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label>AVD — Actividades de la vida diaria</Label>
-                <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Ej: Dificultad para vestido de tren superior, higiene personal..." />
-              </div>
-              <div className="space-y-2">
-                <Label>AIVD — Actividades instrumentales</Label>
-                <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Ej: Dificultad para escurrir trapos, cortar alimentos, cocinar..." />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Puntaje Barthel (0-100)</Label>
-                  <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Puntaje DASH (0-100)</Label>
-                  <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} />
-                  <p className="text-xs text-muted-foreground">0 = sin discapacidad · 100 = máxima discapacidad</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Notas</Label>
-                <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 5 */}
-        {step === 5 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Evaluación analítica</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 5 de 6 — Evaluación analítica</p>
-              <p className="text-xs text-muted-foreground mt-1">Completá solo los campos evaluados en esta visita</p>
-            </div>
-
+        {/* Card 5 — Evaluación analítica */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Evaluación analítica</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
             {/* Dolor */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
               <div className="space-y-2">
-                <Label>Intensidad EVA (0-10)</Label>
+                <Label>Intensidad EVA (0-10) *</Label>
                 <div className="flex items-center gap-4">
                   <Slider
                     min={0} max={10} step={1}
-                    value={painScore !== null ? [painScore] : [0]}
-                    onValueChange={(v) => setPainScore(v[0])}
-                    className="flex-1"
+                    value={[painScore]}
+                    onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
+                    className={`flex-1 ${fieldClass("painScore")}`}
                   />
-                  <span className="text-sm font-bold bg-muted px-2 py-1 rounded min-w-[2rem] text-center">
-                    {painScore ?? 0}
-                  </span>
+                  <span className="text-sm font-bold bg-muted px-2 py-1 rounded min-w-[2rem] text-center">{painScore}</span>
                 </div>
+                <ErrMsg field="painScore" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -586,10 +548,6 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Descripción del dolor</Label>
-                <Textarea value={pain} onChange={(e) => setPain(e.target.value)} rows={2} />
-              </div>
-              <div className="space-y-2">
                 <Label>Agravantes / Atenuantes</Label>
                 <Textarea value={painAggravating} onChange={(e) => setPainAggravating(e.target.value)} rows={2} />
               </div>
@@ -605,13 +563,14 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Circometría</Label>
-                  <Textarea value={edemaCircummetry} onChange={(e) => setEdemaCircummetry(e.target.value)} rows={2} placeholder="Ej: MSD muñeca 19cm / MSI 17cm" />
+                  <Textarea value={edemaCircummetry} onChange={(e) => setEdemaCircummetry(e.target.value)} rows={2} placeholder="MSD muñeca 19cm / MSI muñeca 17cm / Global MSD 48cm / Global MSI 44cm" />
                 </div>
                 <div className="space-y-2">
                   <Label>Test de Godet</Label>
                   <Select value={godetTest} onValueChange={setGodetTest}>
-                    <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="No evaluado" /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="not_evaluated">No evaluado</SelectItem>
                       <SelectItem value="negative">Negativo</SelectItem>
                       <SelectItem value="1+">1+</SelectItem>
                       <SelectItem value="2+">2+</SelectItem>
@@ -628,7 +587,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               <h3 className="text-sm font-semibold text-foreground">▸ Movilidad</h3>
               <div className="space-y-2">
                 <Label>AROM</Label>
-                <Textarea value={arom} onChange={(e) => setArom(e.target.value)} rows={3} placeholder="Ej: Flex muñeca 45°, Ext 60°, DR 15°, DC 25°. Limitada supinación." />
+                <Textarea value={arom} onChange={(e) => setArom(e.target.value)} rows={2} placeholder="Flex 30° Ext 20° DR 5° DC 15° Prono 60° Supino 50°" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -637,12 +596,12 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                 </div>
                 <div className="space-y-2">
                   <Label>Kapandji</Label>
-                  <Input value={kapandji} onChange={(e) => setKapandji(e.target.value)} placeholder="Ej: 8/10" />
+                  <Input value={kapandji} onChange={(e) => setKapandji(e.target.value)} placeholder="5/10 con dolor" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Cierre de puño</Label>
-                <Input value={fistClosure} onChange={(e) => setFistClosure(e.target.value)} placeholder="Ej: Completo / Incompleto con tirantez por edema" />
+                <Input value={fistClosure} onChange={(e) => setFistClosure(e.target.value)} placeholder="Completo / Incompleto con tirantez" />
               </div>
             </div>
 
@@ -660,7 +619,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Observaciones de fuerza muscular</Label>
+                <Label>Fuerza muscular observaciones</Label>
                 <Textarea value={muscleStrength} onChange={(e) => setMuscleStrength(e.target.value)} rows={2} />
               </div>
             </div>
@@ -669,12 +628,12 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
               <div className="space-y-2">
-                <Label>Sensibilidad epicrítica (funcional)</Label>
-                <Textarea value={sensitivityFunctional} onChange={(e) => setSensitivityFunctional(e.target.value)} rows={2} placeholder="Tacto ligero, discriminación 2 puntos, picking up test..." />
+                <Label>Sensibilidad epicrítica/funcional</Label>
+                <Textarea value={sensitivityFunctional} onChange={(e) => setSensitivityFunctional(e.target.value)} rows={2} />
               </div>
               <div className="space-y-2">
-                <Label>Sensibilidad protopática (protectora)</Label>
-                <Textarea value={sensitivityProtective} onChange={(e) => setSensitivityProtective(e.target.value)} rows={2} placeholder="Toco-pincho, temperatura frío-calor..." />
+                <Label>Sensibilidad protopática/protectora</Label>
+                <Textarea value={sensitivityProtective} onChange={(e) => setSensitivityProtective(e.target.value)} rows={2} />
               </div>
             </div>
 
@@ -683,7 +642,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               <h3 className="text-sm font-semibold text-foreground">▸ Otros</h3>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
-                <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} placeholder="Coloración, hidratación, temperatura, turgencia de piel..." />
+                <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
               </div>
               <div className="space-y-2">
                 <Label>Cicatriz</Label>
@@ -701,7 +660,7 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
               </div>
               <div className="space-y-2">
                 <Label>Postura</Label>
-                <Textarea value={posture} onChange={(e) => setPosture(e.target.value)} rows={2} placeholder="Ej: Compensa movimientos con elevación de hombro. Postura antiálgica." />
+                <Textarea value={posture} onChange={(e) => setPosture(e.target.value)} rows={2} />
               </div>
               <div className="space-y-2">
                 <Label>Emotividad</Label>
@@ -712,56 +671,44 @@ export function NewPatientForm({ onSuccess, onCancel }: Props) {
                 <Textarea value={analNotes} onChange={(e) => setAnalNotes(e.target.value)} rows={2} />
               </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
 
-        {/* STEP 6 */}
-        {step === 6 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Admisión</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Paso 6 de 6 — Admisión</p>
-              <p className="text-xs text-muted-foreground mt-1">Registrá lo que se realizó en esta primera visita</p>
+        {/* Card 6 — Intervenciones de admisión */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Intervenciones de admisión</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Intervenciones *</Label>
+              <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={5} placeholder="Se brindan estrategias no farmacológicas para el dolor..." className={fieldClass("interventions")} />
+              <ErrMsg field="interventions" />
             </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label>Intervenciones del día *</Label>
-                <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={6} placeholder="Ej: Se brindan estrategias no farmacológicas para el dolor. Ejercicios de elongación y movilidad en plano horizontal en flexo-extensión." className={fieldClass("interventions")} />
-                {errors.interventions && <p className="text-xs text-destructive">Campo obligatorio</p>}
-              </div>
-              <div className="space-y-2">
-                <Label>Indicaciones enviadas</Label>
-                <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} placeholder="Ej: Se envían por WhatsApp ejercicios de movilidad 3 veces al día, 10 repeticiones." />
-              </div>
-              <div className="space-y-2">
-                <Label>Notas</Label>
-                <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} />
-              </div>
+            <div className="space-y-2">
+              <Label>Indicaciones enviadas al paciente</Label>
+              <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} />
             </div>
-          </div>
-        )}
-      </div>
+            <div className="space-y-2">
+              <Label>Notas internas</Label>
+              <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} />
+              <p className="text-xs text-muted-foreground">Campo interno — no se muestra en el resumen clínico</p>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Navigation */}
-      <div className="flex justify-between pt-4 mt-4 border-t border-border flex-shrink-0">
-        {step > 1 ? (
-          <Button variant="ghost" onClick={() => setStep(step - 1)}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Anterior
-          </Button>
-        ) : (
-          <Button variant="ghost" onClick={onCancel}>Cancelar</Button>
-        )}
-        {step < 6 ? (
-          <Button onClick={goNext}>
-            Siguiente <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        ) : (
-          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {/* Bottom save button */}
+        <div className="flex justify-end pb-8">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-teal-600 hover:bg-teal-700 text-white"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
-        )}
+        </div>
       </div>
     </div>
   );
 }
+
+export default NewPatientForm;
