@@ -918,7 +918,7 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                               {nn(e.arom) && <Line>Goniometría PRE: {e.arom}</Line>}
                               {nn(e.prom) && <Line>Goniometría POST: {e.prom}</Line>}
                               {nn(e.kapandji) && <Line>Kapandji: {e.kapandji}</Line>}
-                              {renderGoniometry(e.goniometry)}
+                              {renderGonioJsonb(e.goniometry)}
                             </div>
                           )}
                           {hasStrength && (
@@ -927,7 +927,9 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                                 <Line>Dinamómetro: {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}{nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}{nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}</Line>
                               )}
                               {nn(e.muscle_strength) && <Line>{e.muscle_strength}</Line>}
-                              {nn(e.muscle_strength_median) && <Line>Nervio mediano: {e.muscle_strength_median}</Line>}
+                              {renderNerveStrength(e)}
+                            </div>
+                          )}
                               {nn(e.muscle_strength_cubital) && <Line>Nervio cubital: {e.muscle_strength_cubital}</Line>}
                               {nn(e.muscle_strength_radial) && <Line>Nervio radial: {e.muscle_strength_radial}</Line>}
                             </div>
