@@ -111,7 +111,7 @@ export default function PatientProfile() {
       supabase.from("functional_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
       supabase.from("analytical_evaluations").select("*").eq("patient_id", id).eq("episode_id", episodeId).order("evaluation_date", { ascending: false }),
       supabase.from("treatment_plans").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("created_at", { ascending: false }),
-      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("episode_id", episodeId).eq("is_deleted", false).order("photo_date", { ascending: false }),
+      supabase.from("clinical_files").select("*").eq("patient_id", id).eq("is_deleted", false).order("photo_date", { ascending: false }),
       apptPromise,
     ]);
     setClinical(c.data);
@@ -726,7 +726,7 @@ export default function PatientProfile() {
       <DeletePlanConfirm plan={deletePlan} onClose={() => setDeletePlan(null)} onSaved={fetchAll} />
 
       {/* Upload File Dialog */}
-      <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+      <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} episodeId={activeEpisodeId} />
 
       {/* Delete File Confirm */}
       <DeleteFileConfirm file={deleteFile} onClose={() => setDeleteFile(null)} onDeleted={(fileId) => {
@@ -1815,7 +1815,7 @@ function PlanCardActions({ plan, patient, onDetail, onEdit, onDelete }: { plan: 
   );
 }
 
-function UploadFileDialog({ open, onClose, patientId, userId, onSaved }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void }) {
+function UploadFileDialog({ open, onClose, patientId, userId, onSaved, episodeId }: { open: boolean; onClose: () => void; patientId: string; userId: string; onSaved: () => void; episodeId: string | null }) {
   const [category, setCategory] = useState<string>("");
   const [photoDate, setPhotoDate] = useState(new Date().toISOString().split("T")[0]);
   const [description, setDescription] = useState("");
@@ -1845,6 +1845,7 @@ function UploadFileDialog({ open, onClose, patientId, userId, onSaved }: { open:
       patient_id: patientId, uploaded_by: userId, file_name: file.name,
       file_path: path, file_type: file.type, category: category as any,
       description: description || null, photo_date: photoDate, is_deleted: false,
+      episode_id: episodeId ?? null,
     });
     setSaving(false);
     if (error) { toast.error("Error al guardar el archivo"); return; }
