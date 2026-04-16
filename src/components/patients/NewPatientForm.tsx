@@ -47,6 +47,8 @@ const GONIO_PARTS = {
       { key: "ext", label: "Extensión", norm: "70" },
       { key: "dr", label: "Desv. Radial", norm: "20" },
       { key: "dc", label: "Desv. Cubital", norm: "30" },
+      { key: "prono", label: "Pronación", norm: "80" },
+      { key: "supino", label: "Supinación", norm: "80" },
     ],
   },
   hand: {
