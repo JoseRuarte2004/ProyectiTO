@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           arom: string | null
           created_at: string
+          dppd_fingers: Json | null
           dynamometer_msd: number | null
           dynamometer_msi: number | null
           edema: string | null
@@ -49,8 +50,14 @@ export type Database = {
           scar: string | null
           scar_evaluation: Json | null
           sensitivity: string | null
+          sensitivity_dos_puntos: string | null
           sensitivity_functional: string | null
+          sensitivity_picking_up: string | null
           sensitivity_protective: string | null
+          sensitivity_semmes_weinstein: string | null
+          sensitivity_tacto_ligero: string | null
+          sensitivity_temperatura: string | null
+          sensitivity_toco_pincho: string | null
           session_id: string | null
           specific_tests: Json | null
           trophic_state: string | null
@@ -60,6 +67,7 @@ export type Database = {
         Insert: {
           arom?: string | null
           created_at?: string
+          dppd_fingers?: Json | null
           dynamometer_msd?: number | null
           dynamometer_msi?: number | null
           edema?: string | null
@@ -91,8 +99,14 @@ export type Database = {
           scar?: string | null
           scar_evaluation?: Json | null
           sensitivity?: string | null
+          sensitivity_dos_puntos?: string | null
           sensitivity_functional?: string | null
+          sensitivity_picking_up?: string | null
           sensitivity_protective?: string | null
+          sensitivity_semmes_weinstein?: string | null
+          sensitivity_tacto_ligero?: string | null
+          sensitivity_temperatura?: string | null
+          sensitivity_toco_pincho?: string | null
           session_id?: string | null
           specific_tests?: Json | null
           trophic_state?: string | null
@@ -102,6 +116,7 @@ export type Database = {
         Update: {
           arom?: string | null
           created_at?: string
+          dppd_fingers?: Json | null
           dynamometer_msd?: number | null
           dynamometer_msi?: number | null
           edema?: string | null
@@ -133,8 +148,14 @@ export type Database = {
           scar?: string | null
           scar_evaluation?: Json | null
           sensitivity?: string | null
+          sensitivity_dos_puntos?: string | null
           sensitivity_functional?: string | null
+          sensitivity_picking_up?: string | null
           sensitivity_protective?: string | null
+          sensitivity_semmes_weinstein?: string | null
+          sensitivity_tacto_ligero?: string | null
+          sensitivity_temperatura?: string | null
+          sensitivity_toco_pincho?: string | null
           session_id?: string | null
           specific_tests?: Json | null
           trophic_state?: string | null
@@ -603,6 +624,7 @@ export type Database = {
           episode_id: string | null
           id: string
           immobilization_days: number | null
+          immobilization_type: string | null
           immobilization_weeks: number | null
           injury_date: string | null
           injury_mechanism: string | null
@@ -628,6 +650,7 @@ export type Database = {
           episode_id?: string | null
           id?: string
           immobilization_days?: number | null
+          immobilization_type?: string | null
           immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
@@ -653,6 +676,7 @@ export type Database = {
           episode_id?: string | null
           id?: string
           immobilization_days?: number | null
+          immobilization_type?: string | null
           immobilization_weeks?: number | null
           injury_date?: string | null
           injury_mechanism?: string | null
@@ -765,6 +789,7 @@ export type Database = {
           insurance: string | null
           is_deleted: boolean
           last_name: string
+          nationality: string | null
           phone: string | null
           professional_id: string
           status: Database["public"]["Enums"]["patient_status"]
@@ -785,6 +810,7 @@ export type Database = {
           insurance?: string | null
           is_deleted?: boolean
           last_name: string
+          nationality?: string | null
           phone?: string | null
           professional_id: string
           status?: Database["public"]["Enums"]["patient_status"]
@@ -805,6 +831,7 @@ export type Database = {
           insurance?: string | null
           is_deleted?: boolean
           last_name?: string
+          nationality?: string | null
           phone?: string | null
           professional_id?: string
           status?: Database["public"]["Enums"]["patient_status"]

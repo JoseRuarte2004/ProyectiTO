@@ -91,7 +91,8 @@ const SPECIFIC_TESTS = [
 type TestResult = "positive" | "negative" | null;
 
 // ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0","1","1+","2","2-","2+","3","3-","3+","4","4-","4+","5"];
+const DANIELS_GRADES = ["0","1","2","3","4","5"];
+const DANIELS_FULL_GRADES = ["0","1","1+","2-","2","2+","3-","3","3+","4-","4","4+","5"];
 
 const MEDIAN_MUSCLES = [
   "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
@@ -147,6 +148,7 @@ export function NewPatientForm() {
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [dni, setDni] = useState("");
+  const [nationality, setNationality] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -166,6 +168,7 @@ export function NewPatientForm() {
   const [daysPostSurgery, setDaysPostSurgery] = useState("");
   const [immobilizationWeeks, setImmobilizationWeeks] = useState("");
   const [immobilizationDays, setImmobilizationDays] = useState("");
+  const [immobilizationType, setImmobilizationType] = useState("");
   const [nextOyt, setNextOyt] = useState("");
   const [studies, setStudies] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
@@ -203,9 +206,19 @@ export function NewPatientForm() {
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
   const [muscleStrength, setMuscleStrength] = useState("");
-  const [sensitivityFunctional, setSensitivityFunctional] = useState("");
-  const [sensitivityProtective, setSensitivityProtective] = useState("");
+  const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
+  const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
+  const [sensitivityPickingUp, setSensitivityPickingUp] = useState("");
+  const [sensitivitySemmesWeinstein, setSensitivitySemmesWeinstein] = useState("");
+  const [sensitivityTocoPincho, setSensitivityTocoPincho] = useState("");
+  const [sensitivityTemperatura, setSensitivityTemperatura] = useState("");
   const [sensitivity, setSensitivity] = useState("");
+  // DPPD 5 fingers
+  const [dppdPulgar, setDppdPulgar] = useState("");
+  const [dppdIndice, setDppdIndice] = useState("");
+  const [dppdMedio, setDppdMedio] = useState("");
+  const [dppdAnular, setDppdAnular] = useState("");
+  const [dppdMenique, setDppdMenique] = useState("");
   const [trophicState, setTrophicState] = useState("");
   const [scar, setScar] = useState("");
   const [vancouverScore, setVancouverScore] = useState("");
@@ -341,6 +354,7 @@ export function NewPatientForm() {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           dni: dni.trim(),
+          nationality: or(nationality),
           birth_date: or(birthDate),
           phone: or(phone),
           address: or(address),
@@ -386,6 +400,7 @@ export function NewPatientForm() {
         days_post_surgery: orNum(daysPostSurgery),
         immobilization_weeks: orNum(immobilizationWeeks),
         immobilization_days: orNum(immobilizationDays),
+        immobilization_type: or(immobilizationType),
         next_oyt_appointment: or(nextOyt),
         studies: or(studies),
         medical_history: or(medicalHistory),
@@ -453,10 +468,23 @@ export function NewPatientForm() {
         evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
         painCharacteristics, painAggravating, painFree, edema, godetTest,
         kapandji, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
-        sensitivityFunctional, sensitivityProtective, sensitivity, trophicState, scar, vancouverScore,
+        sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
+        sensitivityTocoPincho, sensitivityTemperatura,
+        sensitivity, trophicState, scar, vancouverScore,
         osasScore, posture, emotionalState, analNotes,
+        dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
       ];
-      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson;
+
+      // DPPD fingers JSONB
+      const dppdEntries: [string, string][] = [
+        ["pulgar", dppdPulgar], ["indice", dppdIndice], ["medio", dppdMedio],
+        ["anular", dppdAnular], ["menique", dppdMenique],
+      ].filter(([, v]) => v && v.trim()) as [string, string][];
+      const dppdFingersJson = dppdEntries.length > 0
+        ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
+        : null;
+
+      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
       if (analFields.some((f) => f.trim()) || hasStructured) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
@@ -484,9 +512,16 @@ export function NewPatientForm() {
           muscle_strength_cubital: cubitalJson,
           muscle_strength_radial: radialJson,
           specific_tests: specificTestsJson,
+          dppd_fingers: dppdFingersJson,
           sensitivity: or(sensitivity),
-          sensitivity_functional: or(sensitivityFunctional),
-          sensitivity_protective: or(sensitivityProtective),
+          sensitivity_functional: null,
+          sensitivity_protective: null,
+          sensitivity_tacto_ligero: or(sensitivityTactoLigero),
+          sensitivity_dos_puntos: or(sensitivityDosPuntos),
+          sensitivity_picking_up: or(sensitivityPickingUp),
+          sensitivity_semmes_weinstein: or(sensitivitySemmesWeinstein),
+          sensitivity_toco_pincho: or(sensitivityTocoPincho),
+          sensitivity_temperatura: or(sensitivityTemperatura),
           trophic_state: or(trophicState),
           scar: or(scar),
           vancouver_score: orNum(vancouverScore),
@@ -589,6 +624,10 @@ export function NewPatientForm() {
               <ErrMsg field="dni" />
             </div>
             <div className="space-y-2">
+              <Label>Nacionalidad</Label>
+              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." />
+            </div>
+            <div className="space-y-2">
               <Label>Fecha de nacimiento</Label>
               <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             </div>
@@ -669,6 +708,10 @@ export function NewPatientForm() {
                   <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className="flex-1" />
                   <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className="w-20" />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de inmovilización</Label>
+                <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." />
               </div>
               <div className="space-y-2">
                 <Label>Próx. turno OyT</Label>
@@ -785,6 +828,25 @@ export function NewPatientForm() {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
               <div className="space-y-2">
+                <Label>Aparición</Label>
+                <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Localización</Label>
+                <Input value={painLocation} onChange={(e) => setPainLocation(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={!!painRadiation || painRadiation === ""} onCheckedChange={() => {}} className="hidden" />
+                  <Label className="font-normal">Irradiación</Label>
+                </div>
+                <Input placeholder="¿Hacia dónde?" value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Características</Label>
+                <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
+              </div>
+              <div className="space-y-2">
                 <Label>Intensidad EVA (0-10) *</Label>
                 <div className="flex items-center gap-4">
                   <Slider
@@ -797,31 +859,9 @@ export function NewPatientForm() {
                 </div>
                 <ErrMsg field="painScore" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Aparición</Label>
-                  <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Localización</Label>
-                  <Input value={painLocation} onChange={(e) => setPainLocation(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Irradiación</Label>
-                  <Input value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Características</Label>
-                  <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
-                </div>
-              </div>
               <div className="space-y-2">
                 <Label>Agravantes / Atenuantes</Label>
                 <Textarea value={painAggravating} onChange={(e) => setPainAggravating(e.target.value)} rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Descripción libre del dolor</Label>
-                <Textarea value={painFree} onChange={(e) => setPainFree(e.target.value)} rows={2} />
               </div>
             </div>
 
@@ -899,15 +939,51 @@ export function NewPatientForm() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Fuerza muscular observaciones</Label>
-                <Textarea value={muscleStrength} onChange={(e) => setMuscleStrength(e.target.value)} rows={2} />
+                <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  <div className="space-y-1"><Label className="text-xs">Pulgar</Label><Input type="number" step="0.1" value={dppdPulgar} onChange={e => setDppdPulgar(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Índice</Label><Input type="number" step="0.1" value={dppdIndice} onChange={e => setDppdIndice(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Medio</Label><Input type="number" step="0.1" value={dppdMedio} onChange={e => setDppdMedio(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Anular</Label><Input type="number" step="0.1" value={dppdAnular} onChange={e => setDppdAnular(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Meñique</Label><Input type="number" step="0.1" value={dppdMenique} onChange={e => setDppdMenique(e.target.value)} /></div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Fuerza muscular (Daniels)</Label>
+                <Select value={muscleStrength} onValueChange={setMuscleStrength}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar grado" /></SelectTrigger>
+                  <SelectContent>
+                    {DANIELS_FULL_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Sensibilidad */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
+                <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Discriminación 2 puntos</Label><Textarea rows={2} value={sensitivityDosPuntos} onChange={(e) => setSensitivityDosPuntos(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Picking up test</Label><Textarea rows={2} value={sensitivityPickingUp} onChange={(e) => setSensitivityPickingUp(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Semmes-Weinstein</Label><Textarea rows={2} value={sensitivitySemmesWeinstein} onChange={(e) => setSensitivitySemmesWeinstein(e.target.value)} /></div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">Protopática (protectora)</p>
+                <div className="space-y-2"><Label className="text-xs">Toco-pincho</Label><Textarea rows={2} value={sensitivityTocoPincho} onChange={(e) => setSensitivityTocoPincho(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Temperatura frío-calor</Label><Textarea rows={2} value={sensitivityTemperatura} onChange={(e) => setSensitivityTemperatura(e.target.value)} /></div>
+              </div>
+              <div className="space-y-2">
+                <Label>Observaciones de sensibilidad</Label>
+                <Textarea value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} rows={2} />
               </div>
 
-              {/* Daniels by nerve */}
+              {/* Tabla Kendall */}
               <Collapsible open={showDaniels} onOpenChange={setShowDaniels}>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm" className="w-full justify-between text-xs text-muted-foreground mt-2">
-                    Fuerza muscular por nervio (Daniels)
+                    Tabla Kendall
                     <ChevronDown className={`h-4 w-4 transition-transform ${showDaniels ? "rotate-180" : ""}`} />
                   </Button>
                 </CollapsibleTrigger>
@@ -950,23 +1026,6 @@ export function NewPatientForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
-            </div>
-
-            {/* Sensibilidad */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
-              <div className="space-y-2">
-                <Label>Sensibilidad epicrítica (funcional)</Label>
-                <Textarea value={sensitivityFunctional} onChange={(e) => setSensitivityFunctional(e.target.value)} rows={2} placeholder="Tacto ligero, discriminación 2 puntos, picking up test..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Sensibilidad protopática (protectora)</Label>
-                <Textarea value={sensitivityProtective} onChange={(e) => setSensitivityProtective(e.target.value)} rows={2} placeholder="Toco-pincho, temperatura frío-calor..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Observaciones de sensibilidad</Label>
-                <Textarea value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} rows={2} />
-              </div>
             </div>
 
             {/* Otros */}
