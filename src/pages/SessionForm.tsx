@@ -781,8 +781,8 @@ export default function SessionForm() {
                 {/* Tabla Kendall */}
                 <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-full justify-between text-xs text-muted-foreground mt-2">
-                      Tabla Kendall
+                    <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-foreground mt-2">
+                      <span className="font-semibold">Tabla Kendall</span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${show_daniels ? "rotate-180" : ""}`} />
                     </Button>
                   </CollapsibleTrigger>
