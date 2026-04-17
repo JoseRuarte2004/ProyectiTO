@@ -921,11 +921,144 @@ export default function SessionForm() {
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Estado trófico y otros</h4>
                 <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={trophic_state} onChange={e => setTrophicState(e.target.value)} /></div>
-                <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={scar} onChange={e => setScar(e.target.value)} /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Vancouver VSS (0-15)</Label><Input type="number" min={0} max={15} value={vancouver_score} onChange={e => setVancouverScore(e.target.value)} /></div>
-                  <div className="space-y-2"><Label>OSAS (0-60)</Label><Input type="number" min={0} max={60} value={osas_score} onChange={e => setOsasScore(e.target.value)} /></div>
+
+                {/* Cicatriz estructurada */}
+                <Separator />
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-foreground">Cicatriz</h4>
+
+                  {/* Sub-sección A — Planilla */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground">Planilla</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Localización</Label>
+                        <Select value={scar_localizacion} onValueChange={setScarLocalizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.localizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Longitud (cm)</Label>
+                        <Input type="number" step="0.1" min={0} value={scar_longitud} onChange={e => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vascularización</Label>
+                        <Select value={scar_vascularizacion} onValueChange={setScarVascularizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.vascularizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Pigmentación</Label>
+                        <Select value={scar_pigmentacion} onValueChange={setScarPigmentacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.pigmentacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Flexibilidad</Label>
+                        <Select value={scar_flexibilidad} onValueChange={setScarFlexibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.flexibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Sensibilidad</Label>
+                        <Select value={scar_sensibilidad} onValueChange={setScarSensibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.sensibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Relieve</Label>
+                        <Select value={scar_relieve} onValueChange={setScarRelieve}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.relieve.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temperatura</Label>
+                        <Select value={scar_temperatura} onValueChange={setScarTemperatura}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.temperatura.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Observaciones / Impresión estética</Label>
+                      <Textarea rows={2} value={scar_observaciones} onChange={e => setScarObservaciones(e.target.value)} />
+                    </div>
+                  </div>
+
+                  {/* Sub-sección B — Vancouver VSS */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-muted-foreground">Escala Vancouver VSS</p>
+                      <Badge variant="secondary">
+                        Total VSS: {
+                          (vss_pigmentacion ? parseInt(vss_pigmentacion) : 0) +
+                          (vss_vascularizacion ? parseInt(vss_vascularizacion) : 0) +
+                          (vss_flexibilidad ? parseInt(vss_flexibilidad) : 0) +
+                          (vss_altura ? parseInt(vss_altura) : 0)
+                        }/15
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Pigmentación</Label>
+                        <Select value={vss_pigmentacion} onValueChange={setVssPigmentacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.pigmentacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vascularización</Label>
+                        <Select value={vss_vascularizacion} onValueChange={setVssVascularizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.vascularizacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Flexibilidad</Label>
+                        <Select value={vss_flexibilidad} onValueChange={setVssFlexibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.flexibilidad.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Altura</Label>
+                        <Select value={vss_altura} onValueChange={setVssAltura}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.altura.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="space-y-2"><Label>Postura</Label><Textarea rows={2} value={posture} onChange={e => setPosture(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Emotividad</Label><Textarea rows={2} value={emotional_state} onChange={e => setEmotionalState(e.target.value)} /></div>
               </div>
