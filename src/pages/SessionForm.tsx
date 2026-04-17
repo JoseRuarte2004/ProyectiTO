@@ -138,6 +138,50 @@ function DanielsTable({ muscles, values, onChange }: { muscles: string[]; values
   );
 }
 
+// ── Cicatriz: opciones planilla ──
+const SCAR_OPTIONS: Record<string, string[]> = {
+  localizacion: ["Zona", "Atraviesa articulación"],
+  vascularizacion: ["Normal", "Rosa", "Roja", "Púrpura"],
+  pigmentacion: ["Normal", "Hipopigmentada", "Pigmentación mixta", "Hiperpigmentada"],
+  flexibilidad: ["Flexible", "Semiflexible", "Rígida", "Adherida", "Retráctil", "Brida cicatrizal"],
+  sensibilidad: ["Normal", "Hipersensibilidad", "Hiposensibilidad", "Parestesias", "Prurito"],
+  relieve: ["Plana", "Levemente elevada", "Invaginada", "Hipertrófica", "Queloide"],
+  temperatura: ["Normal", "Alta"],
+};
+
+// ── Vancouver VSS: opciones por dimensión ──
+const VSS_OPTIONS = {
+  pigmentacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Hipopigmentación" },
+    { v: "2", label: "2 — Pigmentación mixta" },
+    { v: "3", label: "3 — Hiperpigmentación" },
+  ],
+  vascularizacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Rosa" },
+    { v: "2", label: "2 — Rojo" },
+    { v: "3", label: "3 — Púrpura" },
+  ],
+  flexibilidad: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Suave, flexible con mínima resistencia" },
+    { v: "2", label: "2 — Cedente, cede a la presión" },
+    { v: "3", label: "3 — Firme, inflexible, resistente a la presión manual" },
+    { v: "4", label: "4 — Cordón: tejido tipo soga que se blanquea al extender" },
+    { v: "5", label: "5 — Contractura: acortamiento permanente que produce deformidad" },
+  ],
+  altura: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — ≤1mm" },
+    { v: "2", label: "2 — >1 a ≤2mm" },
+    { v: "3", label: "3 — >2 a ≤4mm" },
+    { v: "4", label: "4 — >4mm" },
+  ],
+};
+
+const SCAR_PLACEHOLDER = "No evaluado";
+
 export default function SessionForm() {
   const { patientId } = useParams<{ patientId: string }>();
   const [searchParams] = useSearchParams();
