@@ -336,9 +336,17 @@ export default function SessionForm() {
 
     const msParts: string[] = [];
     if (fist_closure) msParts.push(`Cierre de puño: ${fist_closure}`);
-    if (dppd) msParts.push(`DPPD: ${dppd}cm`);
     if (muscle_strength) msParts.push(muscle_strength);
     const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
+
+    // DPPD fingers JSONB
+    const dppdEntries: [string, string][] = [
+      ["pulgar", dppd_pulgar], ["indice", dppd_indice], ["medio", dppd_medio],
+      ["anular", dppd_anular], ["menique", dppd_menique],
+    ].filter(([, v]) => v && v.trim()) as [string, string][];
+    const dppdFingersJson = dppdEntries.length > 0
+      ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
+      : null;
 
     const generalObsFinal = session_type === "admission"
       ? discharge_summary || general_observations || null
@@ -397,10 +405,12 @@ export default function SessionForm() {
       pain_aggravating_factors, pain_appearance, pain_free, edema_obs, godet_test,
       edemaCirc, aromVal, promVal, fist_closure,
       dyn_msd, dyn_msi, kapandjiFinal, msVal,
-      sensitivity, sensitivity_functional, sensitivity_protective,
+      sensitivity, sensitivity_tacto_ligero, sensitivity_dos_puntos,
+      sensitivity_picking_up, sensitivity_semmes_weinstein,
+      sensitivity_toco_pincho, sensitivity_temperatura,
       trophic_state, scar, vancouver_score, osas_score,
       posture, emotional_state,
-      specificTestsJson, medianJson, cubitalJson, radialJson, gonioJsonb,
+      specificTestsJson, medianJson, cubitalJson, radialJson, gonioJsonb, dppdFingersJson,
     ].some(v => v !== "" && v !== null && v !== undefined && v !== false);
 
     if (hasMeasurements) {
