@@ -636,22 +636,26 @@ export default function SessionForm() {
               {/* Pain */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Dolor EVA</h4>
-                <div className="flex items-center gap-3">
-                  <Slider min={0} max={10} step={1} value={[pain_score]} onValueChange={([v]) => { setPainScore(v); setPainTouched(true); }} className="flex-1" />
-                  <Badge variant="outline" className="text-sm font-semibold w-8 justify-center">{pain_score}</Badge>
-                </div>
                 <div className="space-y-2"><Label>Aparición</Label><Input value={pain_appearance} onChange={e => setPainAppearance(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Localización</Label><Input value={pain_location} onChange={e => setPainLocation(e.target.value)} /></div>
-                <div className="space-y-2"><Label>Características (urente, punzante, etc.)</Label><Input value={pain_characteristics} onChange={e => setPainCharacteristics(e.target.value)} /></div>
-                <div className="space-y-2"><Label>Agravantes / atenuantes</Label><Textarea rows={2} value={pain_aggravating_factors} onChange={e => setPainAggravatingFactors(e.target.value)} /></div>
-                <div className="flex items-center gap-2">
-                  <Checkbox checked={pain_radiates} onCheckedChange={v => setPainRadiates(!!v)} />
-                  <Label className="font-normal">Irradia</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={pain_radiates} onCheckedChange={v => setPainRadiates(!!v)} />
+                    <Label className="font-normal">Irradiación</Label>
+                  </div>
+                  {pain_radiates && (
+                    <Input className="mt-2" placeholder="¿Hacia dónde?" value={pain_radiation} onChange={e => setPainRadiation(e.target.value)} />
+                  )}
                 </div>
-                {pain_radiates && (
-                  <div className="space-y-2"><Label>¿Hacia dónde?</Label><Input value={pain_radiation} onChange={e => setPainRadiation(e.target.value)} /></div>
-                )}
-                <div className="space-y-2"><Label>Descripción libre del dolor</Label><Textarea rows={2} value={pain_free} onChange={e => setPainFree(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Características (urente, punzante, etc.)</Label><Input value={pain_characteristics} onChange={e => setPainCharacteristics(e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Intensidad EVA (0-10)</Label>
+                  <div className="flex items-center gap-3">
+                    <Slider min={0} max={10} step={1} value={[pain_score]} onValueChange={([v]) => { setPainScore(v); setPainTouched(true); }} className="flex-1" />
+                    <Badge variant="outline" className="text-sm font-semibold w-8 justify-center">{pain_score}</Badge>
+                  </div>
+                </div>
+                <div className="space-y-2"><Label>Agravantes / Atenuantes</Label><Textarea rows={2} value={pain_aggravating_factors} onChange={e => setPainAggravatingFactors(e.target.value)} /></div>
               </div>
 
               {/* Edema */}
