@@ -212,7 +212,11 @@ export default function SessionForm() {
   const [dyn_msi, setDynMsi] = useState("");
   const [kapandji_val, setKapandjiVal] = useState("");
   const [kapandji_pain, setKapandjiPain] = useState(false);
-  const [dppd, setDppd] = useState("");
+  const [dppd_pulgar, setDppdPulgar] = useState("");
+  const [dppd_indice, setDppdIndice] = useState("");
+  const [dppd_medio, setDppdMedio] = useState("");
+  const [dppd_anular, setDppdAnular] = useState("");
+  const [dppd_menique, setDppdMenique] = useState("");
   const [muscle_strength, setMuscleStrength] = useState("");
 
   // Daniels by nerve
@@ -228,8 +232,12 @@ export default function SessionForm() {
 
   // Sensitivity
   const [sensitivity, setSensitivity] = useState("");
-  const [sensitivity_functional, setSensitivityFunctional] = useState("");
-  const [sensitivity_protective, setSensitivityProtective] = useState("");
+  const [sensitivity_tacto_ligero, setSensitivityTactoLigero] = useState("");
+  const [sensitivity_dos_puntos, setSensitivityDosPuntos] = useState("");
+  const [sensitivity_picking_up, setSensitivityPickingUp] = useState("");
+  const [sensitivity_semmes_weinstein, setSensitivitySemmesWeinstein] = useState("");
+  const [sensitivity_toco_pincho, setSensitivityTocoPincho] = useState("");
+  const [sensitivity_temperatura, setSensitivityTemperatura] = useState("");
 
   // Trophic & others
   const [trophic_state, setTrophicState] = useState("");
