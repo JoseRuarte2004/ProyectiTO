@@ -535,9 +535,10 @@ export default function SessionForm() {
         sensitivity_toco_pincho: sensitivity_toco_pincho || null,
         sensitivity_temperatura: sensitivity_temperatura || null,
         trophic_state: trophic_state || null,
-        scar: scar || null,
-        vancouver_score: vancouver_score ? parseInt(vancouver_score) : null,
-        osas_score: osas_score ? parseInt(osas_score) : null,
+        scar: scar_observaciones || null,
+        scar_evaluation: scarEvalJson,
+        vancouver_score: hasVss ? vssTotal : null,
+        osas_score: null,
         posture: posture || null,
         emotional_state: emotional_state || null,
       });
