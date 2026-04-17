@@ -624,6 +624,10 @@ export function NewPatientForm() {
               <ErrMsg field="dni" />
             </div>
             <div className="space-y-2">
+              <Label>Nacionalidad</Label>
+              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." />
+            </div>
+            <div className="space-y-2">
               <Label>Fecha de nacimiento</Label>
               <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             </div>
