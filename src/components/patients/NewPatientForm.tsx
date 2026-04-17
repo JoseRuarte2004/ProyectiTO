@@ -1172,12 +1172,7 @@ export function NewPatientForm() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs">Localización</Label>
-                      <Select value={scarLocalizacion} onValueChange={setScarLocalizacion}>
-                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
-                          {SCAR_OPTIONS.localizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                      <Input value={scarLocalizacion} onChange={(e) => setScarLocalizacion(e.target.value)} placeholder={SCAR_PLACEHOLDER} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Longitud (cm)</Label>
