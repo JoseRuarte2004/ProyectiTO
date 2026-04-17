@@ -464,10 +464,41 @@ export default function SessionForm() {
       sensitivity, sensitivity_tacto_ligero, sensitivity_dos_puntos,
       sensitivity_picking_up, sensitivity_semmes_weinstein,
       sensitivity_toco_pincho, sensitivity_temperatura,
-      trophic_state, scar, vancouver_score, osas_score,
+      trophic_state, scar_observaciones,
+      scar_localizacion, scar_longitud, scar_vascularizacion, scar_pigmentacion,
+      scar_flexibilidad, scar_sensibilidad, scar_relieve, scar_temperatura,
+      vss_pigmentacion, vss_vascularizacion, vss_flexibilidad, vss_altura,
       posture, emotional_state,
       specificTestsJson, medianJson, cubitalJson, radialJson, gonioJsonb, dppdFingersJson,
     ].some(v => v !== "" && v !== null && v !== undefined && v !== false);
+
+    // Build scar_evaluation JSONB
+    const scarPlanillaEntries: [string, string][] = [
+      ["localizacion", scar_localizacion],
+      ["longitud_cm", scar_longitud],
+      ["vascularizacion", scar_vascularizacion],
+      ["pigmentacion", scar_pigmentacion],
+      ["flexibilidad", scar_flexibilidad],
+      ["sensibilidad", scar_sensibilidad],
+      ["relieve", scar_relieve],
+      ["temperatura", scar_temperatura],
+    ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+
+    const vssObj: Record<string, number> = {};
+    if (vss_pigmentacion !== "") vssObj.pigmentacion = parseInt(vss_pigmentacion);
+    if (vss_vascularizacion !== "") vssObj.vascularizacion = parseInt(vss_vascularizacion);
+    if (vss_flexibilidad !== "") vssObj.flexibilidad = parseInt(vss_flexibilidad);
+    if (vss_altura !== "") vssObj.altura = parseInt(vss_altura);
+    const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
+    const hasVss = Object.keys(vssObj).length > 0;
+
+    const scarEvalJson =
+      scarPlanillaEntries.length > 0 || hasVss
+        ? {
+            ...Object.fromEntries(scarPlanillaEntries),
+            ...(hasVss ? { vss: vssObj } : {}),
+          }
+        : null;
 
     if (hasMeasurements) {
       const { error: aeErr } = await supabase.from("analytical_evaluations").insert({
