@@ -288,6 +288,27 @@ export type Database = {
           },
         ]
       }
+      cie10: {
+        Row: {
+          category: string | null
+          code: string
+          description: string
+          id: number
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          description: string
+          id?: number
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          description?: string
+          id?: number
+        }
+        Relationships: []
+      }
       clinical_files: {
         Row: {
           category: Database["public"]["Enums"]["clinical_file_category"]

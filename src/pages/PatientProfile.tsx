@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1933,6 +1933,73 @@ function DeleteFileConfirm({ file, onClose, onDeleted }: { file: any; onClose: (
   );
 }
 
+function Cie10AutocompleteInline({ value, onChange, placeholder }: {
+  value: string; onChange: (v: string) => void; placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<Array<{ code: string; description: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const wrapper = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const term = value.trim();
+    if (term.length < 2) { setResults([]); setOpen(false); return; }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("cie10")
+        .select("code, description")
+        .or(`code.ilike.%${term}%,description.ilike.%${term}%`)
+        .limit(10);
+      if (cancelled) return;
+      setResults(data || []);
+      setOpen(true);
+      setLoading(false);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); setLoading(false); };
+  }, [value]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (wrapper.current && !wrapper.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, []);
+
+  return (
+    <div ref={wrapper} className="relative">
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => { if (results.length > 0) setOpen(true); }}
+        placeholder={placeholder}
+        autoComplete="off"
+      />
+      {loading && (
+        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+      )}
+      {open && results.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-md border bg-popover shadow-md">
+          {results.map((r) => (
+            <button
+              key={r.code}
+              type="button"
+              onClick={() => { onChange(`${r.code} — ${r.description}`); setOpen(false); }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              <span className="font-medium">{r.code}</span> — {r.description}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved }: {
   open: boolean; onClose: () => void; patientId: string; userId: string; episodes: any[]; onSaved: (newEpId: string) => void;
 }) {
@@ -2015,7 +2082,7 @@ function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved 
           </div>
           <div className="space-y-2">
             <Label>Diagnóstico *</Label>
-            <Input value={form.diagnosis} onChange={e => setForm({ ...form, diagnosis: e.target.value })} placeholder="Ej: Fx distal de radio D°" />
+            <Cie10AutocompleteInline value={form.diagnosis} onChange={(v) => setForm({ ...form, diagnosis: v })} placeholder="Buscar por código o descripción CIE-10…" />
           </div>
           <div className="space-y-2">
             <Label>Tipo de tratamiento</Label>
