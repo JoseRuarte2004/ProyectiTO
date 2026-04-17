@@ -710,6 +710,10 @@ export function NewPatientForm() {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label>Tipo de inmovilización</Label>
+                <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." />
+              </div>
+              <div className="space-y-2">
                 <Label>Próx. turno OyT</Label>
                 <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} />
               </div>
