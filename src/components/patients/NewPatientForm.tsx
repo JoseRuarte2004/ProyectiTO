@@ -206,9 +206,19 @@ export function NewPatientForm() {
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
   const [muscleStrength, setMuscleStrength] = useState("");
-  const [sensitivityFunctional, setSensitivityFunctional] = useState("");
-  const [sensitivityProtective, setSensitivityProtective] = useState("");
+  const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
+  const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
+  const [sensitivityPickingUp, setSensitivityPickingUp] = useState("");
+  const [sensitivitySemmesWeinstein, setSensitivitySemmesWeinstein] = useState("");
+  const [sensitivityTocoPincho, setSensitivityTocoPincho] = useState("");
+  const [sensitivityTemperatura, setSensitivityTemperatura] = useState("");
   const [sensitivity, setSensitivity] = useState("");
+  // DPPD 5 fingers
+  const [dppdPulgar, setDppdPulgar] = useState("");
+  const [dppdIndice, setDppdIndice] = useState("");
+  const [dppdMedio, setDppdMedio] = useState("");
+  const [dppdAnular, setDppdAnular] = useState("");
+  const [dppdMenique, setDppdMenique] = useState("");
   const [trophicState, setTrophicState] = useState("");
   const [scar, setScar] = useState("");
   const [vancouverScore, setVancouverScore] = useState("");
