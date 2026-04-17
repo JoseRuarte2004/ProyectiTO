@@ -138,6 +138,50 @@ function DanielsTable({ muscles, values, onChange }: { muscles: string[]; values
   );
 }
 
+// ── Cicatriz: opciones planilla ──
+const SCAR_OPTIONS: Record<string, string[]> = {
+  localizacion: ["Zona", "Atraviesa articulación"],
+  vascularizacion: ["Normal", "Rosa", "Roja", "Púrpura"],
+  pigmentacion: ["Normal", "Hipopigmentada", "Pigmentación mixta", "Hiperpigmentada"],
+  flexibilidad: ["Flexible", "Semiflexible", "Rígida", "Adherida", "Retráctil", "Brida cicatrizal"],
+  sensibilidad: ["Normal", "Hipersensibilidad", "Hiposensibilidad", "Parestesias", "Prurito"],
+  relieve: ["Plana", "Levemente elevada", "Invaginada", "Hipertrófica", "Queloide"],
+  temperatura: ["Normal", "Alta"],
+};
+
+// ── Vancouver VSS: opciones por dimensión ──
+const VSS_OPTIONS = {
+  pigmentacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Hipopigmentación" },
+    { v: "2", label: "2 — Pigmentación mixta" },
+    { v: "3", label: "3 — Hiperpigmentación" },
+  ],
+  vascularizacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Rosa" },
+    { v: "2", label: "2 — Rojo" },
+    { v: "3", label: "3 — Púrpura" },
+  ],
+  flexibilidad: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Suave, flexible con mínima resistencia" },
+    { v: "2", label: "2 — Cedente, cede a la presión" },
+    { v: "3", label: "3 — Firme, inflexible, resistente a la presión manual" },
+    { v: "4", label: "4 — Cordón: tejido tipo soga que se blanquea al extender" },
+    { v: "5", label: "5 — Contractura: acortamiento permanente que produce deformidad" },
+  ],
+  altura: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — ≤1mm" },
+    { v: "2", label: "2 — >1 a ≤2mm" },
+    { v: "3", label: "3 — >2 a ≤4mm" },
+    { v: "4", label: "4 — >4mm" },
+  ],
+};
+
+const SCAR_PLACEHOLDER = "No evaluado";
+
 export default function SessionForm() {
   const { patientId } = useParams<{ patientId: string }>();
   const [searchParams] = useSearchParams();
@@ -241,9 +285,21 @@ export default function SessionForm() {
 
   // Trophic & others
   const [trophic_state, setTrophicState] = useState("");
-  const [scar, setScar] = useState("");
-  const [vancouver_score, setVancouverScore] = useState("");
-  const [osas_score, setOsasScore] = useState("");
+  // Cicatriz — Planilla
+  const [scar_localizacion, setScarLocalizacion] = useState("");
+  const [scar_longitud, setScarLongitud] = useState("");
+  const [scar_vascularizacion, setScarVascularizacion] = useState("");
+  const [scar_pigmentacion, setScarPigmentacion] = useState("");
+  const [scar_flexibilidad, setScarFlexibilidad] = useState("");
+  const [scar_sensibilidad, setScarSensibilidad] = useState("");
+  const [scar_relieve, setScarRelieve] = useState("");
+  const [scar_temperatura, setScarTemperatura] = useState("");
+  const [scar_observaciones, setScarObservaciones] = useState("");
+  // Cicatriz — Vancouver VSS
+  const [vss_pigmentacion, setVssPigmentacion] = useState("");
+  const [vss_vascularizacion, setVssVascularizacion] = useState("");
+  const [vss_flexibilidad, setVssFlexibilidad] = useState("");
+  const [vss_altura, setVssAltura] = useState("");
   const [posture, setPosture] = useState("");
   const [emotional_state, setEmotionalState] = useState("");
 
@@ -408,10 +464,41 @@ export default function SessionForm() {
       sensitivity, sensitivity_tacto_ligero, sensitivity_dos_puntos,
       sensitivity_picking_up, sensitivity_semmes_weinstein,
       sensitivity_toco_pincho, sensitivity_temperatura,
-      trophic_state, scar, vancouver_score, osas_score,
+      trophic_state, scar_observaciones,
+      scar_localizacion, scar_longitud, scar_vascularizacion, scar_pigmentacion,
+      scar_flexibilidad, scar_sensibilidad, scar_relieve, scar_temperatura,
+      vss_pigmentacion, vss_vascularizacion, vss_flexibilidad, vss_altura,
       posture, emotional_state,
       specificTestsJson, medianJson, cubitalJson, radialJson, gonioJsonb, dppdFingersJson,
     ].some(v => v !== "" && v !== null && v !== undefined && v !== false);
+
+    // Build scar_evaluation JSONB
+    const scarPlanillaEntries: [string, string][] = [
+      ["localizacion", scar_localizacion],
+      ["longitud_cm", scar_longitud],
+      ["vascularizacion", scar_vascularizacion],
+      ["pigmentacion", scar_pigmentacion],
+      ["flexibilidad", scar_flexibilidad],
+      ["sensibilidad", scar_sensibilidad],
+      ["relieve", scar_relieve],
+      ["temperatura", scar_temperatura],
+    ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+
+    const vssObj: Record<string, number> = {};
+    if (vss_pigmentacion !== "") vssObj.pigmentacion = parseInt(vss_pigmentacion);
+    if (vss_vascularizacion !== "") vssObj.vascularizacion = parseInt(vss_vascularizacion);
+    if (vss_flexibilidad !== "") vssObj.flexibilidad = parseInt(vss_flexibilidad);
+    if (vss_altura !== "") vssObj.altura = parseInt(vss_altura);
+    const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
+    const hasVss = Object.keys(vssObj).length > 0;
+
+    const scarEvalJson =
+      scarPlanillaEntries.length > 0 || hasVss
+        ? {
+            ...Object.fromEntries(scarPlanillaEntries),
+            ...(hasVss ? { vss: vssObj } : {}),
+          }
+        : null;
 
     if (hasMeasurements) {
       const { error: aeErr } = await supabase.from("analytical_evaluations").insert({
@@ -448,9 +535,10 @@ export default function SessionForm() {
         sensitivity_toco_pincho: sensitivity_toco_pincho || null,
         sensitivity_temperatura: sensitivity_temperatura || null,
         trophic_state: trophic_state || null,
-        scar: scar || null,
-        vancouver_score: vancouver_score ? parseInt(vancouver_score) : null,
-        osas_score: osas_score ? parseInt(osas_score) : null,
+        scar: scar_observaciones || null,
+        scar_evaluation: scarEvalJson,
+        vancouver_score: hasVss ? vssTotal : null,
+        osas_score: null,
         posture: posture || null,
         emotional_state: emotional_state || null,
       });
@@ -781,8 +869,8 @@ export default function SessionForm() {
                 {/* Tabla Kendall */}
                 <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-full justify-between text-xs text-muted-foreground mt-2">
-                      Tabla Kendall
+                    <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-foreground mt-2">
+                      <span className="font-semibold">Tabla Kendall</span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${show_daniels ? "rotate-180" : ""}`} />
                     </Button>
                   </CollapsibleTrigger>
@@ -833,11 +921,144 @@ export default function SessionForm() {
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Estado trófico y otros</h4>
                 <div className="space-y-2"><Label>Estado trófico</Label><Textarea rows={2} value={trophic_state} onChange={e => setTrophicState(e.target.value)} /></div>
-                <div className="space-y-2"><Label>Cicatriz</Label><Textarea rows={2} value={scar} onChange={e => setScar(e.target.value)} /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Vancouver VSS (0-15)</Label><Input type="number" min={0} max={15} value={vancouver_score} onChange={e => setVancouverScore(e.target.value)} /></div>
-                  <div className="space-y-2"><Label>OSAS (0-60)</Label><Input type="number" min={0} max={60} value={osas_score} onChange={e => setOsasScore(e.target.value)} /></div>
+
+                {/* Cicatriz estructurada */}
+                <Separator />
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-foreground">Cicatriz</h4>
+
+                  {/* Sub-sección A — Planilla */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground">Planilla</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Localización</Label>
+                        <Select value={scar_localizacion} onValueChange={setScarLocalizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.localizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Longitud (cm)</Label>
+                        <Input type="number" step="0.1" min={0} value={scar_longitud} onChange={e => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vascularización</Label>
+                        <Select value={scar_vascularizacion} onValueChange={setScarVascularizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.vascularizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Pigmentación</Label>
+                        <Select value={scar_pigmentacion} onValueChange={setScarPigmentacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.pigmentacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Flexibilidad</Label>
+                        <Select value={scar_flexibilidad} onValueChange={setScarFlexibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.flexibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Sensibilidad</Label>
+                        <Select value={scar_sensibilidad} onValueChange={setScarSensibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.sensibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Relieve</Label>
+                        <Select value={scar_relieve} onValueChange={setScarRelieve}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.relieve.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temperatura</Label>
+                        <Select value={scar_temperatura} onValueChange={setScarTemperatura}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {SCAR_OPTIONS.temperatura.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Observaciones / Impresión estética</Label>
+                      <Textarea rows={2} value={scar_observaciones} onChange={e => setScarObservaciones(e.target.value)} />
+                    </div>
+                  </div>
+
+                  {/* Sub-sección B — Vancouver VSS */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-muted-foreground">Escala Vancouver VSS</p>
+                      <Badge variant="secondary">
+                        Total VSS: {
+                          (vss_pigmentacion ? parseInt(vss_pigmentacion) : 0) +
+                          (vss_vascularizacion ? parseInt(vss_vascularizacion) : 0) +
+                          (vss_flexibilidad ? parseInt(vss_flexibilidad) : 0) +
+                          (vss_altura ? parseInt(vss_altura) : 0)
+                        }/15
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Pigmentación</Label>
+                        <Select value={vss_pigmentacion} onValueChange={setVssPigmentacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.pigmentacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vascularización</Label>
+                        <Select value={vss_vascularizacion} onValueChange={setVssVascularizacion}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.vascularizacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Flexibilidad</Label>
+                        <Select value={vss_flexibilidad} onValueChange={setVssFlexibilidad}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.flexibilidad.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Altura</Label>
+                        <Select value={vss_altura} onValueChange={setVssAltura}>
+                          <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                          <SelectContent>
+                            {VSS_OPTIONS.altura.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="space-y-2"><Label>Postura</Label><Textarea rows={2} value={posture} onChange={e => setPosture(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Emotividad</Label><Textarea rows={2} value={emotional_state} onChange={e => setEmotionalState(e.target.value)} /></div>
               </div>

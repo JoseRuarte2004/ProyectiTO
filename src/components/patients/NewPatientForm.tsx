@@ -137,6 +137,50 @@ function DanielsTable({ muscles, values, onChange }: { muscles: string[]; values
   );
 }
 
+// ── Cicatriz: opciones planilla ──
+const SCAR_OPTIONS: Record<string, string[]> = {
+  localizacion: ["Zona", "Atraviesa articulación"],
+  vascularizacion: ["Normal", "Rosa", "Roja", "Púrpura"],
+  pigmentacion: ["Normal", "Hipopigmentada", "Pigmentación mixta", "Hiperpigmentada"],
+  flexibilidad: ["Flexible", "Semiflexible", "Rígida", "Adherida", "Retráctil", "Brida cicatrizal"],
+  sensibilidad: ["Normal", "Hipersensibilidad", "Hiposensibilidad", "Parestesias", "Prurito"],
+  relieve: ["Plana", "Levemente elevada", "Invaginada", "Hipertrófica", "Queloide"],
+  temperatura: ["Normal", "Alta"],
+};
+
+// ── Vancouver VSS: opciones por dimensión ──
+const VSS_OPTIONS = {
+  pigmentacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Hipopigmentación" },
+    { v: "2", label: "2 — Pigmentación mixta" },
+    { v: "3", label: "3 — Hiperpigmentación" },
+  ],
+  vascularizacion: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Rosa" },
+    { v: "2", label: "2 — Rojo" },
+    { v: "3", label: "3 — Púrpura" },
+  ],
+  flexibilidad: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — Suave, flexible con mínima resistencia" },
+    { v: "2", label: "2 — Cedente, cede a la presión" },
+    { v: "3", label: "3 — Firme, inflexible, resistente a la presión manual" },
+    { v: "4", label: "4 — Cordón: tejido tipo soga que se blanquea al extender" },
+    { v: "5", label: "5 — Contractura: acortamiento permanente que produce deformidad" },
+  ],
+  altura: [
+    { v: "0", label: "0 — Normal" },
+    { v: "1", label: "1 — ≤1mm" },
+    { v: "2", label: "2 — >1 a ≤2mm" },
+    { v: "3", label: "3 — >2 a ≤4mm" },
+    { v: "4", label: "4 — >4mm" },
+  ],
+};
+
+const SCAR_PLACEHOLDER = "No evaluado";
+
 export function NewPatientForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -201,7 +245,8 @@ export function NewPatientForm() {
   const [painFree, setPainFree] = useState("");
   const [edema, setEdema] = useState("");
   const [godetTest, setGodetTest] = useState("");
-  const [kapandji, setKapandji] = useState("");
+  const [kapandjiVal, setKapandjiVal] = useState("");
+  const [kapandjiPain, setKapandjiPain] = useState(false);
   const [fistClosure, setFistClosure] = useState("");
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
@@ -220,9 +265,21 @@ export function NewPatientForm() {
   const [dppdAnular, setDppdAnular] = useState("");
   const [dppdMenique, setDppdMenique] = useState("");
   const [trophicState, setTrophicState] = useState("");
-  const [scar, setScar] = useState("");
-  const [vancouverScore, setVancouverScore] = useState("");
-  const [osasScore, setOsasScore] = useState("");
+  // Cicatriz — Planilla
+  const [scarLocalizacion, setScarLocalizacion] = useState("");
+  const [scarLongitud, setScarLongitud] = useState("");
+  const [scarVascularizacion, setScarVascularizacion] = useState("");
+  const [scarPigmentacion, setScarPigmentacion] = useState("");
+  const [scarFlexibilidad, setScarFlexibilidad] = useState("");
+  const [scarSensibilidad, setScarSensibilidad] = useState("");
+  const [scarRelieve, setScarRelieve] = useState("");
+  const [scarTemperatura, setScarTemperatura] = useState("");
+  const [scarObservaciones, setScarObservaciones] = useState("");
+  // Cicatriz — Vancouver VSS
+  const [vssPigmentacion, setVssPigmentacion] = useState("");
+  const [vssVascularizacion, setVssVascularizacion] = useState("");
+  const [vssFlexibilidad, setVssFlexibilidad] = useState("");
+  const [vssAltura, setVssAltura] = useState("");
   const [posture, setPosture] = useState("");
   const [emotionalState, setEmotionalState] = useState("");
   const [analNotes, setAnalNotes] = useState("");
@@ -464,15 +521,47 @@ export function NewPatientForm() {
       if (muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
+      const kapandjiFinal = kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
+
+      // Build scar_evaluation JSONB
+      const scarPlanillaEntries: [string, string][] = [
+        ["localizacion", scarLocalizacion],
+        ["longitud_cm", scarLongitud],
+        ["vascularizacion", scarVascularizacion],
+        ["pigmentacion", scarPigmentacion],
+        ["flexibilidad", scarFlexibilidad],
+        ["sensibilidad", scarSensibilidad],
+        ["relieve", scarRelieve],
+        ["temperatura", scarTemperatura],
+      ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+
+      const vssObj: Record<string, number> = {};
+      if (vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
+      if (vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
+      if (vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
+      if (vssAltura !== "") vssObj.altura = parseInt(vssAltura);
+      const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
+      const hasVss = Object.keys(vssObj).length > 0;
+      const scarEvalJson =
+        scarPlanillaEntries.length > 0 || hasVss
+          ? {
+              ...Object.fromEntries(scarPlanillaEntries),
+              ...(hasVss ? { vss: vssObj } : {}),
+            }
+          : null;
+
       const analFields = [
         evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
         painCharacteristics, painAggravating, painFree, edema, godetTest,
-        kapandji, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
+        kapandjiFinal, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
         sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
         sensitivityTocoPincho, sensitivityTemperatura,
-        sensitivity, trophicState, scar, vancouverScore,
-        osasScore, posture, emotionalState, analNotes,
+        sensitivity, trophicState, scarObservaciones,
+        posture, emotionalState, analNotes,
         dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
+        scarLocalizacion, scarLongitud, scarVascularizacion, scarPigmentacion,
+        scarFlexibilidad, scarSensibilidad, scarRelieve, scarTemperatura,
+        vssPigmentacion, vssVascularizacion, vssFlexibilidad, vssAltura,
       ];
 
       // DPPD fingers JSONB
@@ -504,7 +593,7 @@ export function NewPatientForm() {
           arom: aromVal,
           prom: promVal,
           goniometry: gonioJsonb,
-          kapandji: or(kapandji),
+          kapandji: or(kapandjiFinal),
           dynamometer_msd: orFloat(dynamometerMsd),
           dynamometer_msi: orFloat(dynamometerMsi),
           muscle_strength: msVal,
@@ -523,9 +612,10 @@ export function NewPatientForm() {
           sensitivity_toco_pincho: or(sensitivityTocoPincho),
           sensitivity_temperatura: or(sensitivityTemperatura),
           trophic_state: or(trophicState),
-          scar: or(scar),
-          vancouver_score: orNum(vancouverScore),
-          osas_score: orNum(osasScore),
+          scar: or(scarObservaciones),
+          scar_evaluation: scarEvalJson,
+          vancouver_score: hasVss ? vssTotal : null,
+          osas_score: null,
           posture: or(posture),
           emotional_state: or(emotionalState),
           notes: or(analNotes),
@@ -915,8 +1005,14 @@ export function NewPatientForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                 <div className="space-y-2">
-                  <Label>Kapandji</Label>
-                  <Input value={kapandji} onChange={(e) => setKapandji(e.target.value)} placeholder="5/10 con dolor" />
+                  <Label>Kapandji (0-10)</Label>
+                  <div className="flex items-end gap-3">
+                    <Input className="flex-1" type="number" min={0} max={10} value={kapandjiVal} onChange={(e) => setKapandjiVal(e.target.value)} />
+                    <div className="flex items-center gap-2 pb-2">
+                      <Checkbox checked={kapandjiPain} onCheckedChange={(v) => setKapandjiPain(!!v)} />
+                      <Label className="font-normal text-sm">Con dolor</Label>
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Cierre de puño</Label>
@@ -1035,18 +1131,139 @@ export function NewPatientForm() {
                 <Label>Estado trófico</Label>
                 <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
               </div>
-              <div className="space-y-2">
-                <Label>Cicatriz</Label>
-                <Textarea value={scar} onChange={(e) => setScar(e.target.value)} rows={2} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Vancouver VSS (0-15)</Label>
-                  <Input type="number" min={0} max={15} value={vancouverScore} onChange={(e) => setVancouverScore(e.target.value)} />
+              {/* Cicatriz estructurada */}
+              <div className="space-y-4 rounded-md border border-border p-3">
+                <h4 className="text-sm font-semibold text-foreground">Cicatriz</h4>
+
+                {/* Sub-sección A — Planilla */}
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground">Planilla</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Localización</Label>
+                      <Select value={scarLocalizacion} onValueChange={setScarLocalizacion}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.localizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Longitud (cm)</Label>
+                      <Input type="number" step="0.1" min={0} value={scarLongitud} onChange={(e) => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Vascularización</Label>
+                      <Select value={scarVascularizacion} onValueChange={setScarVascularizacion}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.vascularizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Pigmentación</Label>
+                      <Select value={scarPigmentacion} onValueChange={setScarPigmentacion}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.pigmentacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Flexibilidad</Label>
+                      <Select value={scarFlexibilidad} onValueChange={setScarFlexibilidad}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.flexibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Sensibilidad</Label>
+                      <Select value={scarSensibilidad} onValueChange={setScarSensibilidad}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.sensibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Relieve</Label>
+                      <Select value={scarRelieve} onValueChange={setScarRelieve}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.relieve.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Temperatura</Label>
+                      <Select value={scarTemperatura} onValueChange={setScarTemperatura}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {SCAR_OPTIONS.temperatura.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Observaciones / Impresión estética</Label>
+                    <Textarea rows={2} value={scarObservaciones} onChange={(e) => setScarObservaciones(e.target.value)} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>OSAS (0-60)</Label>
-                  <Input type="number" min={0} max={60} value={osasScore} onChange={(e) => setOsasScore(e.target.value)} />
+
+                {/* Sub-sección B — Vancouver VSS */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">Escala Vancouver VSS</p>
+                    <Badge variant="secondary">
+                      Total VSS: {
+                        (vssPigmentacion ? parseInt(vssPigmentacion) : 0) +
+                        (vssVascularizacion ? parseInt(vssVascularizacion) : 0) +
+                        (vssFlexibilidad ? parseInt(vssFlexibilidad) : 0) +
+                        (vssAltura ? parseInt(vssAltura) : 0)
+                      }/15
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Pigmentación</Label>
+                      <Select value={vssPigmentacion} onValueChange={setVssPigmentacion}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {VSS_OPTIONS.pigmentacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Vascularización</Label>
+                      <Select value={vssVascularizacion} onValueChange={setVssVascularizacion}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {VSS_OPTIONS.vascularizacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Flexibilidad</Label>
+                      <Select value={vssFlexibilidad} onValueChange={setVssFlexibilidad}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {VSS_OPTIONS.flexibilidad.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Altura</Label>
+                      <Select value={vssAltura} onValueChange={setVssAltura}>
+                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
+                        <SelectContent>
+                          {VSS_OPTIONS.altura.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
