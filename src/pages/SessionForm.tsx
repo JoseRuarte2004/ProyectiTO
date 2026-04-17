@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Loader2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -225,8 +226,9 @@ export default function SessionForm() {
   const [pain_location, setPainLocation] = useState("");
   const [pain_characteristics, setPainCharacteristics] = useState("");
   const [pain_aggravating_factors, setPainAggravatingFactors] = useState("");
-  const [pain_radiates, setPainRadiates] = useState(false);
+  const [pain_radiates_choice, setPainRadiatesChoice] = useState<"" | "no" | "si">("");
   const [pain_radiation, setPainRadiation] = useState("");
+  const pain_radiates = pain_radiates_choice === "si";
   const [pain_appearance, setPainAppearance] = useState("");
   const [pain_free, setPainFree] = useState("");
 
@@ -374,7 +376,12 @@ export default function SessionForm() {
     setSaving(true);
 
     // Build derived values
-    const painLocFinal = [pain_location, pain_radiates && pain_radiation ? `Irradia a: ${pain_radiation}` : ""].filter(Boolean).join(" — ") || null;
+    const painLocFinal = [pain_location, pain_radiates_choice === "si" && pain_radiation ? `Irradia a: ${pain_radiation}` : ""].filter(Boolean).join(" — ") || null;
+    const painRadiationFinal = pain_radiates_choice === "si"
+      ? (pain_radiation || null)
+      : pain_radiates_choice === "no"
+        ? "No irradia"
+        : null;
 
     const circParts: string[] = [];
     if (circ_wrist_msd || circ_global_msd) circParts.push(`MSD: ${circ_wrist_msd || "-"}cm muñeca / ${circ_global_msd || "-"}cm global`);
@@ -508,6 +515,7 @@ export default function SessionForm() {
         pain_score: pain_touched ? pain_score : null,
         pain_appearance: pain_appearance || null,
         pain_location: painLocFinal,
+        pain_radiation: painRadiationFinal,
         pain_characteristics: pain_characteristics || null,
         pain_aggravating_factors: pain_aggravating_factors || null,
         pain: pain_free || null,
@@ -727,12 +735,30 @@ export default function SessionForm() {
                 <div className="space-y-2"><Label>Aparición</Label><Input value={pain_appearance} onChange={e => setPainAppearance(e.target.value)} /></div>
                 <div className="space-y-2"><Label>Localización</Label><Input value={pain_location} onChange={e => setPainLocation(e.target.value)} /></div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={pain_radiates} onCheckedChange={v => setPainRadiates(!!v)} />
-                    <Label className="font-normal">Irradiación</Label>
-                  </div>
-                  {pain_radiates && (
-                    <Input className="mt-2" placeholder="¿Hacia dónde?" value={pain_radiation} onChange={e => setPainRadiation(e.target.value)} />
+                  <Label>Irradiación</Label>
+                  <RadioGroup
+                    value={pain_radiates_choice}
+                    onValueChange={(v) => {
+                      const val = v as "no" | "si";
+                      setPainRadiatesChoice(val);
+                      if (val === "no") setPainRadiation("");
+                    }}
+                    className="flex gap-6"
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="no" id="pain-rad-no-sf" />
+                      <Label htmlFor="pain-rad-no-sf" className="font-normal cursor-pointer">No irradia</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="si" id="pain-rad-si-sf" />
+                      <Label htmlFor="pain-rad-si-sf" className="font-normal cursor-pointer">Sí irradia</Label>
+                    </div>
+                  </RadioGroup>
+                  {pain_radiates_choice === "si" && (
+                    <div className="space-y-1 mt-2">
+                      <Label className="font-normal">¿Hacia dónde?</Label>
+                      <Input value={pain_radiation} onChange={e => setPainRadiation(e.target.value)} />
+                    </div>
                   )}
                 </div>
                 <div className="space-y-2"><Label>Características (urente, punzante, etc.)</Label><Input value={pain_characteristics} onChange={e => setPainCharacteristics(e.target.value)} /></div>
