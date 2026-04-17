@@ -2082,7 +2082,7 @@ function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved 
           </div>
           <div className="space-y-2">
             <Label>Diagnóstico *</Label>
-            <Input value={form.diagnosis} onChange={e => setForm({ ...form, diagnosis: e.target.value })} placeholder="Ej: Fx distal de radio D°" />
+            <Cie10AutocompleteInline value={form.diagnosis} onChange={(v) => setForm({ ...form, diagnosis: v })} placeholder="Buscar por código o descripción CIE-10…" />
           </div>
           <div className="space-y-2">
             <Label>Tipo de tratamiento</Label>
