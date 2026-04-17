@@ -939,15 +939,51 @@ export function NewPatientForm() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Fuerza muscular observaciones</Label>
-                <Textarea value={muscleStrength} onChange={(e) => setMuscleStrength(e.target.value)} rows={2} />
+                <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  <div className="space-y-1"><Label className="text-xs">Pulgar</Label><Input type="number" step="0.1" value={dppdPulgar} onChange={e => setDppdPulgar(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Índice</Label><Input type="number" step="0.1" value={dppdIndice} onChange={e => setDppdIndice(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Medio</Label><Input type="number" step="0.1" value={dppdMedio} onChange={e => setDppdMedio(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Anular</Label><Input type="number" step="0.1" value={dppdAnular} onChange={e => setDppdAnular(e.target.value)} /></div>
+                  <div className="space-y-1"><Label className="text-xs">Meñique</Label><Input type="number" step="0.1" value={dppdMenique} onChange={e => setDppdMenique(e.target.value)} /></div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Fuerza muscular (Daniels)</Label>
+                <Select value={muscleStrength} onValueChange={setMuscleStrength}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar grado" /></SelectTrigger>
+                  <SelectContent>
+                    {DANIELS_FULL_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Sensibilidad */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
+                <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Discriminación 2 puntos</Label><Textarea rows={2} value={sensitivityDosPuntos} onChange={(e) => setSensitivityDosPuntos(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Picking up test</Label><Textarea rows={2} value={sensitivityPickingUp} onChange={(e) => setSensitivityPickingUp(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Semmes-Weinstein</Label><Textarea rows={2} value={sensitivitySemmesWeinstein} onChange={(e) => setSensitivitySemmesWeinstein(e.target.value)} /></div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">Protopática (protectora)</p>
+                <div className="space-y-2"><Label className="text-xs">Toco-pincho</Label><Textarea rows={2} value={sensitivityTocoPincho} onChange={(e) => setSensitivityTocoPincho(e.target.value)} /></div>
+                <div className="space-y-2"><Label className="text-xs">Temperatura frío-calor</Label><Textarea rows={2} value={sensitivityTemperatura} onChange={(e) => setSensitivityTemperatura(e.target.value)} /></div>
+              </div>
+              <div className="space-y-2">
+                <Label>Observaciones de sensibilidad</Label>
+                <Textarea value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} rows={2} />
               </div>
 
-              {/* Daniels by nerve */}
+              {/* Tabla Kendall */}
               <Collapsible open={showDaniels} onOpenChange={setShowDaniels}>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm" className="w-full justify-between text-xs text-muted-foreground mt-2">
-                    Fuerza muscular por nervio (Daniels)
+                    Tabla Kendall
                     <ChevronDown className={`h-4 w-4 transition-transform ${showDaniels ? "rotate-180" : ""}`} />
                   </Button>
                 </CollapsibleTrigger>
@@ -990,23 +1026,6 @@ export function NewPatientForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
-            </div>
-
-            {/* Sensibilidad */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
-              <div className="space-y-2">
-                <Label>Sensibilidad epicrítica (funcional)</Label>
-                <Textarea value={sensitivityFunctional} onChange={(e) => setSensitivityFunctional(e.target.value)} rows={2} placeholder="Tacto ligero, discriminación 2 puntos, picking up test..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Sensibilidad protopática (protectora)</Label>
-                <Textarea value={sensitivityProtective} onChange={(e) => setSensitivityProtective(e.target.value)} rows={2} placeholder="Toco-pincho, temperatura frío-calor..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Observaciones de sensibilidad</Label>
-                <Textarea value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} rows={2} />
-              </div>
             </div>
 
             {/* Otros */}
