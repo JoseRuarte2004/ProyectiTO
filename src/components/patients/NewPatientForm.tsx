@@ -828,6 +828,25 @@ export function NewPatientForm() {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
               <div className="space-y-2">
+                <Label>Aparición</Label>
+                <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Localización</Label>
+                <Input value={painLocation} onChange={(e) => setPainLocation(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={!!painRadiation || painRadiation === ""} onCheckedChange={() => {}} className="hidden" />
+                  <Label className="font-normal">Irradiación</Label>
+                </div>
+                <Input placeholder="¿Hacia dónde?" value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Características</Label>
+                <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
+              </div>
+              <div className="space-y-2">
                 <Label>Intensidad EVA (0-10) *</Label>
                 <div className="flex items-center gap-4">
                   <Slider
@@ -840,31 +859,9 @@ export function NewPatientForm() {
                 </div>
                 <ErrMsg field="painScore" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Aparición</Label>
-                  <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Localización</Label>
-                  <Input value={painLocation} onChange={(e) => setPainLocation(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Irradiación</Label>
-                  <Input value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Características</Label>
-                  <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
-                </div>
-              </div>
               <div className="space-y-2">
                 <Label>Agravantes / Atenuantes</Label>
                 <Textarea value={painAggravating} onChange={(e) => setPainAggravating(e.target.value)} rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Descripción libre del dolor</Label>
-                <Textarea value={painFree} onChange={(e) => setPainFree(e.target.value)} rows={2} />
               </div>
             </div>
 
