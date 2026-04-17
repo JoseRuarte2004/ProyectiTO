@@ -92,7 +92,8 @@ const SPECIFIC_TESTS = [
 type TestResult = "positive" | "negative" | null;
 
 // ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0","1","1+","2","2-","2+","3","3-","3+","4","4-","4+","5"];
+const DANIELS_GRADES = ["0","1","2","3","4","5"];
+const DANIELS_FULL_GRADES = ["0","1","1+","2-","2","2+","3-","3","3+","4-","4","4+","5"];
 
 const MEDIAN_MUSCLES = [
   "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
