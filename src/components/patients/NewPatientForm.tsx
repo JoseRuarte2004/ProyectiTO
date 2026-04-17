@@ -521,15 +521,47 @@ export function NewPatientForm() {
       if (muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
+      const kapandjiFinal = kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
+
+      // Build scar_evaluation JSONB
+      const scarPlanillaEntries: [string, string][] = [
+        ["localizacion", scarLocalizacion],
+        ["longitud_cm", scarLongitud],
+        ["vascularizacion", scarVascularizacion],
+        ["pigmentacion", scarPigmentacion],
+        ["flexibilidad", scarFlexibilidad],
+        ["sensibilidad", scarSensibilidad],
+        ["relieve", scarRelieve],
+        ["temperatura", scarTemperatura],
+      ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+
+      const vssObj: Record<string, number> = {};
+      if (vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
+      if (vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
+      if (vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
+      if (vssAltura !== "") vssObj.altura = parseInt(vssAltura);
+      const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
+      const hasVss = Object.keys(vssObj).length > 0;
+      const scarEvalJson =
+        scarPlanillaEntries.length > 0 || hasVss
+          ? {
+              ...Object.fromEntries(scarPlanillaEntries),
+              ...(hasVss ? { vss: vssObj } : {}),
+            }
+          : null;
+
       const analFields = [
         evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
         painCharacteristics, painAggravating, painFree, edema, godetTest,
-        kapandji, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
+        kapandjiFinal, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
         sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
         sensitivityTocoPincho, sensitivityTemperatura,
-        sensitivity, trophicState, scar, vancouverScore,
-        osasScore, posture, emotionalState, analNotes,
+        sensitivity, trophicState, scarObservaciones,
+        posture, emotionalState, analNotes,
         dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
+        scarLocalizacion, scarLongitud, scarVascularizacion, scarPigmentacion,
+        scarFlexibilidad, scarSensibilidad, scarRelieve, scarTemperatura,
+        vssPigmentacion, vssVascularizacion, vssFlexibilidad, vssAltura,
       ];
 
       // DPPD fingers JSONB
@@ -561,7 +593,7 @@ export function NewPatientForm() {
           arom: aromVal,
           prom: promVal,
           goniometry: gonioJsonb,
-          kapandji: or(kapandji),
+          kapandji: or(kapandjiFinal),
           dynamometer_msd: orFloat(dynamometerMsd),
           dynamometer_msi: orFloat(dynamometerMsi),
           muscle_strength: msVal,
@@ -580,9 +612,10 @@ export function NewPatientForm() {
           sensitivity_toco_pincho: or(sensitivityTocoPincho),
           sensitivity_temperatura: or(sensitivityTemperatura),
           trophic_state: or(trophicState),
-          scar: or(scar),
-          vancouver_score: orNum(vancouverScore),
-          osas_score: orNum(osasScore),
+          scar: or(scarObservaciones),
+          scar_evaluation: scarEvalJson,
+          vancouver_score: hasVss ? vssTotal : null,
+          osas_score: null,
           posture: or(posture),
           emotional_state: or(emotionalState),
           notes: or(analNotes),
