@@ -354,6 +354,7 @@ export function NewPatientForm() {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           dni: dni.trim(),
+          nationality: or(nationality),
           birth_date: or(birthDate),
           phone: or(phone),
           address: or(address),
@@ -399,6 +400,7 @@ export function NewPatientForm() {
         days_post_surgery: orNum(daysPostSurgery),
         immobilization_weeks: orNum(immobilizationWeeks),
         immobilization_days: orNum(immobilizationDays),
+        immobilization_type: or(immobilizationType),
         next_oyt_appointment: or(nextOyt),
         studies: or(studies),
         medical_history: or(medicalHistory),
@@ -466,10 +468,23 @@ export function NewPatientForm() {
         evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
         painCharacteristics, painAggravating, painFree, edema, godetTest,
         kapandji, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
-        sensitivityFunctional, sensitivityProtective, sensitivity, trophicState, scar, vancouverScore,
+        sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
+        sensitivityTocoPincho, sensitivityTemperatura,
+        sensitivity, trophicState, scar, vancouverScore,
         osasScore, posture, emotionalState, analNotes,
+        dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
       ];
-      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson;
+
+      // DPPD fingers JSONB
+      const dppdEntries: [string, string][] = [
+        ["pulgar", dppdPulgar], ["indice", dppdIndice], ["medio", dppdMedio],
+        ["anular", dppdAnular], ["menique", dppdMenique],
+      ].filter(([, v]) => v && v.trim()) as [string, string][];
+      const dppdFingersJson = dppdEntries.length > 0
+        ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
+        : null;
+
+      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
       if (analFields.some((f) => f.trim()) || hasStructured) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
