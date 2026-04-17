@@ -91,7 +91,8 @@ const SPECIFIC_TESTS = [
 type TestResult = "positive" | "negative" | null;
 
 // ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0","1","1+","2","2-","2+","3","3-","3+","4","4-","4+","5"];
+const DANIELS_GRADES = ["0","1","2","3","4","5"];
+const DANIELS_FULL_GRADES = ["0","1","1+","2-","2","2+","3-","3","3+","4-","4","4+","5"];
 
 const MEDIAN_MUSCLES = [
   "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
@@ -147,6 +148,7 @@ export function NewPatientForm() {
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [dni, setDni] = useState("");
+  const [nationality, setNationality] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -166,6 +168,7 @@ export function NewPatientForm() {
   const [daysPostSurgery, setDaysPostSurgery] = useState("");
   const [immobilizationWeeks, setImmobilizationWeeks] = useState("");
   const [immobilizationDays, setImmobilizationDays] = useState("");
+  const [immobilizationType, setImmobilizationType] = useState("");
   const [nextOyt, setNextOyt] = useState("");
   const [studies, setStudies] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
