@@ -245,7 +245,8 @@ export function NewPatientForm() {
   const [painFree, setPainFree] = useState("");
   const [edema, setEdema] = useState("");
   const [godetTest, setGodetTest] = useState("");
-  const [kapandji, setKapandji] = useState("");
+  const [kapandjiVal, setKapandjiVal] = useState("");
+  const [kapandjiPain, setKapandjiPain] = useState(false);
   const [fistClosure, setFistClosure] = useState("");
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
@@ -264,9 +265,21 @@ export function NewPatientForm() {
   const [dppdAnular, setDppdAnular] = useState("");
   const [dppdMenique, setDppdMenique] = useState("");
   const [trophicState, setTrophicState] = useState("");
-  const [scar, setScar] = useState("");
-  const [vancouverScore, setVancouverScore] = useState("");
-  const [osasScore, setOsasScore] = useState("");
+  // Cicatriz — Planilla
+  const [scarLocalizacion, setScarLocalizacion] = useState("");
+  const [scarLongitud, setScarLongitud] = useState("");
+  const [scarVascularizacion, setScarVascularizacion] = useState("");
+  const [scarPigmentacion, setScarPigmentacion] = useState("");
+  const [scarFlexibilidad, setScarFlexibilidad] = useState("");
+  const [scarSensibilidad, setScarSensibilidad] = useState("");
+  const [scarRelieve, setScarRelieve] = useState("");
+  const [scarTemperatura, setScarTemperatura] = useState("");
+  const [scarObservaciones, setScarObservaciones] = useState("");
+  // Cicatriz — Vancouver VSS
+  const [vssPigmentacion, setVssPigmentacion] = useState("");
+  const [vssVascularizacion, setVssVascularizacion] = useState("");
+  const [vssFlexibilidad, setVssFlexibilidad] = useState("");
+  const [vssAltura, setVssAltura] = useState("");
   const [posture, setPosture] = useState("");
   const [emotionalState, setEmotionalState] = useState("");
   const [analNotes, setAnalNotes] = useState("");
