@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -240,6 +241,7 @@ export function NewPatientForm() {
   const [painAppearance, setPainAppearance] = useState("");
   const [painLocation, setPainLocation] = useState("");
   const [painRadiation, setPainRadiation] = useState("");
+  const [painRadiationChoice, setPainRadiationChoice] = useState<"" | "no" | "si">("");
   const [painCharacteristics, setPainCharacteristics] = useState("");
   const [painAggravating, setPainAggravating] = useState("");
   const [painFree, setPainFree] = useState("");
@@ -582,8 +584,17 @@ export function NewPatientForm() {
           evaluation_date: admissionDate,
           pain_score: evaTouched ? painScore : null,
           pain_appearance: or(painAppearance),
-          pain_location: or(painLocation),
-          pain_radiation: or(painRadiation),
+          pain_location: (() => {
+            const base = painLocation || "";
+            const extra = painRadiationChoice === "si" && painRadiation ? `Irradia a: ${painRadiation}` : "";
+            const joined = [base, extra].filter(Boolean).join(" — ");
+            return joined || null;
+          })(),
+          pain_radiation: painRadiationChoice === "si"
+            ? (painRadiation || null)
+            : painRadiationChoice === "no"
+              ? "No irradia"
+              : null,
           pain_characteristics: or(painCharacteristics),
           pain_aggravating_factors: or(painAggravating),
           pain: or(painFree),
@@ -926,11 +937,31 @@ export function NewPatientForm() {
                 <Input value={painLocation} onChange={(e) => setPainLocation(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox checked={!!painRadiation || painRadiation === ""} onCheckedChange={() => {}} className="hidden" />
-                  <Label className="font-normal">Irradiación</Label>
-                </div>
-                <Input placeholder="¿Hacia dónde?" value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
+                <Label>Irradiación</Label>
+                <RadioGroup
+                  value={painRadiationChoice}
+                  onValueChange={(v) => {
+                    const val = v as "no" | "si";
+                    setPainRadiationChoice(val);
+                    if (val === "no") setPainRadiation("");
+                  }}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="no" id="pain-rad-no-np" />
+                    <Label htmlFor="pain-rad-no-np" className="font-normal cursor-pointer">No irradia</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="si" id="pain-rad-si-np" />
+                    <Label htmlFor="pain-rad-si-np" className="font-normal cursor-pointer">Sí irradia</Label>
+                  </div>
+                </RadioGroup>
+                {painRadiationChoice === "si" && (
+                  <div className="space-y-1 mt-2">
+                    <Label className="font-normal">¿Hacia dónde?</Label>
+                    <Input value={painRadiation} onChange={(e) => setPainRadiation(e.target.value)} />
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Características</Label>
