@@ -241,9 +241,21 @@ export default function SessionForm() {
 
   // Trophic & others
   const [trophic_state, setTrophicState] = useState("");
-  const [scar, setScar] = useState("");
-  const [vancouver_score, setVancouverScore] = useState("");
-  const [osas_score, setOsasScore] = useState("");
+  // Cicatriz — Planilla
+  const [scar_localizacion, setScarLocalizacion] = useState("");
+  const [scar_longitud, setScarLongitud] = useState("");
+  const [scar_vascularizacion, setScarVascularizacion] = useState("");
+  const [scar_pigmentacion, setScarPigmentacion] = useState("");
+  const [scar_flexibilidad, setScarFlexibilidad] = useState("");
+  const [scar_sensibilidad, setScarSensibilidad] = useState("");
+  const [scar_relieve, setScarRelieve] = useState("");
+  const [scar_temperatura, setScarTemperatura] = useState("");
+  const [scar_observaciones, setScarObservaciones] = useState("");
+  // Cicatriz — Vancouver VSS
+  const [vss_pigmentacion, setVssPigmentacion] = useState("");
+  const [vss_vascularizacion, setVssVascularizacion] = useState("");
+  const [vss_flexibilidad, setVssFlexibilidad] = useState("");
+  const [vss_altura, setVssAltura] = useState("");
   const [posture, setPosture] = useState("");
   const [emotional_state, setEmotionalState] = useState("");
 
