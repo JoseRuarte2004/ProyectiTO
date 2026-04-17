@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1939,9 +1939,7 @@ function Cie10AutocompleteInline({ value, onChange, placeholder }: {
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<Array<{ code: string; description: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const wrapperRef = useState<HTMLDivElement | null>(null as any);
-  const ref = (typeof window !== "undefined") ? null : null;
-  const wrapper = useRefShim<HTMLDivElement>();
+  const wrapper = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const term = value.trim();
@@ -2000,12 +1998,6 @@ function Cie10AutocompleteInline({ value, onChange, placeholder }: {
       )}
     </div>
   );
-}
-
-// Local useRef shim to avoid touching the import list above
-function useRefShim<T>() {
-  const r = (useState<{ current: T | null }>(() => ({ current: null }))[0]);
-  return r as { current: T | null };
 }
 
 function NewEpisodeDialog({ open, onClose, patientId, userId, episodes, onSaved }: {
