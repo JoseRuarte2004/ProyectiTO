@@ -1198,6 +1198,7 @@ export function NewPatientForm() {
               </Badge>
             ) : null;
           })()}
+          toggle={{ checked: showAnalytical, onChange: setShowAnalytical }}
         >
           <div className="space-y-0">
             {/* Dolor */}
