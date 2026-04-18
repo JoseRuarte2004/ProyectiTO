@@ -15,13 +15,27 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
 
 // ── Section card wrapper ──
-function SectionCard({ icon: Icon, title, action, children }: { icon: any; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function SectionCard({
+  icon: Icon,
+  title,
+  action,
+  children,
+  toggle,
+}: {
+  icon: any;
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  toggle?: { checked: boolean; onChange: (v: boolean) => void };
+}) {
+  const isOff = toggle && !toggle.checked;
   return (
     <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
@@ -29,10 +43,46 @@ function SectionCard({ icon: Icon, title, action, children }: { icon: any; title
           <Icon className="h-4 w-4 text-teal-600" />
           <h2 className="text-base font-semibold text-gray-800">{title}</h2>
         </div>
-        {action}
+        <div className="flex items-center gap-3">
+          {action}
+          {toggle && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
+              <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
+            </div>
+          )}
+        </div>
       </div>
-      <CardContent className="p-6">{children}</CardContent>
+      {!isOff && <CardContent className="p-6">{children}</CardContent>}
     </Card>
+  );
+}
+
+// ── Sub-section with header + toggle (used inside Evaluación analítica) ──
+function SubSection({
+  title,
+  checked,
+  onChange,
+  children,
+  withDivider = true,
+}: {
+  title: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+  withDivider?: boolean;
+}) {
+  return (
+    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-gray-100" : ""}`}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
+          <Switch checked={checked} onCheckedChange={onChange} />
+        </div>
+      </div>
+      {checked && <div className="space-y-3">{children}</div>}
+    </div>
   );
 }
 
@@ -362,6 +412,21 @@ export function NewPatientForm() {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [evaTouched, setEvaTouched] = useState(false);
 
+  // Section toggles
+  const [showOccupational, setShowOccupational] = useState(true);
+  const [showFunctional, setShowFunctional] = useState(true);
+  const [showAnalytical, setShowAnalytical] = useState(true);
+
+  // Analytical sub-section toggles
+  const [showDolor, setShowDolor] = useState(true);
+  const [showEdema, setShowEdema] = useState(false);
+  const [showMovilidad, setShowMovilidad] = useState(false);
+  const [showFuerza, setShowFuerza] = useState(false);
+  const [showSensibilidad, setShowSensibilidad] = useState(false);
+  const [showCicatriz, setShowCicatriz] = useState(false);
+  const [showPruebas, setShowPruebas] = useState(false);
+  const [showOtros, setShowOtros] = useState(false);
+
   // Card 1 — Patient data
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -531,9 +596,9 @@ export function NewPatientForm() {
     if (!dni.trim()) errs.dni = true;
     if (!admissionDate) errs.admissionDate = true;
     if (!diagnosis.trim()) errs.diagnosis = true;
-    if (!dominance) errs.dominance = true;
-    if (!avd.trim()) errs.avd = true;
-    if (!evaTouched) errs.painScore = true;
+    if (showOccupational && !dominance) errs.dominance = true;
+    if (showFunctional && !avd.trim()) errs.avd = true;
+    if (showAnalytical && showDolor && !evaTouched) errs.painScore = true;
     if (!interventions.trim()) errs.interventions = true;
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
@@ -643,25 +708,25 @@ export function NewPatientForm() {
       // 3. Occupational profile
       await supabase.from("patient_occupational_profiles").insert({
         patient_id: pid,
-        dominance: or(dominance),
-        support_network: or(supportNetwork),
-        education: or(education),
-        job: or(job),
-        leisure: or(leisure),
-        physical_activity: or(physicalActivity),
-        sleep_rest: or(sleepRest),
-        health_management: or(healthManagement),
+        dominance: showOccupational ? or(dominance) : null,
+        support_network: showOccupational ? or(supportNetwork) : null,
+        education: showOccupational ? or(education) : null,
+        job: showOccupational ? or(job) : null,
+        leisure: showOccupational ? or(leisure) : null,
+        physical_activity: showOccupational ? or(physicalActivity) : null,
+        sleep_rest: showOccupational ? or(sleepRest) : null,
+        health_management: showOccupational ? or(healthManagement) : null,
       });
 
       // 4. Functional evaluation
-      const funcFields = [avd, aivd, barthelScore, dashScore, funcNotes];
-      if (funcFields.some((f) => f.trim())) {
+      const funcFields = showFunctional ? [avd, aivd, barthelScore, dashScore, funcNotes] : [];
+      if (showFunctional && funcFields.some((f) => f.trim())) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
           episode_id: episodeId,
           evaluation_date: admissionDate,
-          dominance: or(dominance) as any,
+          dominance: showOccupational ? (or(dominance) as any) : null,
           avd: or(avd),
           aivd: or(aivd),
           barthel_score: orNum(barthelScore),
@@ -670,37 +735,37 @@ export function NewPatientForm() {
         });
       }
 
-      // 5. Analytical evaluation — build structured fields
-      const aromVal = buildAllGonioText(allPreGonio);
-      const promVal = showPostGonio ? buildAllGonioText(allPostGonio) : null;
-      const preJsonArr = buildAllGonioJsonArray(allPreGonio);
-      const postJsonArr = showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
+      // 5. Analytical evaluation — build structured fields (gated by sub-section toggles)
+      const aromVal = showMovilidad ? buildAllGonioText(allPreGonio) : null;
+      const promVal = showMovilidad && showPostGonio ? buildAllGonioText(allPostGonio) : null;
+      const preJsonArr = showMovilidad ? buildAllGonioJsonArray(allPreGonio) : null;
+      const postJsonArr = showMovilidad && showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
       const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
       const circParts: string[] = [];
-      if (circWristMsd || circGlobalMsd) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
-      if (circWristMsi || circGlobalMsi) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
+      if (showEdema && (circWristMsd || circGlobalMsd)) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
+      if (showEdema && (circWristMsi || circGlobalMsi)) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
       const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
 
-      const hasTests = Object.values(specificTests).some(v => v !== null);
+      const hasTests = showPruebas && Object.values(specificTests).some(v => v !== null);
       const specificTestsJson = hasTests ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v])) : null;
 
-      const hasMedian = Object.values(danielsMedian).some(v => v);
-      const hasCubital = Object.values(danielsCubital).some(v => v);
-      const hasRadial = Object.values(danielsRadial).some(v => v);
+      const hasMedian = showSensibilidad && Object.values(danielsMedian).some(v => v);
+      const hasCubital = showSensibilidad && Object.values(danielsCubital).some(v => v);
+      const hasRadial = showSensibilidad && Object.values(danielsRadial).some(v => v);
       const medianJson = hasMedian ? JSON.stringify(danielsMedian) : null;
       const cubitalJson = hasCubital ? JSON.stringify(danielsCubital) : null;
       const radialJson = hasRadial ? JSON.stringify(danielsRadial) : null;
 
       const msParts: string[] = [];
-      if (fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
-      if (muscleStrength.trim()) msParts.push(muscleStrength);
+      if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
+      if (showFuerza && muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
-      const kapandjiFinal = kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
+      const kapandjiFinal = showMovilidad && kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
 
-      // Build scar_evaluation JSONB
-      const scarPlanillaEntries: [string, string][] = [
+      // Build scar_evaluation JSONB (only if Cicatriz on)
+      const scarPlanillaEntries: [string, string][] = showCicatriz ? ([
         ["localizacion", scarLocalizacion],
         ["longitud_cm", scarLongitud],
         ["vascularizacion", scarVascularizacion],
@@ -709,13 +774,13 @@ export function NewPatientForm() {
         ["sensibilidad", scarSensibilidad],
         ["relieve", scarRelieve],
         ["temperatura", scarTemperatura],
-      ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+      ].filter(([, v]) => v && String(v).trim()) as [string, string][]) : [];
 
       const vssObj: Record<string, number> = {};
-      if (vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
-      if (vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
-      if (vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
-      if (vssAltura !== "") vssObj.altura = parseInt(vssAltura);
+      if (showCicatriz && vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
+      if (showCicatriz && vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
+      if (showCicatriz && vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
+      if (showCicatriz && vssAltura !== "") vssObj.altura = parseInt(vssAltura);
       const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
       const hasVss = Object.keys(vssObj).length > 0;
       const scarEvalJson =
@@ -726,85 +791,95 @@ export function NewPatientForm() {
             }
           : null;
 
-      const analFields = [
-        evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
-        painCharacteristics, painAggravating, painFree, edema, godetTest,
-        kapandjiFinal, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
-        sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
-        sensitivityTocoPincho, sensitivityTemperatura,
-        sensitivity, trophicState, scarObservaciones,
-        posture, emotionalState, analNotes,
-        dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
-        scarLocalizacion, scarLongitud, scarVascularizacion, scarPigmentacion,
-        scarFlexibilidad, scarSensibilidad, scarRelieve, scarTemperatura,
-        vssPigmentacion, vssVascularizacion, vssFlexibilidad, vssAltura,
-      ];
+      const analFields = showAnalytical ? [
+        showDolor && evaTouched ? String(painScore) : "",
+        showDolor ? painAppearance : "", showDolor ? painLocation : "", showDolor ? painRadiation : "",
+        showDolor ? painCharacteristics : "", showDolor ? painAggravating : "", showDolor ? painFree : "",
+        showEdema ? edema : "", showEdema ? godetTest : "",
+        kapandjiFinal, showMovilidad ? fistClosure : "",
+        showFuerza ? dynamometerMsd : "", showFuerza ? dynamometerMsi : "", showFuerza ? muscleStrength : "",
+        showSensibilidad ? sensitivityTactoLigero : "", showSensibilidad ? sensitivityDosPuntos : "",
+        showSensibilidad ? sensitivityPickingUp : "", showSensibilidad ? sensitivitySemmesWeinstein : "",
+        showSensibilidad ? sensitivityTocoPincho : "", showSensibilidad ? sensitivityTemperatura : "",
+        showSensibilidad ? sensitivity : "",
+        showOtros ? trophicState : "",
+        showCicatriz ? scarObservaciones : "",
+        showOtros ? posture : "", showOtros ? emotionalState : "", showOtros ? analNotes : "",
+        showFuerza ? dppdPulgar : "", showFuerza ? dppdIndice : "", showFuerza ? dppdMedio : "",
+        showFuerza ? dppdAnular : "", showFuerza ? dppdMenique : "",
+        showCicatriz ? scarLocalizacion : "", showCicatriz ? scarLongitud : "",
+        showCicatriz ? scarVascularizacion : "", showCicatriz ? scarPigmentacion : "",
+        showCicatriz ? scarFlexibilidad : "", showCicatriz ? scarSensibilidad : "",
+        showCicatriz ? scarRelieve : "", showCicatriz ? scarTemperatura : "",
+        showCicatriz ? vssPigmentacion : "", showCicatriz ? vssVascularizacion : "",
+        showCicatriz ? vssFlexibilidad : "", showCicatriz ? vssAltura : "",
+      ] : [];
 
-      // DPPD fingers JSONB
-      const dppdEntries: [string, string][] = [
+      // DPPD fingers JSONB (Fuerza)
+      const dppdEntries: [string, string][] = showFuerza ? ([
         ["pulgar", dppdPulgar], ["indice", dppdIndice], ["medio", dppdMedio],
         ["anular", dppdAnular], ["menique", dppdMenique],
-      ].filter(([, v]) => v && v.trim()) as [string, string][];
+      ].filter(([, v]) => v && v.trim()) as [string, string][]) : [];
       const dppdFingersJson = dppdEntries.length > 0
         ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
         : null;
 
       const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
-      if (analFields.some((f) => f.trim()) || hasStructured) {
+      if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured)) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
           episode_id: episodeId,
           evaluation_date: admissionDate,
-          pain_score: evaTouched ? painScore : null,
-          pain_appearance: or(painAppearance),
-          pain_location: (() => {
+          pain_score: showDolor && evaTouched ? painScore : null,
+          pain_appearance: showDolor ? or(painAppearance) : null,
+          pain_location: showDolor ? (() => {
             const base = painLocation || "";
             const extra = painRadiationChoice === "si" && painRadiation ? `Irradia a: ${painRadiation}` : "";
             const joined = [base, extra].filter(Boolean).join(" — ");
             return joined || null;
-          })(),
-          pain_radiation: painRadiationChoice === "si"
+          })() : null,
+          pain_radiation: showDolor ? (painRadiationChoice === "si"
             ? (painRadiation || null)
             : painRadiationChoice === "no"
               ? "No irradia"
-              : null,
-          pain_characteristics: or(painCharacteristics),
-          pain_aggravating_factors: or(painAggravating),
-          pain: or(painFree),
-          edema: or(edema),
+              : null) : null,
+          pain_characteristics: showDolor ? or(painCharacteristics) : null,
+          pain_aggravating_factors: showDolor ? or(painAggravating) : null,
+          pain: showDolor ? or(painFree) : null,
+          edema: showEdema ? or(edema) : null,
           edema_circummetry: edemaCirc,
-          godet_test: or(godetTest),
+          godet_test: showEdema ? or(godetTest) : null,
           arom: aromVal,
           prom: promVal,
           goniometry: gonioJsonb,
-          kapandji: or(kapandjiFinal),
-          dynamometer_msd: orFloat(dynamometerMsd),
-          dynamometer_msi: orFloat(dynamometerMsi),
-          dynamometer_notes: or(dynamometerNotes),
+          kapandji: showMovilidad ? or(kapandjiFinal) : null,
+          dynamometer_msd: showFuerza ? orFloat(dynamometerMsd) : null,
+          dynamometer_msi: showFuerza ? orFloat(dynamometerMsi) : null,
+          dynamometer_notes: showFuerza ? or(dynamometerNotes) : null,
           muscle_strength: msVal,
           muscle_strength_median: medianJson,
           muscle_strength_cubital: cubitalJson,
           muscle_strength_radial: radialJson,
           specific_tests: specificTestsJson,
           dppd_fingers: dppdFingersJson,
-          sensitivity: or(sensitivity),
+          sensitivity: showSensibilidad ? or(sensitivity) : null,
           sensitivity_functional: null,
           sensitivity_protective: null,
-          sensitivity_tacto_ligero: or(sensitivityTactoLigero),
-          sensitivity_dos_puntos: or(sensitivityDosPuntos),
-          sensitivity_picking_up: or(sensitivityPickingUp),
-          sensitivity_semmes_weinstein: or(sensitivitySemmesWeinstein),
-          sensitivity_toco_pincho: or(sensitivityTocoPincho),
-          sensitivity_temperatura: or(sensitivityTemperatura),
-          trophic_state: or(trophicState),
-          scar: or(scarObservaciones),
+          sensitivity_tacto_ligero: showSensibilidad ? or(sensitivityTactoLigero) : null,
+          sensitivity_dos_puntos: showSensibilidad ? or(sensitivityDosPuntos) : null,
+          sensitivity_picking_up: showSensibilidad ? or(sensitivityPickingUp) : null,
+          sensitivity_semmes_weinstein: showSensibilidad ? or(sensitivitySemmesWeinstein) : null,
+          sensitivity_toco_pincho: showSensibilidad ? or(sensitivityTocoPincho) : null,
+          sensitivity_temperatura: showSensibilidad ? or(sensitivityTemperatura) : null,
+          trophic_state: showOtros ? or(trophicState) : null,
+          scar: showCicatriz ? or(scarObservaciones) : null,
           scar_evaluation: scarEvalJson,
           vancouver_score: hasVss ? vssTotal : null,
           osas_score: null,
-          posture: or(posture),
-          emotional_state: or(emotionalState),
-          notes: or(analNotes),
+          posture: showOtros ? or(posture) : null,
+          emotional_state: showOtros ? or(emotionalState) : null,
+          notes: showOtros ? or(analNotes) : null,
         });
       }
 
@@ -1023,7 +1098,7 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 3 — Perfil ocupacional */}
-        <SectionCard icon={Briefcase} title="Perfil ocupacional">
+        <SectionCard icon={Briefcase} title="Perfil ocupacional" toggle={{ checked: showOccupational, onChange: setShowOccupational }}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <FieldLabel required>Lateralidad</FieldLabel>
@@ -1078,7 +1153,7 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 4 — Evaluación funcional */}
-        <SectionCard icon={Activity} title="Evaluación funcional">
+        <SectionCard icon={Activity} title="Evaluación funcional" toggle={{ checked: showFunctional, onChange: setShowFunctional }}>
           <div className="space-y-4">
             <div>
               <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
@@ -1123,11 +1198,11 @@ export function NewPatientForm() {
               </Badge>
             ) : null;
           })()}
+          toggle={{ checked: showAnalytical, onChange: setShowAnalytical }}
         >
           <div className="space-y-0">
             {/* Dolor */}
-            <div className="space-y-3">
-              <h3 className={subLabel}>Dolor</h3>
+            <SubSection title="Dolor" checked={showDolor} onChange={setShowDolor} withDivider={false}>
               <div className="space-y-2">
                 <Label>Aparición</Label>
                 <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
@@ -1191,11 +1266,10 @@ export function NewPatientForm() {
                 <Label>Agravantes / Atenuantes</Label>
                 <Textarea value={painAggravating} onChange={(e) => setPainAggravating(e.target.value)} rows={2} />
               </div>
-            </div>
+            </SubSection>
 
             {/* Edema */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Edema</h3>
+            <SubSection title="Edema" checked={showEdema} onChange={setShowEdema}>
               <div className="space-y-2">
                 <Label>Observación de edema</Label>
                 <Textarea value={edema} onChange={(e) => setEdema(e.target.value)} rows={2} />
@@ -1221,11 +1295,10 @@ export function NewPatientForm() {
                 <div className="space-y-1"><Label className="text-xs">Global MSD (cm)</Label><Input type="number" step="0.1" value={circGlobalMsd} onChange={e => setCircGlobalMsd(e.target.value)} /></div>
                 <div className="space-y-1"><Label className="text-xs">Global MSI (cm)</Label><Input type="number" step="0.1" value={circGlobalMsi} onChange={e => setCircGlobalMsi(e.target.value)} /></div>
               </div>
-            </div>
+            </SubSection>
 
             {/* Movilidad */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Movilidad</h3>
+            <SubSection title="Movilidad" checked={showMovilidad} onChange={setShowMovilidad}>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
               <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
@@ -1257,11 +1330,10 @@ export function NewPatientForm() {
                   <Input value={fistClosure} onChange={(e) => setFistClosure(e.target.value)} placeholder="Completo / Incompleto con tirantez" />
                 </div>
               </div>
-            </div>
+            </SubSection>
 
             {/* Fuerza */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Fuerza</h3>
+            <SubSection title="Fuerza" checked={showFuerza} onChange={setShowFuerza}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dinamómetro MSD (kgf)</Label>
@@ -1303,11 +1375,10 @@ export function NewPatientForm() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            </SubSection>
 
             {/* Sensibilidad */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Sensibilidad</h3>
+            <SubSection title="Sensibilidad" checked={showSensibilidad} onChange={setShowSensibilidad}>
               <div className="space-y-3">
                 <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
                 <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
@@ -1352,11 +1423,10 @@ export function NewPatientForm() {
                   </Tabs>
                 </CollapsibleContent>
               </Collapsible>
-            </div>
+            </SubSection>
 
             {/* Pruebas específicas */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Pruebas específicas</h3>
+            <SubSection title="Pruebas específicas" checked={showPruebas} onChange={setShowPruebas}>
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
                   const val = specificTests[t.key];
@@ -1376,11 +1446,10 @@ export function NewPatientForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
-            </div>
+            </SubSection>
 
             {/* Otros */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Otros</h3>
+            <SubSection title="Otros" checked={showOtros} onChange={setShowOtros}>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
                 <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
@@ -1527,7 +1596,7 @@ export function NewPatientForm() {
                 <Label>Notas</Label>
                 <Textarea value={analNotes} onChange={(e) => setAnalNotes(e.target.value)} rows={2} />
               </div>
-            </div>
+            </SubSection>
           </div>
         </SectionCard>
 
