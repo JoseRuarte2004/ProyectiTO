@@ -1071,35 +1071,34 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 4 — Evaluación funcional */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Evaluación funcional</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>AVD — Actividades de la vida diaria *</Label>
-              <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={fieldClass("avd")} />
+        <SectionCard icon={Activity} title="Evaluación funcional">
+          <div className="space-y-4">
+            <div>
+              <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
+              <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={`${textareaClass} ${fieldClass("avd")}`} />
               <ErrMsg field="avd" />
             </div>
-            <div className="space-y-2">
-              <Label>AIVD — Actividades instrumentales</Label>
-              <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." />
+            <div>
+              <FieldLabel>AIVD — Actividades instrumentales</FieldLabel>
+              <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." className={textareaClass} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Barthel (0-100)</Label>
-                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} />
+              <div>
+                <FieldLabel>Barthel (0-100)</FieldLabel>
+                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} className={inputClass} />
               </div>
-              <div className="space-y-2">
-                <Label>DASH (0-100)</Label>
-                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} />
-                <p className="text-xs text-muted-foreground">0 = sin discapacidad · 100 = máxima discapacidad</p>
+              <div>
+                <FieldLabel>DASH (0-100)</FieldLabel>
+                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} className={inputClass} />
+                <p className="text-xs text-muted-foreground mt-1">0 = sin discapacidad · 100 = máxima discapacidad</p>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Notas</Label>
-              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Notas</FieldLabel>
+              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} className={textareaClass} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 5 — Evaluación analítica */}
         <Card>
