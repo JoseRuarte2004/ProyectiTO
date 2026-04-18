@@ -1153,7 +1153,7 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 4 — Evaluación funcional */}
-        <SectionCard icon={Activity} title="Evaluación funcional">
+        <SectionCard icon={Activity} title="Evaluación funcional" toggle={{ checked: showFunctional, onChange: setShowFunctional }}>
           <div className="space-y-4">
             <div>
               <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
