@@ -937,86 +937,83 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 2 — Datos clínicos */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Datos clínicos</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Diagnóstico *</Label>
-                <Cie10Autocomplete value={diagnosis} onChange={setDiagnosis} placeholder="Buscar por código o descripción CIE-10…" className={fieldClass("diagnosis")} />
-                <ErrMsg field="diagnosis" />
-              </div>
-              <div className="space-y-2">
-                <Label>Médico derivante</Label>
-                <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de lesión</Label>
-                <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de cirugía</Label>
-                <Input type="date" value={surgeryDate} onChange={(e) => setSurgeryDate(e.target.value)} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Mecanismo de lesión</Label>
-                <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Caída, accidente laboral..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Tratamiento</Label>
-                <Select value={treatmentType} onValueChange={setTreatmentType}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="conservative">Conservador</SelectItem>
-                    <SelectItem value="surgery">Quirúrgico</SelectItem>
-                    <SelectItem value="mixed">Mixto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas post lesión + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas post cirugía + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas de inmovilización + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Tipo de inmovilización</Label>
-                <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Próx. turno OyT</Label>
-                <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} />
+        <SectionCard icon={FileText} title="Datos clínicos">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <FieldLabel required>Diagnóstico</FieldLabel>
+              <Cie10Autocomplete value={diagnosis} onChange={setDiagnosis} placeholder="Buscar por código o descripción CIE-10…" className={`${inputClass} ${fieldClass("diagnosis")}`} />
+              <ErrMsg field="diagnosis" />
+            </div>
+            <div>
+              <FieldLabel>Médico derivante</FieldLabel>
+              <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Fecha de lesión</FieldLabel>
+              <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Fecha de cirugía</FieldLabel>
+              <Input type="date" value={surgeryDate} onChange={(e) => setSurgeryDate(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Tratamiento</FieldLabel>
+              <Select value={treatmentType} onValueChange={setTreatmentType}>
+                <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conservative">Conservador</SelectItem>
+                  <SelectItem value="surgery">Quirúrgico</SelectItem>
+                  <SelectItem value="mixed">Mixto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Mecanismo de lesión</FieldLabel>
+              <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Caída, accidente laboral..." className={textareaClass} />
+            </div>
+            <div>
+              <FieldLabel>Semanas post lesión + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Estudios</Label>
-              <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Rx, RMN..." />
+            <div>
+              <FieldLabel>Semanas post cirugía + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Antecedentes personales</Label>
-              <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Inmovilización + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Tto farmacológico</Label>
-              <Textarea value={pharma} onChange={(e) => setPharma(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Tipo de inmovilización</FieldLabel>
+              <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." className={inputClass} />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <FieldLabel>Próx. turno OyT</FieldLabel>
+              <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} className={inputClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Estudios</FieldLabel>
+              <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Rx, RMN..." className={textareaClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Antecedentes personales</FieldLabel>
+              <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} className={textareaClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Tto farmacológico</FieldLabel>
+              <Textarea value={pharma} onChange={(e) => setPharma(e.target.value)} rows={2} className={textareaClass} />
+            </div>
+          </div>
+        </SectionCard>
 
         {/* Card 3 — Perfil ocupacional */}
         <Card>
