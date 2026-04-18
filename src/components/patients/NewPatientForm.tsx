@@ -1596,7 +1596,7 @@ export function NewPatientForm() {
                 <Label>Notas</Label>
                 <Textarea value={analNotes} onChange={(e) => setAnalNotes(e.target.value)} rows={2} />
               </div>
-            </div>
+            </SubSection>
           </div>
         </SectionCard>
 
