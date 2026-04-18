@@ -395,6 +395,7 @@ export function NewPatientForm() {
   const [fistClosure, setFistClosure] = useState("");
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
+  const [dynamometerNotes, setDynamometerNotes] = useState("");
   const [muscleStrength, setMuscleStrength] = useState("");
   const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
   const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
