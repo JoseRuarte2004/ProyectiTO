@@ -16,9 +16,39 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ChevronDown } from "lucide-react";
+import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
+
+// ── Section card wrapper ──
+function SectionCard({ icon: Icon, title, action, children }: { icon: any; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-teal-600" />
+          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+        </div>
+        {action}
+      </div>
+      <CardContent className="p-6">{children}</CardContent>
+    </Card>
+  );
+}
+
+// ── Reusable label with optional required asterisk ──
+function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
+  return (
+    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">
+      {children}{required && <span className="text-red-500 ml-0.5">*</span>}
+    </Label>
+  );
+}
+
+const inputClass = "border-gray-200 rounded-lg min-h-[44px] focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
+const textareaClass = "border-gray-200 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
+const subDivider = "pt-5 mt-5 border-t border-gray-100";
+const subLabel = "text-sm font-semibold text-gray-600 mb-3";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
