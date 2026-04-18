@@ -1127,7 +1127,7 @@ export function NewPatientForm() {
           <div className="space-y-0">
             {/* Dolor */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
+              <h3 className={subLabel}>Dolor</h3>
               <div className="space-y-2">
                 <Label>Aparición</Label>
                 <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
@@ -1188,7 +1188,7 @@ export function NewPatientForm() {
 
             {/* Edema */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Edema</h3>
+              <h3 className={subLabel}>Edema</h3>
               <div className="space-y-2">
                 <Label>Observación de edema</Label>
                 <Textarea value={edema} onChange={(e) => setEdema(e.target.value)} rows={2} />
@@ -1218,7 +1218,7 @@ export function NewPatientForm() {
 
             {/* Movilidad */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Movilidad</h3>
+              <h3 className={subLabel}>Movilidad</h3>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
               <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
@@ -1254,7 +1254,7 @@ export function NewPatientForm() {
 
             {/* Fuerza */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Fuerza</h3>
+              <h3 className={subLabel}>Fuerza</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dinamómetro MSD (kgf)</Label>
@@ -1300,7 +1300,7 @@ export function NewPatientForm() {
 
             {/* Sensibilidad */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
+              <h3 className={subLabel}>Sensibilidad</h3>
               <div className="space-y-3">
                 <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
                 <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
@@ -1349,7 +1349,7 @@ export function NewPatientForm() {
 
             {/* Pruebas específicas */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Pruebas específicas</h3>
+              <h3 className={subLabel}>Pruebas específicas</h3>
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
                   const val = specificTests[t.key];
@@ -1369,7 +1369,7 @@ export function NewPatientForm() {
 
             {/* Otros */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Otros</h3>
+              <h3 className={subLabel}>Otros</h3>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
                 <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
