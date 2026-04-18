@@ -32,13 +32,14 @@ function Cie10Autocomplete({ value, onChange, placeholder, className }: {
   useEffect(() => {
     const term = value.trim();
     if (term.length < 2) { setResults([]); setOpen(false); return; }
+    const searchTerm = term.toLowerCase();
     let cancelled = false;
     setLoading(true);
     const t = setTimeout(async () => {
       const { data } = await supabase
         .from("cie10")
         .select("code, description")
-        .or(`code.ilike.%${term}%,description.ilike.%${term}%`)
+        .or(`code.ilike.%${searchTerm}%,description_search.ilike.%${searchTerm}%`)
         .limit(10);
       if (cancelled) return;
       setResults(data || []);
