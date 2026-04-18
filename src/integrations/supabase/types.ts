@@ -293,18 +293,21 @@ export type Database = {
           category: string | null
           code: string
           description: string
+          description_search: string | null
           id: number
         }
         Insert: {
           category?: string | null
           code: string
           description: string
+          description_search?: string | null
           id?: number
         }
         Update: {
           category?: string | null
           code?: string
           description?: string
+          description_search?: string | null
           id?: number
         }
         Relationships: []
@@ -1250,6 +1253,7 @@ export type Database = {
       }
       is_active_professional: { Args: never; Returns: boolean }
       is_my_patient: { Args: { p_patient_id: string }; Returns: boolean }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       appointment_status: "scheduled" | "completed" | "cancelled"
