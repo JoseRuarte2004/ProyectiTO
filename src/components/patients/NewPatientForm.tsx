@@ -1217,6 +1217,9 @@ export function NewPatientForm() {
                   <Input type="number" step={0.1} value={dynamometerMsi} onChange={(e) => setDynamometerMsi(e.target.value)} />
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Evalúa: fuerza de puño isométrica en 5 posiciones (se toma 3 veces y se promedia). Primera evaluación: comparar con MS sano (10% más de FM). Mediciones siguientes: comparar con MS afectado.
+              </p>
               <div className="space-y-2">
                 <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
                 <div className="grid grid-cols-5 gap-2">
