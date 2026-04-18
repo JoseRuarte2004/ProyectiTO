@@ -1517,8 +1517,8 @@ export function NewPatientForm() {
                 <Textarea value={analNotes} onChange={(e) => setAnalNotes(e.target.value)} rows={2} />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 6 — Intervenciones de admisión */}
         <Card>
