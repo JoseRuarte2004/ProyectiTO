@@ -708,25 +708,25 @@ export function NewPatientForm() {
       // 3. Occupational profile
       await supabase.from("patient_occupational_profiles").insert({
         patient_id: pid,
-        dominance: or(dominance),
-        support_network: or(supportNetwork),
-        education: or(education),
-        job: or(job),
-        leisure: or(leisure),
-        physical_activity: or(physicalActivity),
-        sleep_rest: or(sleepRest),
-        health_management: or(healthManagement),
+        dominance: showOccupational ? or(dominance) : null,
+        support_network: showOccupational ? or(supportNetwork) : null,
+        education: showOccupational ? or(education) : null,
+        job: showOccupational ? or(job) : null,
+        leisure: showOccupational ? or(leisure) : null,
+        physical_activity: showOccupational ? or(physicalActivity) : null,
+        sleep_rest: showOccupational ? or(sleepRest) : null,
+        health_management: showOccupational ? or(healthManagement) : null,
       });
 
       // 4. Functional evaluation
-      const funcFields = [avd, aivd, barthelScore, dashScore, funcNotes];
-      if (funcFields.some((f) => f.trim())) {
+      const funcFields = showFunctional ? [avd, aivd, barthelScore, dashScore, funcNotes] : [];
+      if (showFunctional && funcFields.some((f) => f.trim())) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
           episode_id: episodeId,
           evaluation_date: admissionDate,
-          dominance: or(dominance) as any,
+          dominance: showOccupational ? (or(dominance) as any) : null,
           avd: or(avd),
           aivd: or(aivd),
           barthel_score: orNum(barthelScore),
