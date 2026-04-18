@@ -858,13 +858,20 @@ export function NewPatientForm() {
   };
 
   const GonioPartSelector = ({ value, onChange }: { value: GonioPartKey; onChange: (v: GonioPartKey) => void }) => (
-    <div className="flex flex-wrap gap-1 mb-3">
+    <div className="flex flex-wrap gap-2 mb-3">
       {(Object.keys(GONIO_PARTS) as GonioPartKey[]).map(k => (
-        <Button key={k} type="button" size="sm" variant={value === k ? "default" : "outline"}
-          className={value === k ? "bg-teal-600 hover:bg-teal-700 text-white h-7 text-xs" : "h-7 text-xs"}
-          onClick={() => onChange(k)}>
+        <button
+          key={k}
+          type="button"
+          onClick={() => onChange(k)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+            value === k
+              ? "bg-teal-600 text-white border border-teal-600"
+              : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
+          }`}
+        >
           {GONIO_PARTS[k].label}
-        </Button>
+        </button>
       ))}
     </div>
   );
