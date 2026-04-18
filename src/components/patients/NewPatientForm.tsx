@@ -412,6 +412,21 @@ export function NewPatientForm() {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [evaTouched, setEvaTouched] = useState(false);
 
+  // Section toggles
+  const [showOccupational, setShowOccupational] = useState(true);
+  const [showFunctional, setShowFunctional] = useState(true);
+  const [showAnalytical, setShowAnalytical] = useState(true);
+
+  // Analytical sub-section toggles
+  const [showDolor, setShowDolor] = useState(true);
+  const [showEdema, setShowEdema] = useState(false);
+  const [showMovilidad, setShowMovilidad] = useState(false);
+  const [showFuerza, setShowFuerza] = useState(false);
+  const [showSensibilidad, setShowSensibilidad] = useState(false);
+  const [showCicatriz, setShowCicatriz] = useState(false);
+  const [showPruebas, setShowPruebas] = useState(false);
+  const [showOtros, setShowOtros] = useState(false);
+
   // Card 1 — Patient data
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
