@@ -1446,11 +1446,10 @@ export function NewPatientForm() {
                 })}
               </div>
               <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
-            </div>
+            </SubSection>
 
             {/* Otros */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Otros</h3>
+            <SubSection title="Otros" checked={showOtros} onChange={setShowOtros}>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
                 <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
