@@ -735,37 +735,37 @@ export function NewPatientForm() {
         });
       }
 
-      // 5. Analytical evaluation — build structured fields
-      const aromVal = buildAllGonioText(allPreGonio);
-      const promVal = showPostGonio ? buildAllGonioText(allPostGonio) : null;
-      const preJsonArr = buildAllGonioJsonArray(allPreGonio);
-      const postJsonArr = showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
+      // 5. Analytical evaluation — build structured fields (gated by sub-section toggles)
+      const aromVal = showMovilidad ? buildAllGonioText(allPreGonio) : null;
+      const promVal = showMovilidad && showPostGonio ? buildAllGonioText(allPostGonio) : null;
+      const preJsonArr = showMovilidad ? buildAllGonioJsonArray(allPreGonio) : null;
+      const postJsonArr = showMovilidad && showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
       const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
       const circParts: string[] = [];
-      if (circWristMsd || circGlobalMsd) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
-      if (circWristMsi || circGlobalMsi) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
+      if (showEdema && (circWristMsd || circGlobalMsd)) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
+      if (showEdema && (circWristMsi || circGlobalMsi)) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
       const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
 
-      const hasTests = Object.values(specificTests).some(v => v !== null);
+      const hasTests = showPruebas && Object.values(specificTests).some(v => v !== null);
       const specificTestsJson = hasTests ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v])) : null;
 
-      const hasMedian = Object.values(danielsMedian).some(v => v);
-      const hasCubital = Object.values(danielsCubital).some(v => v);
-      const hasRadial = Object.values(danielsRadial).some(v => v);
+      const hasMedian = showSensibilidad && Object.values(danielsMedian).some(v => v);
+      const hasCubital = showSensibilidad && Object.values(danielsCubital).some(v => v);
+      const hasRadial = showSensibilidad && Object.values(danielsRadial).some(v => v);
       const medianJson = hasMedian ? JSON.stringify(danielsMedian) : null;
       const cubitalJson = hasCubital ? JSON.stringify(danielsCubital) : null;
       const radialJson = hasRadial ? JSON.stringify(danielsRadial) : null;
 
       const msParts: string[] = [];
-      if (fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
-      if (muscleStrength.trim()) msParts.push(muscleStrength);
+      if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
+      if (showFuerza && muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
-      const kapandjiFinal = kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
+      const kapandjiFinal = showMovilidad && kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
 
-      // Build scar_evaluation JSONB
-      const scarPlanillaEntries: [string, string][] = [
+      // Build scar_evaluation JSONB (only if Cicatriz on)
+      const scarPlanillaEntries: [string, string][] = showCicatriz ? ([
         ["localizacion", scarLocalizacion],
         ["longitud_cm", scarLongitud],
         ["vascularizacion", scarVascularizacion],
@@ -774,13 +774,13 @@ export function NewPatientForm() {
         ["sensibilidad", scarSensibilidad],
         ["relieve", scarRelieve],
         ["temperatura", scarTemperatura],
-      ].filter(([, v]) => v && String(v).trim()) as [string, string][];
+      ].filter(([, v]) => v && String(v).trim()) as [string, string][]) : [];
 
       const vssObj: Record<string, number> = {};
-      if (vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
-      if (vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
-      if (vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
-      if (vssAltura !== "") vssObj.altura = parseInt(vssAltura);
+      if (showCicatriz && vssPigmentacion !== "") vssObj.pigmentacion = parseInt(vssPigmentacion);
+      if (showCicatriz && vssVascularizacion !== "") vssObj.vascularizacion = parseInt(vssVascularizacion);
+      if (showCicatriz && vssFlexibilidad !== "") vssObj.flexibilidad = parseInt(vssFlexibilidad);
+      if (showCicatriz && vssAltura !== "") vssObj.altura = parseInt(vssAltura);
       const vssTotal = Object.values(vssObj).reduce((a, b) => a + b, 0);
       const hasVss = Object.keys(vssObj).length > 0;
       const scarEvalJson =
@@ -791,85 +791,95 @@ export function NewPatientForm() {
             }
           : null;
 
-      const analFields = [
-        evaTouched ? String(painScore) : "", painAppearance, painLocation, painRadiation,
-        painCharacteristics, painAggravating, painFree, edema, godetTest,
-        kapandjiFinal, fistClosure, dynamometerMsd, dynamometerMsi, muscleStrength,
-        sensitivityTactoLigero, sensitivityDosPuntos, sensitivityPickingUp, sensitivitySemmesWeinstein,
-        sensitivityTocoPincho, sensitivityTemperatura,
-        sensitivity, trophicState, scarObservaciones,
-        posture, emotionalState, analNotes,
-        dppdPulgar, dppdIndice, dppdMedio, dppdAnular, dppdMenique,
-        scarLocalizacion, scarLongitud, scarVascularizacion, scarPigmentacion,
-        scarFlexibilidad, scarSensibilidad, scarRelieve, scarTemperatura,
-        vssPigmentacion, vssVascularizacion, vssFlexibilidad, vssAltura,
-      ];
+      const analFields = showAnalytical ? [
+        showDolor && evaTouched ? String(painScore) : "",
+        showDolor ? painAppearance : "", showDolor ? painLocation : "", showDolor ? painRadiation : "",
+        showDolor ? painCharacteristics : "", showDolor ? painAggravating : "", showDolor ? painFree : "",
+        showEdema ? edema : "", showEdema ? godetTest : "",
+        kapandjiFinal, showMovilidad ? fistClosure : "",
+        showFuerza ? dynamometerMsd : "", showFuerza ? dynamometerMsi : "", showFuerza ? muscleStrength : "",
+        showSensibilidad ? sensitivityTactoLigero : "", showSensibilidad ? sensitivityDosPuntos : "",
+        showSensibilidad ? sensitivityPickingUp : "", showSensibilidad ? sensitivitySemmesWeinstein : "",
+        showSensibilidad ? sensitivityTocoPincho : "", showSensibilidad ? sensitivityTemperatura : "",
+        showSensibilidad ? sensitivity : "",
+        showOtros ? trophicState : "",
+        showCicatriz ? scarObservaciones : "",
+        showOtros ? posture : "", showOtros ? emotionalState : "", showOtros ? analNotes : "",
+        showFuerza ? dppdPulgar : "", showFuerza ? dppdIndice : "", showFuerza ? dppdMedio : "",
+        showFuerza ? dppdAnular : "", showFuerza ? dppdMenique : "",
+        showCicatriz ? scarLocalizacion : "", showCicatriz ? scarLongitud : "",
+        showCicatriz ? scarVascularizacion : "", showCicatriz ? scarPigmentacion : "",
+        showCicatriz ? scarFlexibilidad : "", showCicatriz ? scarSensibilidad : "",
+        showCicatriz ? scarRelieve : "", showCicatriz ? scarTemperatura : "",
+        showCicatriz ? vssPigmentacion : "", showCicatriz ? vssVascularizacion : "",
+        showCicatriz ? vssFlexibilidad : "", showCicatriz ? vssAltura : "",
+      ] : [];
 
-      // DPPD fingers JSONB
-      const dppdEntries: [string, string][] = [
+      // DPPD fingers JSONB (Fuerza)
+      const dppdEntries: [string, string][] = showFuerza ? ([
         ["pulgar", dppdPulgar], ["indice", dppdIndice], ["medio", dppdMedio],
         ["anular", dppdAnular], ["menique", dppdMenique],
-      ].filter(([, v]) => v && v.trim()) as [string, string][];
+      ].filter(([, v]) => v && v.trim()) as [string, string][]) : [];
       const dppdFingersJson = dppdEntries.length > 0
         ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
         : null;
 
       const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
-      if (analFields.some((f) => f.trim()) || hasStructured) {
+      if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured)) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
           episode_id: episodeId,
           evaluation_date: admissionDate,
-          pain_score: evaTouched ? painScore : null,
-          pain_appearance: or(painAppearance),
-          pain_location: (() => {
+          pain_score: showDolor && evaTouched ? painScore : null,
+          pain_appearance: showDolor ? or(painAppearance) : null,
+          pain_location: showDolor ? (() => {
             const base = painLocation || "";
             const extra = painRadiationChoice === "si" && painRadiation ? `Irradia a: ${painRadiation}` : "";
             const joined = [base, extra].filter(Boolean).join(" — ");
             return joined || null;
-          })(),
-          pain_radiation: painRadiationChoice === "si"
+          })() : null,
+          pain_radiation: showDolor ? (painRadiationChoice === "si"
             ? (painRadiation || null)
             : painRadiationChoice === "no"
               ? "No irradia"
-              : null,
-          pain_characteristics: or(painCharacteristics),
-          pain_aggravating_factors: or(painAggravating),
-          pain: or(painFree),
-          edema: or(edema),
+              : null) : null,
+          pain_characteristics: showDolor ? or(painCharacteristics) : null,
+          pain_aggravating_factors: showDolor ? or(painAggravating) : null,
+          pain: showDolor ? or(painFree) : null,
+          edema: showEdema ? or(edema) : null,
           edema_circummetry: edemaCirc,
-          godet_test: or(godetTest),
+          godet_test: showEdema ? or(godetTest) : null,
           arom: aromVal,
           prom: promVal,
           goniometry: gonioJsonb,
-          kapandji: or(kapandjiFinal),
-          dynamometer_msd: orFloat(dynamometerMsd),
-          dynamometer_msi: orFloat(dynamometerMsi),
-          dynamometer_notes: or(dynamometerNotes),
+          kapandji: showMovilidad ? or(kapandjiFinal) : null,
+          dynamometer_msd: showFuerza ? orFloat(dynamometerMsd) : null,
+          dynamometer_msi: showFuerza ? orFloat(dynamometerMsi) : null,
+          dynamometer_notes: showFuerza ? or(dynamometerNotes) : null,
           muscle_strength: msVal,
           muscle_strength_median: medianJson,
           muscle_strength_cubital: cubitalJson,
           muscle_strength_radial: radialJson,
           specific_tests: specificTestsJson,
           dppd_fingers: dppdFingersJson,
-          sensitivity: or(sensitivity),
+          sensitivity: showSensibilidad ? or(sensitivity) : null,
           sensitivity_functional: null,
           sensitivity_protective: null,
-          sensitivity_tacto_ligero: or(sensitivityTactoLigero),
-          sensitivity_dos_puntos: or(sensitivityDosPuntos),
-          sensitivity_picking_up: or(sensitivityPickingUp),
-          sensitivity_semmes_weinstein: or(sensitivitySemmesWeinstein),
-          sensitivity_toco_pincho: or(sensitivityTocoPincho),
-          sensitivity_temperatura: or(sensitivityTemperatura),
-          trophic_state: or(trophicState),
-          scar: or(scarObservaciones),
+          sensitivity_tacto_ligero: showSensibilidad ? or(sensitivityTactoLigero) : null,
+          sensitivity_dos_puntos: showSensibilidad ? or(sensitivityDosPuntos) : null,
+          sensitivity_picking_up: showSensibilidad ? or(sensitivityPickingUp) : null,
+          sensitivity_semmes_weinstein: showSensibilidad ? or(sensitivitySemmesWeinstein) : null,
+          sensitivity_toco_pincho: showSensibilidad ? or(sensitivityTocoPincho) : null,
+          sensitivity_temperatura: showSensibilidad ? or(sensitivityTemperatura) : null,
+          trophic_state: showOtros ? or(trophicState) : null,
+          scar: showCicatriz ? or(scarObservaciones) : null,
           scar_evaluation: scarEvalJson,
           vancouver_score: hasVss ? vssTotal : null,
           osas_score: null,
-          posture: or(posture),
-          emotional_state: or(emotionalState),
-          notes: or(analNotes),
+          posture: showOtros ? or(posture) : null,
+          emotional_state: showOtros ? or(emotionalState) : null,
+          notes: showOtros ? or(analNotes) : null,
         });
       }
 
