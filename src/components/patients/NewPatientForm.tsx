@@ -1375,11 +1375,10 @@ export function NewPatientForm() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            </SubSection>
 
             {/* Sensibilidad */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Sensibilidad</h3>
+            <SubSection title="Sensibilidad" checked={showSensibilidad} onChange={setShowSensibilidad}>
               <div className="space-y-3">
                 <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
                 <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
