@@ -565,7 +565,16 @@ export default function SessionForm() {
         {fields.map(f => (
           <div key={f.key} className="space-y-1">
             <Label className="text-xs">{f.label} °</Label>
-            <Input type="number" placeholder={f.norm} value={values[f.key] || ""} onChange={e => setValues({ ...values, [f.key]: e.target.value })} />
+            <Input
+              key={`${partKey}-${f.key}-${values[f.key] || ""}`}
+              type="number"
+              placeholder={f.norm}
+              defaultValue={values[f.key] || ""}
+              onBlur={e => {
+                const v = e.target.value;
+                if (v !== (values[f.key] || "")) setValues({ ...values, [f.key]: v });
+              }}
+            />
           </div>
         ))}
       </div>
@@ -846,6 +855,9 @@ export default function SessionForm() {
                   <div className="space-y-2"><Label>Dinamómetro MSD (kg)</Label><Input type="number" step="0.1" value={dyn_msd} onChange={e => setDynMsd(e.target.value)} /></div>
                   <div className="space-y-2"><Label>Dinamómetro MSI (kg)</Label><Input type="number" step="0.1" value={dyn_msi} onChange={e => setDynMsi(e.target.value)} /></div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Evalúa: fuerza de puño isométrica en 5 posiciones (se toma 3 veces y se promedia). Primera evaluación: comparar con MS sano (10% más de FM). Mediciones siguientes: comparar con MS afectado.
+                </p>
                 <div className="flex items-end gap-3">
                   <div className="space-y-2 flex-1"><Label>Kapandji (0-10)</Label><Input type="number" min={0} max={10} value={kapandji_val} onChange={e => setKapandjiVal(e.target.value)} /></div>
                   <div className="flex items-center gap-2 pb-2">

@@ -809,7 +809,16 @@ export function NewPatientForm() {
         {fields.map(f => (
           <div key={f.key} className="space-y-1">
             <Label className="text-xs">{f.label} °</Label>
-            <Input type="number" placeholder={f.norm} value={values[f.key] || ""} onChange={e => setValues({ ...values, [f.key]: e.target.value })} />
+            <Input
+              key={`${partKey}-${f.key}-${values[f.key] || ""}`}
+              type="number"
+              placeholder={f.norm}
+              defaultValue={values[f.key] || ""}
+              onBlur={e => {
+                const v = e.target.value;
+                if (v !== (values[f.key] || "")) setValues({ ...values, [f.key]: v });
+              }}
+            />
           </div>
         ))}
       </div>
@@ -885,7 +894,7 @@ export function NewPatientForm() {
             </div>
             <div className="space-y-2">
               <Label>Obra social</Label>
-              <Input value={insurance} onChange={(e) => setInsurance(e.target.value)} placeholder="OSDE, Swiss Medical, PAMI..." />
+              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." />
             </div>
             <div className="space-y-2">
               <Label>Fecha de admisión *</Label>
