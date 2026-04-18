@@ -16,9 +16,39 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ChevronDown } from "lucide-react";
+import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
+
+// ── Section card wrapper ──
+function SectionCard({ icon: Icon, title, action, children }: { icon: any; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-teal-600" />
+          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+        </div>
+        {action}
+      </div>
+      <CardContent className="p-6">{children}</CardContent>
+    </Card>
+  );
+}
+
+// ── Reusable label with optional required asterisk ──
+function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
+  return (
+    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">
+      {children}{required && <span className="text-red-500 ml-0.5">*</span>}
+    </Label>
+  );
+}
+
+const inputClass = "border-gray-200 rounded-lg min-h-[44px] focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
+const textareaClass = "border-gray-200 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
+const subDivider = "pt-5 mt-5 border-t border-gray-100";
+const subLabel = "text-sm font-semibold text-gray-600 mb-3";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
@@ -828,174 +858,177 @@ export function NewPatientForm() {
   };
 
   const GonioPartSelector = ({ value, onChange }: { value: GonioPartKey; onChange: (v: GonioPartKey) => void }) => (
-    <div className="flex flex-wrap gap-1 mb-3">
+    <div className="flex flex-wrap gap-2 mb-3">
       {(Object.keys(GONIO_PARTS) as GonioPartKey[]).map(k => (
-        <Button key={k} type="button" size="sm" variant={value === k ? "default" : "outline"}
-          className={value === k ? "bg-teal-600 hover:bg-teal-700 text-white h-7 text-xs" : "h-7 text-xs"}
-          onClick={() => onChange(k)}>
+        <button
+          key={k}
+          type="button"
+          onClick={() => onChange(k)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+            value === k
+              ? "bg-teal-600 text-white border border-teal-600"
+              : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
+          }`}
+        >
           {GONIO_PARTS[k].label}
-        </Button>
+        </button>
       ))}
     </div>
   );
 
+  const patientDisplay = `${firstName} ${lastName}`.trim() || "Nueva admisión";
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/patients")}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Nueva admisión
+    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+      {/* Sticky top bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 h-14">
+        <div className="max-w-2xl mx-auto h-full px-6 flex items-center justify-between gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-gray-700 hover:bg-gray-100">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-teal-600 hover:bg-teal-700 text-white"
-          >
+          <h1 className="flex-1 text-center text-sm font-semibold text-gray-800 truncate">
+            {patientDisplay}
+          </h1>
+          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-6 py-6">
         {/* Card 1 — Datos del paciente */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Datos del paciente</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Apellido *</Label>
-              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClass("lastName")} />
+        <SectionCard icon={User} title="Datos del paciente">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <FieldLabel required>Apellido</FieldLabel>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={`${inputClass} ${fieldClass("lastName")}`} />
               <ErrMsg field="lastName" />
             </div>
-            <div className="space-y-2">
-              <Label>Nombre *</Label>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClass("firstName")} />
+            <div>
+              <FieldLabel required>Nombre</FieldLabel>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={`${inputClass} ${fieldClass("firstName")}`} />
               <ErrMsg field="firstName" />
             </div>
-            <div className="space-y-2">
-              <Label>DNI *</Label>
-              <Input value={dni} onChange={(e) => setDni(e.target.value)} className={fieldClass("dni")} />
+            <div>
+              <FieldLabel required>DNI</FieldLabel>
+              <Input value={dni} onChange={(e) => setDni(e.target.value)} className={`${inputClass} ${fieldClass("dni")}`} />
               <ErrMsg field="dni" />
             </div>
-            <div className="space-y-2">
-              <Label>Nacionalidad</Label>
-              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." />
+            <div>
+              <FieldLabel>Nacionalidad</FieldLabel>
+              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Fecha de nacimiento</Label>
-              <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+            <div>
+              <FieldLabel>Fecha de nacimiento</FieldLabel>
+              <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Teléfono</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <div>
+              <FieldLabel>Teléfono</FieldLabel>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Domicilio</Label>
-              <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+            <div className="sm:col-span-2">
+              <FieldLabel>Domicilio</FieldLabel>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Obra social</Label>
-              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." />
+            <div>
+              <FieldLabel>Obra social</FieldLabel>
+              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Fecha de admisión *</Label>
-              <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={fieldClass("admissionDate")} />
+            <div>
+              <FieldLabel required>Fecha de admisión</FieldLabel>
+              <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={`${inputClass} ${fieldClass("admissionDate")}`} />
               <ErrMsg field="admissionDate" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 2 — Datos clínicos */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Datos clínicos</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Diagnóstico *</Label>
-                <Cie10Autocomplete value={diagnosis} onChange={setDiagnosis} placeholder="Buscar por código o descripción CIE-10…" className={fieldClass("diagnosis")} />
-                <ErrMsg field="diagnosis" />
-              </div>
-              <div className="space-y-2">
-                <Label>Médico derivante</Label>
-                <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de lesión</Label>
-                <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Fecha de cirugía</Label>
-                <Input type="date" value={surgeryDate} onChange={(e) => setSurgeryDate(e.target.value)} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Mecanismo de lesión</Label>
-                <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Caída, accidente laboral..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Tratamiento</Label>
-                <Select value={treatmentType} onValueChange={setTreatmentType}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="conservative">Conservador</SelectItem>
-                    <SelectItem value="surgery">Quirúrgico</SelectItem>
-                    <SelectItem value="mixed">Mixto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas post lesión + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas post cirugía + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Semanas de inmovilización + Días</Label>
-                <div className="flex gap-2">
-                  <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className="flex-1" />
-                  <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className="w-20" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Tipo de inmovilización</Label>
-                <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Próx. turno OyT</Label>
-                <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} />
+        <SectionCard icon={FileText} title="Datos clínicos">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <FieldLabel required>Diagnóstico</FieldLabel>
+              <Cie10Autocomplete value={diagnosis} onChange={setDiagnosis} placeholder="Buscar por código o descripción CIE-10…" className={`${inputClass} ${fieldClass("diagnosis")}`} />
+              <ErrMsg field="diagnosis" />
+            </div>
+            <div>
+              <FieldLabel>Médico derivante</FieldLabel>
+              <Input value={doctorName} onChange={(e) => setDoctorName(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Fecha de lesión</FieldLabel>
+              <Input type="date" value={injuryDate} onChange={(e) => setInjuryDate(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Fecha de cirugía</FieldLabel>
+              <Input type="date" value={surgeryDate} onChange={(e) => setSurgeryDate(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <FieldLabel>Tratamiento</FieldLabel>
+              <Select value={treatmentType} onValueChange={setTreatmentType}>
+                <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conservative">Conservador</SelectItem>
+                  <SelectItem value="surgery">Quirúrgico</SelectItem>
+                  <SelectItem value="mixed">Mixto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Mecanismo de lesión</FieldLabel>
+              <Textarea value={injuryMechanism} onChange={(e) => setInjuryMechanism(e.target.value)} rows={2} placeholder="Caída, accidente laboral..." className={textareaClass} />
+            </div>
+            <div>
+              <FieldLabel>Semanas post lesión + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={weeksPostInjury} onChange={(e) => setWeeksPostInjury(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={daysPostInjury} onChange={(e) => setDaysPostInjury(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Estudios</Label>
-              <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Rx, RMN..." />
+            <div>
+              <FieldLabel>Semanas post cirugía + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={weeksPostSurgery} onChange={(e) => setWeeksPostSurgery(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={daysPostSurgery} onChange={(e) => setDaysPostSurgery(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Antecedentes personales</Label>
-              <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Inmovilización + Días</FieldLabel>
+              <div className="flex gap-2">
+                <Input type="number" min={0} value={immobilizationWeeks} onChange={(e) => setImmobilizationWeeks(e.target.value)} placeholder="Sem." className={`${inputClass} flex-1`} />
+                <Input type="number" min={0} max={6} value={immobilizationDays} onChange={(e) => setImmobilizationDays(e.target.value)} placeholder="Días" className={`${inputClass} w-20`} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Tto farmacológico</Label>
-              <Textarea value={pharma} onChange={(e) => setPharma(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Tipo de inmovilización</FieldLabel>
+              <Input value={immobilizationType} onChange={(e) => setImmobilizationType(e.target.value)} placeholder="Yeso, férula, vendaje..." className={inputClass} />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <FieldLabel>Próx. turno OyT</FieldLabel>
+              <Input type="date" value={nextOyt} onChange={(e) => setNextOyt(e.target.value)} className={inputClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Estudios</FieldLabel>
+              <Textarea value={studies} onChange={(e) => setStudies(e.target.value)} rows={2} placeholder="Rx, RMN..." className={textareaClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Antecedentes personales</FieldLabel>
+              <Textarea value={medicalHistory} onChange={(e) => setMedicalHistory(e.target.value)} rows={2} className={textareaClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <FieldLabel>Tto farmacológico</FieldLabel>
+              <Textarea value={pharma} onChange={(e) => setPharma(e.target.value)} rows={2} className={textareaClass} />
+            </div>
+          </div>
+        </SectionCard>
 
         {/* Card 3 — Perfil ocupacional */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Perfil ocupacional</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Lateralidad *</Label>
+        <SectionCard icon={Briefcase} title="Perfil ocupacional">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <FieldLabel required>Lateralidad</FieldLabel>
               <Select value={dominance} onValueChange={setDominance}>
-                <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectTrigger className={`${inputClass} ${fieldClass("dominance")}`}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="right">Diestro/a</SelectItem>
                   <SelectItem value="left">Zurdo/a</SelectItem>
@@ -1004,14 +1037,14 @@ export function NewPatientForm() {
               </Select>
               <ErrMsg field="dominance" />
             </div>
-            <div className="space-y-2">
-              <Label>Red de apoyo</Label>
-              <Input value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} />
+            <div>
+              <FieldLabel>Red de apoyo</FieldLabel>
+              <Input value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Educación</Label>
+            <div>
+              <FieldLabel>Educación</FieldLabel>
               <Select value={education} onValueChange={setEducation}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="primario_incompleto">Primario incompleto</SelectItem>
                   <SelectItem value="primario_completo">Primario completo</SelectItem>
@@ -1021,67 +1054,80 @@ export function NewPatientForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Trabajo</Label>
-              <Input value={job} onChange={(e) => setJob(e.target.value)} />
+            <div>
+              <FieldLabel>Trabajo</FieldLabel>
+              <Input value={job} onChange={(e) => setJob(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Ocio</Label>
-              <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} />
+            <div>
+              <FieldLabel>Ocio</FieldLabel>
+              <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Actividad física</Label>
-              <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} />
+            <div>
+              <FieldLabel>Actividad física</FieldLabel>
+              <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Sueño y descanso</Label>
-              <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} />
+            <div>
+              <FieldLabel>Sueño y descanso</FieldLabel>
+              <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Gestión de la salud</Label>
-              <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} />
+            <div>
+              <FieldLabel>Gestión de la salud</FieldLabel>
+              <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} className={inputClass} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 4 — Evaluación funcional */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Evaluación funcional</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>AVD — Actividades de la vida diaria *</Label>
-              <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={fieldClass("avd")} />
+        <SectionCard icon={Activity} title="Evaluación funcional">
+          <div className="space-y-4">
+            <div>
+              <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
+              <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={`${textareaClass} ${fieldClass("avd")}`} />
               <ErrMsg field="avd" />
             </div>
-            <div className="space-y-2">
-              <Label>AIVD — Actividades instrumentales</Label>
-              <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." />
+            <div>
+              <FieldLabel>AIVD — Actividades instrumentales</FieldLabel>
+              <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." className={textareaClass} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Barthel (0-100)</Label>
-                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} />
+              <div>
+                <FieldLabel>Barthel (0-100)</FieldLabel>
+                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} className={inputClass} />
               </div>
-              <div className="space-y-2">
-                <Label>DASH (0-100)</Label>
-                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} />
-                <p className="text-xs text-muted-foreground">0 = sin discapacidad · 100 = máxima discapacidad</p>
+              <div>
+                <FieldLabel>DASH (0-100)</FieldLabel>
+                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} className={inputClass} />
+                <p className="text-xs text-muted-foreground mt-1">0 = sin discapacidad · 100 = máxima discapacidad</p>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Notas</Label>
-              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} />
+            <div>
+              <FieldLabel>Notas</FieldLabel>
+              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} className={textareaClass} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 5 — Evaluación analítica */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Evaluación analítica</CardTitle></CardHeader>
-          <CardContent className="space-y-6">
+        <SectionCard
+          icon={BarChart2}
+          title="Evaluación analítica"
+          action={(() => {
+            const total =
+              (vssPigmentacion ? parseInt(vssPigmentacion) : 0) +
+              (vssVascularizacion ? parseInt(vssVascularizacion) : 0) +
+              (vssFlexibilidad ? parseInt(vssFlexibilidad) : 0) +
+              (vssAltura ? parseInt(vssAltura) : 0);
+            return total > 0 ? (
+              <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+                VSS: {total}/15
+              </Badge>
+            ) : null;
+          })()}
+        >
+          <div className="space-y-0">
             {/* Dolor */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
+              <h3 className={subLabel}>Dolor</h3>
               <div className="space-y-2">
                 <Label>Aparición</Label>
                 <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
@@ -1122,15 +1168,22 @@ export function NewPatientForm() {
                 <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
               </div>
               <div className="space-y-2">
-                <Label>Intensidad EVA (0-10) *</Label>
+                <FieldLabel required>Intensidad EVA (0-10)</FieldLabel>
                 <div className="flex items-center gap-4">
-                  <Slider
-                    min={0} max={10} step={1}
-                    value={[painScore]}
-                    onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
-                    className={`flex-1 ${fieldClass("painScore")}`}
-                  />
-                  <span className="text-sm font-bold bg-muted px-2 py-1 rounded min-w-[2rem] text-center">{painScore}</span>
+                  <div className="relative flex-1 py-2">
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 pointer-events-none" />
+                    <Slider
+                      min={0} max={10} step={1}
+                      value={[painScore]}
+                      onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
+                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-teal-600 [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
+                    />
+                  </div>
+                  <span className={`text-sm font-bold rounded-md min-w-[2.5rem] text-center px-2 py-1 ${
+                    painScore <= 3 ? "bg-green-100 text-green-700" :
+                    painScore <= 6 ? "bg-yellow-100 text-yellow-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>{painScore}</span>
                 </div>
                 <ErrMsg field="painScore" />
               </div>
@@ -1141,8 +1194,8 @@ export function NewPatientForm() {
             </div>
 
             {/* Edema */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Edema</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Edema</h3>
               <div className="space-y-2">
                 <Label>Observación de edema</Label>
                 <Textarea value={edema} onChange={(e) => setEdema(e.target.value)} rows={2} />
@@ -1171,8 +1224,8 @@ export function NewPatientForm() {
             </div>
 
             {/* Movilidad */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Movilidad</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Movilidad</h3>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
               <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
@@ -1207,8 +1260,8 @@ export function NewPatientForm() {
             </div>
 
             {/* Fuerza */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Fuerza</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Fuerza</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dinamómetro MSD (kgf)</Label>
@@ -1253,8 +1306,8 @@ export function NewPatientForm() {
             </div>
 
             {/* Sensibilidad */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Sensibilidad</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Sensibilidad</h3>
               <div className="space-y-3">
                 <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
                 <div className="space-y-2"><Label className="text-xs">Tacto ligero</Label><Textarea rows={2} value={sensitivityTactoLigero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} /></div>
@@ -1302,19 +1355,23 @@ export function NewPatientForm() {
             </div>
 
             {/* Pruebas específicas */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Pruebas específicas</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Pruebas específicas</h3>
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
                   const val = specificTests[t.key];
+                  const base = "h-9 px-3 text-xs font-medium rounded-lg border transition-colors inline-flex items-center gap-1.5";
+                  const cls = val === "positive"
+                    ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
+                    : val === "negative"
+                      ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                      : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50";
                   return (
-                    <Button key={t.key} type="button" variant="outline" size="sm"
-                      className={`h-8 text-xs gap-1.5 ${val === "positive" ? "border-red-300 bg-red-50 text-red-700" : val === "negative" ? "border-green-300 bg-green-50 text-green-700" : ""}`}
-                      onClick={() => cycleTest(t.key)}>
+                    <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
                       {t.label}
-                      {val === "positive" && <span className="font-bold text-red-600">+</span>}
-                      {val === "negative" && <span className="font-bold text-green-600">−</span>}
-                    </Button>
+                      {val === "positive" && <span className="font-bold">+</span>}
+                      {val === "negative" && <span className="font-bold">−</span>}
+                    </button>
                   );
                 })}
               </div>
@@ -1322,8 +1379,8 @@ export function NewPatientForm() {
             </div>
 
             {/* Otros */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">▸ Otros</h3>
+            <div className={`space-y-3 ${subDivider}`}>
+              <h3 className={subLabel}>Otros</h3>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
                 <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
@@ -1471,37 +1528,37 @@ export function NewPatientForm() {
                 <Textarea value={analNotes} onChange={(e) => setAnalNotes(e.target.value)} rows={2} />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 6 — Intervenciones de admisión */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Intervenciones de admisión</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Intervenciones *</Label>
-              <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={5} placeholder="Se brindan estrategias no farmacológicas para el dolor..." className={fieldClass("interventions")} />
+        <SectionCard icon={ClipboardList} title="Intervenciones de admisión">
+          <div className="space-y-4">
+            <div>
+              <FieldLabel required>Intervenciones</FieldLabel>
+              <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={5} placeholder="Se brindan estrategias no farmacológicas para el dolor..." className={`${textareaClass} ${fieldClass("interventions")}`} />
               <ErrMsg field="interventions" />
             </div>
-            <div className="space-y-2">
-              <Label>Indicaciones enviadas al paciente</Label>
-              <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} />
+            <div>
+              <FieldLabel>Indicaciones enviadas al paciente</FieldLabel>
+              <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} className={textareaClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Notas internas</Label>
-              <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} />
-              <p className="text-xs text-muted-foreground">Campo interno — no se muestra en el resumen clínico</p>
+            <div>
+              <FieldLabel>Notas internas</FieldLabel>
+              <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} className={textareaClass} />
+              <p className="text-xs text-muted-foreground mt-1">Campo interno — no se muestra en el resumen clínico</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
+      </div>
 
-        {/* Bottom save button */}
-        <div className="flex justify-end pb-8">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-teal-600 hover:bg-teal-700 text-white"
-          >
+      {/* Sticky bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 px-6">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-gray-600 hover:bg-gray-100">
+            Descartar
+          </Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-6">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
