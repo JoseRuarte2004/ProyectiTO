@@ -1266,11 +1266,10 @@ export function NewPatientForm() {
                 <Label>Agravantes / Atenuantes</Label>
                 <Textarea value={painAggravating} onChange={(e) => setPainAggravating(e.target.value)} rows={2} />
               </div>
-            </div>
+            </SubSection>
 
             {/* Edema */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Edema</h3>
+            <SubSection title="Edema" checked={showEdema} onChange={setShowEdema}>
               <div className="space-y-2">
                 <Label>Observación de edema</Label>
                 <Textarea value={edema} onChange={(e) => setEdema(e.target.value)} rows={2} />
