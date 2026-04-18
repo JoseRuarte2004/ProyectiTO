@@ -1295,11 +1295,10 @@ export function NewPatientForm() {
                 <div className="space-y-1"><Label className="text-xs">Global MSD (cm)</Label><Input type="number" step="0.1" value={circGlobalMsd} onChange={e => setCircGlobalMsd(e.target.value)} /></div>
                 <div className="space-y-1"><Label className="text-xs">Global MSI (cm)</Label><Input type="number" step="0.1" value={circGlobalMsi} onChange={e => setCircGlobalMsi(e.target.value)} /></div>
               </div>
-            </div>
+            </SubSection>
 
             {/* Movilidad */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Movilidad</h3>
+            <SubSection title="Movilidad" checked={showMovilidad} onChange={setShowMovilidad}>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
               <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
