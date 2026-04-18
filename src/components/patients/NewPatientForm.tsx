@@ -1187,7 +1187,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Edema */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Edema</h3>
               <div className="space-y-2">
                 <Label>Observación de edema</Label>
@@ -1217,7 +1217,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Movilidad */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Movilidad</h3>
               <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
@@ -1253,7 +1253,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Fuerza */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Fuerza</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -1299,7 +1299,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Sensibilidad */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Sensibilidad</h3>
               <div className="space-y-3">
                 <p className="text-xs font-medium text-muted-foreground">Epicrítica (funcional)</p>
@@ -1348,7 +1348,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Pruebas específicas */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Pruebas específicas</h3>
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
@@ -1368,7 +1368,7 @@ export function NewPatientForm() {
             </div>
 
             {/* Otros */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${subDivider}`}>
               <h3 className={subLabel}>Otros</h3>
               <div className="space-y-2">
                 <Label>Estado trófico</Label>
