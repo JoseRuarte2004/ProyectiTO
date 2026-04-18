@@ -1016,13 +1016,12 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 3 — Perfil ocupacional */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Perfil ocupacional</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Lateralidad *</Label>
+        <SectionCard icon={Briefcase} title="Perfil ocupacional">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <FieldLabel required>Lateralidad</FieldLabel>
               <Select value={dominance} onValueChange={setDominance}>
-                <SelectTrigger className={fieldClass("dominance")}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectTrigger className={`${inputClass} ${fieldClass("dominance")}`}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="right">Diestro/a</SelectItem>
                   <SelectItem value="left">Zurdo/a</SelectItem>
@@ -1031,14 +1030,14 @@ export function NewPatientForm() {
               </Select>
               <ErrMsg field="dominance" />
             </div>
-            <div className="space-y-2">
-              <Label>Red de apoyo</Label>
-              <Input value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} />
+            <div>
+              <FieldLabel>Red de apoyo</FieldLabel>
+              <Input value={supportNetwork} onChange={(e) => setSupportNetwork(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Educación</Label>
+            <div>
+              <FieldLabel>Educación</FieldLabel>
               <Select value={education} onValueChange={setEducation}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="primario_incompleto">Primario incompleto</SelectItem>
                   <SelectItem value="primario_completo">Primario completo</SelectItem>
@@ -1048,28 +1047,28 @@ export function NewPatientForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Trabajo</Label>
-              <Input value={job} onChange={(e) => setJob(e.target.value)} />
+            <div>
+              <FieldLabel>Trabajo</FieldLabel>
+              <Input value={job} onChange={(e) => setJob(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Ocio</Label>
-              <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} />
+            <div>
+              <FieldLabel>Ocio</FieldLabel>
+              <Input value={leisure} onChange={(e) => setLeisure(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Actividad física</Label>
-              <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} />
+            <div>
+              <FieldLabel>Actividad física</FieldLabel>
+              <Input value={physicalActivity} onChange={(e) => setPhysicalActivity(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Sueño y descanso</Label>
-              <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} />
+            <div>
+              <FieldLabel>Sueño y descanso</FieldLabel>
+              <Input value={sleepRest} onChange={(e) => setSleepRest(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Gestión de la salud</Label>
-              <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} />
+            <div>
+              <FieldLabel>Gestión de la salud</FieldLabel>
+              <Input value={healthManagement} onChange={(e) => setHealthManagement(e.target.value)} className={inputClass} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 4 — Evaluación funcional */}
         <Card>
