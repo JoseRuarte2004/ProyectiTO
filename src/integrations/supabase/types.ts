@@ -21,6 +21,7 @@ export type Database = {
           dppd_fingers: Json | null
           dynamometer_msd: number | null
           dynamometer_msi: number | null
+          dynamometer_notes: string | null
           edema: string | null
           edema_circummetry: string | null
           emotional_state: string | null
@@ -70,6 +71,7 @@ export type Database = {
           dppd_fingers?: Json | null
           dynamometer_msd?: number | null
           dynamometer_msi?: number | null
+          dynamometer_notes?: string | null
           edema?: string | null
           edema_circummetry?: string | null
           emotional_state?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           dppd_fingers?: Json | null
           dynamometer_msd?: number | null
           dynamometer_msi?: number | null
+          dynamometer_notes?: string | null
           edema?: string | null
           edema_circummetry?: string | null
           emotional_state?: string | null
