@@ -1168,15 +1168,22 @@ export function NewPatientForm() {
                 <Input value={painCharacteristics} onChange={(e) => setPainCharacteristics(e.target.value)} placeholder="punzante, urente, opresivo..." />
               </div>
               <div className="space-y-2">
-                <Label>Intensidad EVA (0-10) *</Label>
+                <FieldLabel required>Intensidad EVA (0-10)</FieldLabel>
                 <div className="flex items-center gap-4">
-                  <Slider
-                    min={0} max={10} step={1}
-                    value={[painScore]}
-                    onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
-                    className={`flex-1 ${fieldClass("painScore")}`}
-                  />
-                  <span className="text-sm font-bold bg-muted px-2 py-1 rounded min-w-[2rem] text-center">{painScore}</span>
+                  <div className="relative flex-1 py-2">
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 pointer-events-none" />
+                    <Slider
+                      min={0} max={10} step={1}
+                      value={[painScore]}
+                      onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
+                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-teal-600 [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
+                    />
+                  </div>
+                  <span className={`text-sm font-bold rounded-md min-w-[2.5rem] text-center px-2 py-1 ${
+                    painScore <= 3 ? "bg-green-100 text-green-700" :
+                    painScore <= 6 ? "bg-yellow-100 text-yellow-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>{painScore}</span>
                 </div>
                 <ErrMsg field="painScore" />
               </div>
