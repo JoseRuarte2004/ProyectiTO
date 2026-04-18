@@ -22,7 +22,20 @@ import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
 
 // ── Section card wrapper ──
-function SectionCard({ icon: Icon, title, action, children }: { icon: any; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function SectionCard({
+  icon: Icon,
+  title,
+  action,
+  children,
+  toggle,
+}: {
+  icon: any;
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  toggle?: { checked: boolean; onChange: (v: boolean) => void };
+}) {
+  const isOff = toggle && !toggle.checked;
   return (
     <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
@@ -30,10 +43,46 @@ function SectionCard({ icon: Icon, title, action, children }: { icon: any; title
           <Icon className="h-4 w-4 text-teal-600" />
           <h2 className="text-base font-semibold text-gray-800">{title}</h2>
         </div>
-        {action}
+        <div className="flex items-center gap-3">
+          {action}
+          {toggle && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
+              <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
+            </div>
+          )}
+        </div>
       </div>
-      <CardContent className="p-6">{children}</CardContent>
+      {!isOff && <CardContent className="p-6">{children}</CardContent>}
     </Card>
+  );
+}
+
+// ── Sub-section with header + toggle (used inside Evaluación analítica) ──
+function SubSection({
+  title,
+  checked,
+  onChange,
+  children,
+  withDivider = true,
+}: {
+  title: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+  withDivider?: boolean;
+}) {
+  return (
+    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-gray-100" : ""}`}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
+          <Switch checked={checked} onCheckedChange={onChange} />
+        </div>
+      </div>
+      {checked && <div className="space-y-3">{children}</div>}
+    </div>
   );
 }
 
