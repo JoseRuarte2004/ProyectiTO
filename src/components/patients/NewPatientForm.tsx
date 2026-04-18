@@ -869,72 +869,72 @@ export function NewPatientForm() {
     </div>
   );
 
+  const patientDisplay = `${firstName} ${lastName}`.trim() || "Nueva admisión";
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/patients")}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Nueva admisión
+    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+      {/* Sticky top bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 h-14">
+        <div className="max-w-2xl mx-auto h-full px-6 flex items-center justify-between gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-gray-700 hover:bg-gray-100">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-teal-600 hover:bg-teal-700 text-white"
-          >
+          <h1 className="flex-1 text-center text-sm font-semibold text-gray-800 truncate">
+            {patientDisplay}
+          </h1>
+          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-6 py-6">
         {/* Card 1 — Datos del paciente */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Datos del paciente</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Apellido *</Label>
-              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={fieldClass("lastName")} />
+        <SectionCard icon={User} title="Datos del paciente">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <FieldLabel required>Apellido</FieldLabel>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className={`${inputClass} ${fieldClass("lastName")}`} />
               <ErrMsg field="lastName" />
             </div>
-            <div className="space-y-2">
-              <Label>Nombre *</Label>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={fieldClass("firstName")} />
+            <div>
+              <FieldLabel required>Nombre</FieldLabel>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={`${inputClass} ${fieldClass("firstName")}`} />
               <ErrMsg field="firstName" />
             </div>
-            <div className="space-y-2">
-              <Label>DNI *</Label>
-              <Input value={dni} onChange={(e) => setDni(e.target.value)} className={fieldClass("dni")} />
+            <div>
+              <FieldLabel required>DNI</FieldLabel>
+              <Input value={dni} onChange={(e) => setDni(e.target.value)} className={`${inputClass} ${fieldClass("dni")}`} />
               <ErrMsg field="dni" />
             </div>
-            <div className="space-y-2">
-              <Label>Nacionalidad</Label>
-              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." />
+            <div>
+              <FieldLabel>Nacionalidad</FieldLabel>
+              <Input value={nationality} onChange={(e) => setNationality(e.target.value)} placeholder="Argentina, Uruguaya..." className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Fecha de nacimiento</Label>
-              <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+            <div>
+              <FieldLabel>Fecha de nacimiento</FieldLabel>
+              <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Teléfono</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <div>
+              <FieldLabel>Teléfono</FieldLabel>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Domicilio</Label>
-              <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+            <div className="sm:col-span-2">
+              <FieldLabel>Domicilio</FieldLabel>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Obra social</Label>
-              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." />
+            <div>
+              <FieldLabel>Obra social</FieldLabel>
+              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." className={inputClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Fecha de admisión *</Label>
-              <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={fieldClass("admissionDate")} />
+            <div>
+              <FieldLabel required>Fecha de admisión</FieldLabel>
+              <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={`${inputClass} ${fieldClass("admissionDate")}`} />
               <ErrMsg field="admissionDate" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
         {/* Card 2 — Datos clínicos */}
         <Card>
