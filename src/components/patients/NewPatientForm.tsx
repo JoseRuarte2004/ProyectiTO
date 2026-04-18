@@ -1360,14 +1360,18 @@ export function NewPatientForm() {
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
                   const val = specificTests[t.key];
+                  const base = "h-9 px-3 text-xs font-medium rounded-lg border transition-colors inline-flex items-center gap-1.5";
+                  const cls = val === "positive"
+                    ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
+                    : val === "negative"
+                      ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                      : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50";
                   return (
-                    <Button key={t.key} type="button" variant="outline" size="sm"
-                      className={`h-8 text-xs gap-1.5 ${val === "positive" ? "border-red-300 bg-red-50 text-red-700" : val === "negative" ? "border-green-300 bg-green-50 text-green-700" : ""}`}
-                      onClick={() => cycleTest(t.key)}>
+                    <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
                       {t.label}
-                      {val === "positive" && <span className="font-bold text-red-600">+</span>}
-                      {val === "negative" && <span className="font-bold text-green-600">−</span>}
-                    </Button>
+                      {val === "positive" && <span className="font-bold">+</span>}
+                      {val === "negative" && <span className="font-bold">−</span>}
+                    </button>
                   );
                 })}
               </div>
