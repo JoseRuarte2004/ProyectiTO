@@ -637,6 +637,24 @@ export type Database = {
           },
         ]
       }
+      obras_sociales: {
+        Row: {
+          id: number
+          name: string
+          name_search: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          name_search?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          name_search?: string | null
+        }
+        Relationships: []
+      }
       patient_clinical_records: {
         Row: {
           created_at: string

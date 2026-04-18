@@ -90,6 +90,78 @@ function Cie10Autocomplete({ value, onChange, placeholder, className }: {
   );
 }
 
+// ── Obras Sociales autocomplete (inline) ──
+function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<Array<{ name: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastSelectedRef = useRef<string>("");
+
+  useEffect(() => {
+    const term = value.trim();
+    if (term.length < 1) { setResults([]); setOpen(false); return; }
+    if (term === lastSelectedRef.current) { setOpen(false); return; }
+    const searchTerm = term.toLowerCase();
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("obras_sociales")
+        .select("name")
+        .ilike("name_search", `%${searchTerm}%`)
+        .limit(10);
+      if (cancelled) return;
+      setResults((data as Array<{ name: string }>) || []);
+      setOpen(true);
+      setLoading(false);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); setLoading(false); };
+  }, [value]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <Input
+        value={value}
+        onChange={(e) => { lastSelectedRef.current = ""; onChange(e.target.value); }}
+        onFocus={() => { if (results.length > 0) setOpen(true); }}
+        placeholder={placeholder}
+        className={className}
+        autoComplete="off"
+      />
+      {loading && (
+        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+      )}
+      {open && results.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-md border bg-popover shadow-md">
+          {results.map((r) => (
+            <button
+              key={r.name}
+              type="button"
+              onClick={() => { lastSelectedRef.current = r.name; onChange(r.name); setOpen(false); }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              {r.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Goniometry config by body part ──
 const GONIO_PARTS = {
   shoulder: {
@@ -737,7 +809,16 @@ export function NewPatientForm() {
         {fields.map(f => (
           <div key={f.key} className="space-y-1">
             <Label className="text-xs">{f.label} °</Label>
-            <Input type="number" placeholder={f.norm} value={values[f.key] || ""} onChange={e => setValues({ ...values, [f.key]: e.target.value })} />
+            <Input
+              key={`${partKey}-${f.key}-${values[f.key] || ""}`}
+              type="number"
+              placeholder={f.norm}
+              defaultValue={values[f.key] || ""}
+              onBlur={e => {
+                const v = e.target.value;
+                if (v !== (values[f.key] || "")) setValues({ ...values, [f.key]: v });
+              }}
+            />
           </div>
         ))}
       </div>
@@ -813,7 +894,7 @@ export function NewPatientForm() {
             </div>
             <div className="space-y-2">
               <Label>Obra social</Label>
-              <Input value={insurance} onChange={(e) => setInsurance(e.target.value)} placeholder="OSDE, Swiss Medical, PAMI..." />
+              <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." />
             </div>
             <div className="space-y-2">
               <Label>Fecha de admisión *</Label>
