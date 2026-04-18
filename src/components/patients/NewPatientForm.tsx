@@ -1521,33 +1521,33 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 6 — Intervenciones de admisión */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Intervenciones de admisión</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Intervenciones *</Label>
-              <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={5} placeholder="Se brindan estrategias no farmacológicas para el dolor..." className={fieldClass("interventions")} />
+        <SectionCard icon={ClipboardList} title="Intervenciones de admisión">
+          <div className="space-y-4">
+            <div>
+              <FieldLabel required>Intervenciones</FieldLabel>
+              <Textarea value={interventions} onChange={(e) => setInterventions(e.target.value)} rows={5} placeholder="Se brindan estrategias no farmacológicas para el dolor..." className={`${textareaClass} ${fieldClass("interventions")}`} />
               <ErrMsg field="interventions" />
             </div>
-            <div className="space-y-2">
-              <Label>Indicaciones enviadas al paciente</Label>
-              <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} />
+            <div>
+              <FieldLabel>Indicaciones enviadas al paciente</FieldLabel>
+              <Textarea value={homeInstructions} onChange={(e) => setHomeInstructions(e.target.value)} rows={3} className={textareaClass} />
             </div>
-            <div className="space-y-2">
-              <Label>Notas internas</Label>
-              <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} />
-              <p className="text-xs text-muted-foreground">Campo interno — no se muestra en el resumen clínico</p>
+            <div>
+              <FieldLabel>Notas internas</FieldLabel>
+              <Textarea value={sessionNotes} onChange={(e) => setSessionNotes(e.target.value)} rows={2} className={textareaClass} />
+              <p className="text-xs text-muted-foreground mt-1">Campo interno — no se muestra en el resumen clínico</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
+      </div>
 
-        {/* Bottom save button */}
-        <div className="flex justify-end pb-8">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-teal-600 hover:bg-teal-700 text-white"
-          >
+      {/* Sticky bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 px-6">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-gray-600 hover:bg-gray-100">
+            Descartar
+          </Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-6">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
