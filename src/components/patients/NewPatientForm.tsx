@@ -1330,11 +1330,10 @@ export function NewPatientForm() {
                   <Input value={fistClosure} onChange={(e) => setFistClosure(e.target.value)} placeholder="Completo / Incompleto con tirantez" />
                 </div>
               </div>
-            </div>
+            </SubSection>
 
             {/* Fuerza */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Fuerza</h3>
+            <SubSection title="Fuerza" checked={showFuerza} onChange={setShowFuerza}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dinamómetro MSD (kgf)</Label>
