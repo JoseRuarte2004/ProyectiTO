@@ -596,9 +596,9 @@ export function NewPatientForm() {
     if (!dni.trim()) errs.dni = true;
     if (!admissionDate) errs.admissionDate = true;
     if (!diagnosis.trim()) errs.diagnosis = true;
-    if (!dominance) errs.dominance = true;
-    if (!avd.trim()) errs.avd = true;
-    if (!evaTouched) errs.painScore = true;
+    if (showOccupational && !dominance) errs.dominance = true;
+    if (showFunctional && !avd.trim()) errs.avd = true;
+    if (showAnalytical && showDolor && !evaTouched) errs.painScore = true;
     if (!interventions.trim()) errs.interventions = true;
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
