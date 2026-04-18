@@ -1423,11 +1423,10 @@ export function NewPatientForm() {
                   </Tabs>
                 </CollapsibleContent>
               </Collapsible>
-            </div>
+            </SubSection>
 
             {/* Pruebas específicas */}
-            <div className={`space-y-3 ${subDivider}`}>
-              <h3 className={subLabel}>Pruebas específicas</h3>
+            <SubSection title="Pruebas específicas" checked={showPruebas} onChange={setShowPruebas}>
               <div className="flex flex-wrap gap-2">
                 {SPECIFIC_TESTS.map(t => {
                   const val = specificTests[t.key];
