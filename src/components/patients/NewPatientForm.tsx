@@ -1202,8 +1202,7 @@ export function NewPatientForm() {
         >
           <div className="space-y-0">
             {/* Dolor */}
-            <div className="space-y-3">
-              <h3 className={subLabel}>Dolor</h3>
+            <SubSection title="Dolor" checked={showDolor} onChange={setShowDolor} withDivider={false}>
               <div className="space-y-2">
                 <Label>Aparición</Label>
                 <Input value={painAppearance} onChange={(e) => setPainAppearance(e.target.value)} />
