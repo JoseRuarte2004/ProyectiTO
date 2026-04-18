@@ -1108,9 +1108,23 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 5 — Evaluación analítica */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Evaluación analítica</CardTitle></CardHeader>
-          <CardContent className="space-y-6">
+        <SectionCard
+          icon={BarChart2}
+          title="Evaluación analítica"
+          action={(() => {
+            const total =
+              (vssPigmentacion ? parseInt(vssPigmentacion) : 0) +
+              (vssVascularizacion ? parseInt(vssVascularizacion) : 0) +
+              (vssFlexibilidad ? parseInt(vssFlexibilidad) : 0) +
+              (vssAltura ? parseInt(vssAltura) : 0);
+            return total > 0 ? (
+              <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+                VSS: {total}/15
+              </Badge>
+            ) : null;
+          })()}
+        >
+          <div className="space-y-0">
             {/* Dolor */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">▸ Dolor</h3>
