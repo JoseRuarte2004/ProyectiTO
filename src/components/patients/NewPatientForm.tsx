@@ -1098,7 +1098,7 @@ export function NewPatientForm() {
         </SectionCard>
 
         {/* Card 3 — Perfil ocupacional */}
-        <SectionCard icon={Briefcase} title="Perfil ocupacional">
+        <SectionCard icon={Briefcase} title="Perfil ocupacional" toggle={{ checked: showOccupational, onChange: setShowOccupational }}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <FieldLabel required>Lateralidad</FieldLabel>
