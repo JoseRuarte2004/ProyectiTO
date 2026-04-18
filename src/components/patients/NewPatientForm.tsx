@@ -395,6 +395,7 @@ export function NewPatientForm() {
   const [fistClosure, setFistClosure] = useState("");
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
+  const [dynamometerNotes, setDynamometerNotes] = useState("");
   const [muscleStrength, setMuscleStrength] = useState("");
   const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
   const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
@@ -750,6 +751,7 @@ export function NewPatientForm() {
           kapandji: or(kapandjiFinal),
           dynamometer_msd: orFloat(dynamometerMsd),
           dynamometer_msi: orFloat(dynamometerMsi),
+          dynamometer_notes: or(dynamometerNotes),
           muscle_strength: msVal,
           muscle_strength_median: medianJson,
           muscle_strength_cubital: cubitalJson,
@@ -1220,6 +1222,15 @@ export function NewPatientForm() {
               <p className="text-xs text-muted-foreground">
                 Evalúa: fuerza de puño isométrica en 5 posiciones (se toma 3 veces y se promedia). Primera evaluación: comparar con MS sano (10% más de FM). Mediciones siguientes: comparar con MS afectado.
               </p>
+              <div className="space-y-2">
+                <Label>¿Qué evaluaste?</Label>
+                <Textarea
+                  rows={2}
+                  value={dynamometerNotes}
+                  onChange={(e) => setDynamometerNotes(e.target.value)}
+                  placeholder="Ej: Fuerza de puño en 5 posiciones, se tomó 3 veces y se promedió..."
+                />
+              </div>
               <div className="space-y-2">
                 <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
                 <div className="grid grid-cols-5 gap-2">
