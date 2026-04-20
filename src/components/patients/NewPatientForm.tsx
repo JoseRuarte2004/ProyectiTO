@@ -411,7 +411,7 @@ function DanielsTable({ muscles, values, onChange }: { muscles: string[]; values
             <span className="text-xs flex-1 min-w-0 truncate">{m}</span>
             <Select value={values[k] || ""} onValueChange={v => onChange(k, v)}>
               <SelectTrigger className="h-7 w-16 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {DANIELS_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -1103,7 +1103,7 @@ export function NewPatientForm() {
               <FieldLabel>Tratamiento</FieldLabel>
               <Select value={treatmentType} onValueChange={setTreatmentType}>
                 <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper">
                   <SelectItem value="conservative">Conservador</SelectItem>
                   <SelectItem value="surgery">Quirúrgico</SelectItem>
                   <SelectItem value="mixed">Mixto</SelectItem>
@@ -1165,7 +1165,7 @@ export function NewPatientForm() {
               <FieldLabel required>Lateralidad</FieldLabel>
               <Select value={dominance} onValueChange={setDominance}>
                 <SelectTrigger className={`${inputClass} ${fieldClass("dominance")}`}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper">
                   <SelectItem value="right">Diestro/a</SelectItem>
                   <SelectItem value="left">Zurdo/a</SelectItem>
                   <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
@@ -1181,7 +1181,7 @@ export function NewPatientForm() {
               <FieldLabel>Educación</FieldLabel>
               <Select value={education} onValueChange={setEducation}>
                 <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper">
                   <SelectItem value="primario_incompleto">Primario incompleto</SelectItem>
                   <SelectItem value="primario_completo">Primario completo</SelectItem>
                   <SelectItem value="secundario_incompleto">Secundario incompleto</SelectItem>
@@ -1339,7 +1339,7 @@ export function NewPatientForm() {
                 <Label>Test de Godet</Label>
                 <Select value={godetTest} onValueChange={setGodetTest}>
                   <SelectTrigger><SelectValue placeholder="No evaluado" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper">
                     <SelectItem value="not_evaluated">No evaluado</SelectItem>
                     <SelectItem value="negative">Negativo</SelectItem>
                     <SelectItem value="1+">1+</SelectItem>
@@ -1431,7 +1431,7 @@ export function NewPatientForm() {
                 <Label>Fuerza muscular (Daniels)</Label>
                 <Select value={muscleStrength} onValueChange={setMuscleStrength}>
                   <SelectTrigger><SelectValue placeholder="Seleccionar grado" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper">
                     {DANIELS_FULL_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -1535,7 +1535,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Vascularización</Label>
                       <Select value={scarVascularizacion} onValueChange={setScarVascularizacion}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.vascularizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1544,7 +1544,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Pigmentación</Label>
                       <Select value={scarPigmentacion} onValueChange={setScarPigmentacion}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.pigmentacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1553,7 +1553,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Flexibilidad</Label>
                       <Select value={scarFlexibilidad} onValueChange={setScarFlexibilidad}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.flexibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1562,7 +1562,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Sensibilidad</Label>
                       <Select value={scarSensibilidad} onValueChange={setScarSensibilidad}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.sensibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1571,7 +1571,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Relieve</Label>
                       <Select value={scarRelieve} onValueChange={setScarRelieve}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.relieve.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1580,7 +1580,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Temperatura</Label>
                       <Select value={scarTemperatura} onValueChange={setScarTemperatura}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {SCAR_OPTIONS.temperatura.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
