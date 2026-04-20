@@ -888,7 +888,7 @@ export function NewPatientForm() {
         : null;
 
       const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
-      if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured)) {
+      if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured || scarEvalJson !== null)) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
