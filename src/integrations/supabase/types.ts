@@ -1274,6 +1274,15 @@ export type Database = {
       }
       is_active_professional: { Args: never; Returns: boolean }
       is_my_patient: { Args: { p_patient_id: string }; Returns: boolean }
+      search_cie10: {
+        Args: { max_results?: number; search_input: string }
+        Returns: {
+          category: string
+          code: string
+          description: string
+          rank: number
+        }[]
+      }
       unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
