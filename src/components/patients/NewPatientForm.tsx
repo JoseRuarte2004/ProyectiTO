@@ -1509,16 +1509,9 @@ export function NewPatientForm() {
               <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
             </SubSection>
 
-            {/* Otros */}
-            <SubSection title="Otros" checked={showOtros} onChange={setShowOtros}>
-              <div className="space-y-2">
-                <Label>Estado trófico</Label>
-                <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
-              </div>
-              {/* Cicatriz estructurada */}
+            {/* Cicatriz */}
+            <SubSection title="Cicatriz" checked={showCicatriz} onChange={setShowCicatriz}>
               <div className="space-y-4 rounded-md border border-border p-3">
-                <h4 className="text-sm font-semibold text-foreground">Cicatriz</h4>
-
                 {/* Sub-sección A — Planilla */}
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-muted-foreground">Planilla</p>
@@ -1610,7 +1603,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Pigmentación</Label>
                       <Select value={vssPigmentacion} onValueChange={setVssPigmentacion}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {VSS_OPTIONS.pigmentacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1619,7 +1612,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Vascularización</Label>
                       <Select value={vssVascularizacion} onValueChange={setVssVascularizacion}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {VSS_OPTIONS.vascularizacion.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1628,7 +1621,7 @@ export function NewPatientForm() {
                       <Label className="text-xs">Flexibilidad</Label>
                       <Select value={vssFlexibilidad} onValueChange={setVssFlexibilidad}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {VSS_OPTIONS.flexibilidad.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1637,13 +1630,21 @@ export function NewPatientForm() {
                       <Label className="text-xs">Altura</Label>
                       <Select value={vssAltura} onValueChange={setVssAltura}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                           {VSS_OPTIONS.altura.map(o => <SelectItem key={o.v} value={o.v}>{o.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
+              </div>
+            </SubSection>
+
+            {/* Otros */}
+            <SubSection title="Otros" checked={showOtros} onChange={setShowOtros}>
+              <div className="space-y-2">
+                <Label>Estado trófico</Label>
+                <Textarea value={trophicState} onChange={(e) => setTrophicState(e.target.value)} rows={2} />
               </div>
               <div className="space-y-2">
                 <Label>Postura</Label>
