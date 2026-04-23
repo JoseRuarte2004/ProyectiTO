@@ -21,6 +21,14 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
+import {
+  QuickDashSection,
+  FimSection,
+  emptyQuickDash,
+  emptyFim,
+  calcQuickDashScore,
+  calcFimTotal,
+} from "@/components/evaluations/FunctionalScales";
 
 // ── Section card wrapper ──
 function SectionCard({
@@ -531,9 +539,8 @@ export function NewPatientForm() {
   // Card 4 — Functional evaluation
   const [avd, setAvd] = useState("");
   const [aivd, setAivd] = useState("");
-  const [barthelScore, setBarthelScore] = useState("");
-  const [dashScore, setDashScore] = useState("");
-  const [funcNotes, setFuncNotes] = useState("");
+  const [qdItems, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
+  const [fimItems, setFimItems] = useState<Record<string, number | null>>(emptyFim());
 
   // Card 5 — Analytical evaluation
   const [painScore, setPainScore] = useState<number>(0);
