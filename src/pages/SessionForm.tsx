@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { differenceInYears } from "date-fns";
+import { differenceInYears, differenceInCalendarDays } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -461,6 +461,26 @@ export default function SessionForm() {
     load();
   }, [patientId]);
 
+  // Auto-calculate weeks at session from injury date (or symptom start as fallback)
+  const weekCalcSource: "injury" | "symptom" | null = clinical?.injury_date
+    ? "injury"
+    : clinical?.symptom_start_date
+    ? "symptom"
+    : null;
+
+  useEffect(() => {
+    if (!session_date || !clinical) return;
+    const refDateStr = clinical.injury_date || clinical.symptom_start_date;
+    if (!refDateStr) return;
+    const ref = new Date(refDateStr + "T12:00:00");
+    const sess = new Date(session_date + "T12:00:00");
+    const days = differenceInCalendarDays(sess, ref);
+    if (days < 0) return;
+    const weeks = Math.floor(days / 7);
+    setWeekAtSession(String(weeks));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session_date, clinical]);
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-[#F9FAFB]">
@@ -908,6 +928,11 @@ export default function SessionForm() {
                 onChange={(e) => setWeekAtSession(e.target.value)}
                 className={inputClass}
               />
+              {weekCalcSource && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Calculado desde {weekCalcSource === "injury" ? "fecha de lesión" : "inicio de síntomas"} (editable)
+                </p>
+              )}
             </div>
           </div>
           {session_type === "discharge" && (
@@ -1123,6 +1148,22 @@ export default function SessionForm() {
               <Textarea rows={2} value={edema_obs} onChange={(e) => setEdemaObs(e.target.value)} className={textareaClass} />
             </div>
             <div>
+              <FieldLabel>Test de Godet</FieldLabel>
+              <Select value={godet_test} onValueChange={setGodetTest}>
+                <SelectTrigger className={inputClass}>
+                  <SelectValue placeholder="No evaluado" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="not_evaluated">No evaluado</SelectItem>
+                  <SelectItem value="negative">Negativo</SelectItem>
+                  <SelectItem value="1+">1+</SelectItem>
+                  <SelectItem value="2+">2+</SelectItem>
+                  <SelectItem value="3+">3+</SelectItem>
+                  <SelectItem value="4+">4+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <p className="text-xs font-semibold text-gray-600 mb-2">Circometría</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -1142,22 +1183,6 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" value={circ_global_msi} onChange={(e) => setCircGlobalMsi(e.target.value)} className={inputClass} />
                 </div>
               </div>
-            </div>
-            <div>
-              <FieldLabel>Test de Godet</FieldLabel>
-              <Select value={godet_test} onValueChange={setGodetTest}>
-                <SelectTrigger className={inputClass}>
-                  <SelectValue placeholder="No evaluado" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="not_evaluated">No evaluado</SelectItem>
-                  <SelectItem value="negative">Negativo</SelectItem>
-                  <SelectItem value="1+">1+</SelectItem>
-                  <SelectItem value="2+">2+</SelectItem>
-                  <SelectItem value="3+">3+</SelectItem>
-                  <SelectItem value="4+">4+</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </SubSection>
 
@@ -1245,21 +1270,6 @@ export default function SessionForm() {
               />
             </div>
             <div>
-              <FieldLabel>Daniels</FieldLabel>
-              <Select value={muscle_strength} onValueChange={setMuscleStrength}>
-                <SelectTrigger className={inputClass}>
-                  <SelectValue placeholder="Seleccionar grado" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {DANIELS_FULL_GRADES.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <FieldLabel>DPPD (cm) — distancia pulpejo-pliegue distal</FieldLabel>
               <div className="grid grid-cols-5 gap-2">
                 <div>
@@ -1283,6 +1293,21 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" value={dppd_menique} onChange={(e) => setDppdMenique(e.target.value)} className={inputClass} />
                 </div>
               </div>
+            </div>
+            <div>
+              <FieldLabel>Daniels</FieldLabel>
+              <Select value={muscle_strength} onValueChange={setMuscleStrength}>
+                <SelectTrigger className={inputClass}>
+                  <SelectValue placeholder="Seleccionar grado" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {DANIELS_FULL_GRADES.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </SubSection>
 
@@ -1322,10 +1347,6 @@ export default function SessionForm() {
                 </div>
               </div>
             </div>
-            <div>
-              <FieldLabel>Observaciones</FieldLabel>
-              <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
-            </div>
 
             {/* Tabla Kendall */}
             <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
@@ -1354,6 +1375,40 @@ export default function SessionForm() {
                 </Tabs>
               </CollapsibleContent>
             </Collapsible>
+            <div>
+              <FieldLabel>Observaciones</FieldLabel>
+              <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
+            </div>
+          </SubSection>
+
+          {/* Pruebas específicas */}
+          <SubSection title="Pruebas específicas" checked={showSpecificTests} onChange={setShowSpecificTests}>
+            <div className="flex flex-wrap gap-2">
+              {SPECIFIC_TESTS.map((t) => {
+                const val = specificTests[t.key];
+                return (
+                  <Button
+                    key={t.key}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={`h-9 text-xs gap-1.5 rounded-full border-gray-200 ${
+                      val === "positive"
+                        ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                        : val === "negative"
+                        ? "border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                        : ""
+                    }`}
+                    onClick={() => cycleTest(t.key)}
+                  >
+                    {t.label}
+                    {val === "positive" && <span className="font-bold text-red-600">+</span>}
+                    {val === "negative" && <span className="font-bold text-green-600">−</span>}
+                  </Button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
           </SubSection>
 
           {/* Cicatriz */}
@@ -1483,36 +1538,6 @@ export default function SessionForm() {
                 </div>
               </div>
             </div>
-          </SubSection>
-
-          {/* Pruebas específicas */}
-          <SubSection title="Pruebas específicas" checked={showSpecificTests} onChange={setShowSpecificTests}>
-            <div className="flex flex-wrap gap-2">
-              {SPECIFIC_TESTS.map((t) => {
-                const val = specificTests[t.key];
-                return (
-                  <Button
-                    key={t.key}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 text-xs gap-1.5 rounded-full border-gray-200 ${
-                      val === "positive"
-                        ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
-                        : val === "negative"
-                        ? "border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
-                        : ""
-                    }`}
-                    onClick={() => cycleTest(t.key)}
-                  >
-                    {t.label}
-                    {val === "positive" && <span className="font-bold text-red-600">+</span>}
-                    {val === "negative" && <span className="font-bold text-green-600">−</span>}
-                  </Button>
-                );
-              })}
-            </div>
-            <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
           </SubSection>
 
           {/* Otros */}
