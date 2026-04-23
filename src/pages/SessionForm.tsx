@@ -966,7 +966,7 @@ export default function SessionForm() {
         {/* Functional eval (admission only) */}
         {session_type === "admission" && (
           <SectionCard icon={ClipboardList} title="Evaluación funcional">
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <FieldLabel>Lateralidad</FieldLabel>
                 <Select value={func_dominance} onValueChange={setFuncDominance}>
@@ -980,6 +980,8 @@ export default function SessionForm() {
                   </SelectContent>
                 </Select>
               </div>
+              <QuickDashSection items={qd_items} onChange={setQdItems} />
+              <FimSection items={fim_items} onChange={setFimItems} />
               <div>
                 <FieldLabel>AVD — Actividades de la vida diaria</FieldLabel>
                 <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} className={textareaClass} />
@@ -995,31 +997,6 @@ export default function SessionForm() {
               <div>
                 <FieldLabel>Gestión de la salud</FieldLabel>
                 <Textarea rows={2} value={func_health} onChange={(e) => setFuncHealth(e.target.value)} className={textareaClass} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <FieldLabel>Puntaje Barthel (0-100)</FieldLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={func_barthel}
-                    onChange={(e) => setFuncBarthel(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <FieldLabel>Puntaje DASH (0-100)</FieldLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={func_dash}
-                    onChange={(e) => setFuncDash(e.target.value)}
-                    className={inputClass}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">0 = sin discapacidad · 100 = máxima</p>
-                </div>
               </div>
             </div>
           </SectionCard>
