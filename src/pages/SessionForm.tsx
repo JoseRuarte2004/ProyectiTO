@@ -461,6 +461,26 @@ export default function SessionForm() {
     load();
   }, [patientId]);
 
+  // Auto-calculate weeks at session from injury date (or symptom start as fallback)
+  const weekCalcSource: "injury" | "symptom" | null = clinical?.injury_date
+    ? "injury"
+    : clinical?.symptom_start_date
+    ? "symptom"
+    : null;
+
+  useEffect(() => {
+    if (!session_date || !clinical) return;
+    const refDateStr = clinical.injury_date || clinical.symptom_start_date;
+    if (!refDateStr) return;
+    const ref = new Date(refDateStr + "T12:00:00");
+    const sess = new Date(session_date + "T12:00:00");
+    const days = differenceInCalendarDays(sess, ref);
+    if (days < 0) return;
+    const weeks = Math.floor(days / 7);
+    setWeekAtSession(String(weeks));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session_date, clinical]);
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen bg-[#F9FAFB]">
