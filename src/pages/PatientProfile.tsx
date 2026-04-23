@@ -224,9 +224,8 @@ export default function PatientProfile() {
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="resumen" className="space-y-4">
+      <Tabs defaultValue="ficha" className="space-y-4">
         <TabsList className="bg-muted">
-          <TabsTrigger value="resumen">Historia</TabsTrigger>
           <TabsTrigger value="ficha">Ficha</TabsTrigger>
           <TabsTrigger value="sessions">Sesiones</TabsTrigger>
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
@@ -234,120 +233,6 @@ export default function PatientProfile() {
           <TabsTrigger value="appointments">Turnos</TabsTrigger>
           <TabsTrigger value="archivos">Archivos</TabsTrigger>
         </TabsList>
-
-        {/* RESUMEN */}
-        <TabsContent value="resumen">
-          {(() => {
-            const ordinalR = (n: number | null) => {
-              if (!n) return "";
-              const m: Record<number, string> = {1:"1ra",2:"2da",3:"3ra",4:"4ta",5:"5ta",6:"6ta",7:"7ma",8:"8va",9:"9na",10:"10ma"};
-              return m[n] || `${n}ra`;
-            };
-            const sortedSessions = [...sessions].sort((a, b) => a.session_date.localeCompare(b.session_date));
-
-            return (
-              <div className="max-w-3xl mx-auto space-y-0 text-sm text-foreground">
-                {/* ENCABEZADO */}
-                <div className="pb-4 border-b border-border">
-                  <h2 className="text-xl font-bold">{patient.last_name}, {patient.first_name}</h2>
-                  <p className="text-muted-foreground mt-1">
-                    DNI: {patient.dni} · {age !== null ? `${age} años` : "Edad desconocida"} · {patient.insurance || "Sin obra social"} · Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}
-                  </p>
-                  {clinical?.diagnosis && (
-                    <p className="mt-2 font-semibold text-teal-700">Dx: {clinical.diagnosis}</p>
-                  )}
-                </div>
-
-                {/* HISTORIAL DE VISITAS */}
-                {sortedSessions.length > 0 ? (
-                  <div>
-                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">HISTORIAL DE VISITAS</p>
-                    {sortedSessions.map((s) => {
-                      const linkedEval = analEvals.find((e: any) => e.session_id === s.id);
-                      return (
-                        <div key={s.id} className="pt-4 pb-4 border-b border-border/40 last:border-0">
-                          <div className="flex items-center gap-3 mb-3 flex-wrap">
-                            <span className="font-semibold">
-                              {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: es })}
-                            </span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              s.session_type === "admission" ? "bg-purple-100 text-purple-700" :
-                              s.session_type === "discharge" ? "bg-green-100 text-green-700" :
-                              "bg-teal-50 text-teal-700"
-                            }`}>
-                              {s.session_type === "admission" ? "Admisión" : s.session_type === "discharge" ? "Alta" : "Seguimiento"}
-                            </span>
-                            {s.session_number && (
-                              <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>
-                            )}
-                            {s.week_at_session != null && (
-                              <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>
-                            )}
-                          </div>
-
-                          {(s.session_number || s.week_at_session != null) && (
-                            <p className="italic text-muted-foreground text-xs mb-3">
-                              Paciente asiste a {ordinalR(s.session_number)} sesión
-                              {s.week_at_session != null ? `, cursando su ${s.week_at_session}ma semana POP/PL` : ""}.
-                            </p>
-                          )}
-
-                          {(s.general_observations || s.evolution || s.symptom_changes || s.clinical_changes || s.treatment_adjustments) && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Evolución</p>
-                              {s.general_observations && <p className="whitespace-pre-wrap">{s.general_observations}</p>}
-                              {s.evolution && <p className="whitespace-pre-wrap">{s.evolution}</p>}
-                              {s.symptom_changes && <p><span className="font-medium">Cambios en síntomas:</span> {s.symptom_changes}</p>}
-                              {s.clinical_changes && <p><span className="font-medium">Cambios clínicos:</span> {s.clinical_changes}</p>}
-                              {s.treatment_adjustments && <p><span className="font-medium">Ajustes:</span> {s.treatment_adjustments}</p>}
-                            </div>
-                          )}
-
-                          {s.avd_followup && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">AVD en sesión</p>
-                              <p className="whitespace-pre-wrap">{s.avd_followup}</p>
-                            </div>
-                          )}
-
-                          {linkedEval && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">Mediciones del día</p>
-                              <MeasurementsBlock e={linkedEval} />
-                            </div>
-                          )}
-
-                          {s.interventions && (
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">En el día de hoy se abordó</p>
-                              <p className="whitespace-pre-wrap">{s.interventions}</p>
-                            </div>
-                          )}
-
-                          {s.home_instructions_sent && (
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Indicaciones enviadas</p>
-                              <p className="whitespace-pre-wrap">{s.home_instructions_sent}</p>
-                            </div>
-                          )}
-
-                          {s.notes && (
-                            <p className="italic text-muted-foreground text-xs mt-2">{s.notes}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="pt-8 text-center text-muted-foreground text-sm">
-                    <p>Aún no hay visitas registradas.</p>
-                    <p className="text-xs mt-1">Registrá la primera visita desde el tab Sesiones.</p>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </TabsContent>
 
         {/* FICHA */}
         <TabsContent value="ficha" className="space-y-4">
