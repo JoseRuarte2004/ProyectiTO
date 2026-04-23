@@ -311,79 +311,9 @@ export default function PatientProfile() {
                           )}
 
                           {linkedEval && (
-                            <div className="mb-3 bg-blue-50/40 rounded-lg p-3 space-y-1 border border-blue-100/60">
-                              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Mediciones del día</p>
-                              {linkedEval.pain_score != null && (
-                                <p><span className="font-medium">Dolor EVA:</span> {linkedEval.pain_score}/10
-                                  {linkedEval.pain_location ? ` — ${linkedEval.pain_location}` : ""}
-                                  {linkedEval.pain_characteristics ? ` — ${linkedEval.pain_characteristics}` : ""}
-                                </p>
-                              )}
-                              {linkedEval.pain && <p className="text-muted-foreground">{linkedEval.pain}</p>}
-                              {linkedEval.pain_aggravating_factors && <p><span className="font-medium">Agravantes/Atenuantes:</span> {linkedEval.pain_aggravating_factors}</p>}
-                              {linkedEval.edema && <p><span className="font-medium">Edema:</span> {linkedEval.edema}</p>}
-                              {linkedEval.edema_circummetry && <p><span className="font-medium">Circometría:</span> {linkedEval.edema_circummetry}</p>}
-                              {linkedEval.godet_test && <p><span className="font-medium">Godet:</span> {linkedEval.godet_test}</p>}
-                              {linkedEval.arom && <p><span className="font-medium">Goniometría PRE:</span> {linkedEval.arom}</p>}
-                              {linkedEval.prom && <p><span className="font-medium">Goniometría POST:</span> {linkedEval.prom}</p>}
-                              {linkedEval.goniometry && typeof linkedEval.goniometry === "object" && (() => {
-                                const g = linkedEval.goniometry as any;
-                                const partNames: Record<string, string> = { shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar" };
-                                const renderPart = (label: string, data: any) => {
-                                  if (!data || !data.values || typeof data.values !== "object") return null;
-                                  const vals = Object.entries(data.values).filter(([,v]) => v != null).map(([k,v]) => `${k}: ${v}°`);
-                                  if (vals.length === 0) return null;
-                                  return <p key={label}><span className="font-medium">{label} ({partNames[data.body_part] || data.body_part}):</span> {vals.join(" · ")}</p>;
-                                };
-                                return <>{renderPart("Goniometría PRE", g.pre)}{renderPart("Goniometría POST", g.post)}</>;
-                              })()}
-                              {linkedEval.kapandji && <p><span className="font-medium">Kapandji:</span> {linkedEval.kapandji}</p>}
-                              {(linkedEval.dynamometer_msd || linkedEval.dynamometer_msi) && (
-                                <p><span className="font-medium">Dinamómetro:</span>
-                                  {linkedEval.dynamometer_msd ? ` MSD ${linkedEval.dynamometer_msd}kg` : ""}
-                                  {linkedEval.dynamometer_msi ? ` / MSI ${linkedEval.dynamometer_msi}kg` : ""}
-                                </p>
-                              )}
-                              {linkedEval.muscle_strength && <p><span className="font-medium">Fuerza:</span> {linkedEval.muscle_strength}</p>}
-                              {(linkedEval.muscle_strength_median || linkedEval.muscle_strength_cubital || linkedEval.muscle_strength_radial) && (() => {
-                                const renderNerve = (label: string, raw: string) => {
-                                  try {
-                                    const obj = JSON.parse(raw);
-                                    const entries = Object.entries(obj).filter(([,v]) => v);
-                                    if (entries.length === 0) return null;
-                                    return <p key={label}><span className="font-medium">{label}:</span> {entries.map(([k,v]) => `${k.replace(/_/g," ")}: ${v}`).join(", ")}</p>;
-                                  } catch { return <p><span className="font-medium">{label}:</span> {raw}</p>; }
-                                };
-                                return <>
-                                  {linkedEval.muscle_strength_median && renderNerve("N. Mediano", linkedEval.muscle_strength_median)}
-                                  {linkedEval.muscle_strength_cubital && renderNerve("N. Cubital", linkedEval.muscle_strength_cubital)}
-                                  {linkedEval.muscle_strength_radial && renderNerve("N. Radial", linkedEval.muscle_strength_radial)}
-                                </>;
-                              })()}
-                              {linkedEval.specific_tests && typeof linkedEval.specific_tests === "object" && (() => {
-                                const tests = linkedEval.specific_tests as Record<string, string | null>;
-                                const filled = Object.entries(tests).filter(([,v]) => v != null);
-                                if (filled.length === 0) return null;
-                                return (
-                                  <div>
-                                    <span className="font-medium">Pruebas específicas: </span>
-                                    {filled.map(([name, result]) => (
-                                      <span key={name} className={`inline-block text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5 ${result === "positive" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                                        {name} {result === "positive" ? "+" : "−"}
-                                      </span>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-                              {linkedEval.sensitivity_functional && <p><span className="font-medium">Sensibilidad epicrítica:</span> {linkedEval.sensitivity_functional}</p>}
-                              {linkedEval.sensitivity_protective && <p><span className="font-medium">Sensibilidad protopática:</span> {linkedEval.sensitivity_protective}</p>}
-                              {linkedEval.sensitivity && <p><span className="font-medium">Sensibilidad:</span> {linkedEval.sensitivity}</p>}
-                              {linkedEval.trophic_state && <p><span className="font-medium">Estado trófico:</span> {linkedEval.trophic_state}</p>}
-                              {linkedEval.scar && <p><span className="font-medium">Cicatriz:</span> {linkedEval.scar}</p>}
-                              {linkedEval.vancouver_score != null && <p><span className="font-medium">Vancouver VSS:</span> {linkedEval.vancouver_score}/15</p>}
-                              {linkedEval.osas_score != null && <p><span className="font-medium">OSAS:</span> {linkedEval.osas_score}/60</p>}
-                              {linkedEval.posture && <p><span className="font-medium">Postura:</span> {linkedEval.posture}</p>}
-                              {linkedEval.emotional_state && <p><span className="font-medium">Emotividad:</span> {linkedEval.emotional_state}</p>}
+                            <div className="mb-3 space-y-1">
+                              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">Mediciones del día</p>
+                              <MeasurementsBlock e={linkedEval} />
                             </div>
                           )}
 
@@ -739,6 +669,399 @@ export default function PatientProfile() {
 
 // --- Session Timeline ---
 
+// ---------------------------------------------------------------------------
+// MeasurementsBlock — Renders structured "Mediciones del día" with sub-sections
+// ---------------------------------------------------------------------------
+const TEST_LABELS: Record<string, string> = {
+  finkelstein: "Finkelstein",
+  phalen: "Phalen",
+  froment: "Froment",
+  wartenberg: "Wartenberg",
+  garra_cubital: "Garra cubital",
+  jobe: "Jobe",
+  pate: "Pate",
+  yocum: "Yocum",
+  herber: "Herber",
+};
+
+const FINGER_LABELS: Record<string, string> = {
+  thumb: "Pulgar",
+  index: "Índice",
+  middle: "Medio",
+  ring: "Anular",
+  pinky: "Meñique",
+  pulgar: "Pulgar",
+  indice: "Índice",
+  índice: "Índice",
+  medio: "Medio",
+  anular: "Anular",
+  menique: "Meñique",
+  meñique: "Meñique",
+};
+
+const SCAR_LABELS: Record<string, string> = {
+  location: "Localización",
+  localizacion: "Localización",
+  length: "Longitud",
+  longitud: "Longitud",
+  vascularization: "Vascularización",
+  vascularizacion: "Vascularización",
+  pigmentation: "Pigmentación",
+  pigmentacion: "Pigmentación",
+  flexibility: "Flexibilidad",
+  flexibilidad: "Flexibilidad",
+  sensitivity: "Sensibilidad",
+  sensibilidad: "Sensibilidad",
+  relief: "Relieve",
+  relieve: "Relieve",
+  temperature: "Temperatura",
+  temperatura: "Temperatura",
+  observations: "Observaciones",
+  observaciones: "Observaciones",
+  notes: "Observaciones",
+};
+
+const VSS_LABELS: Record<string, string> = {
+  pigmentation: "Pigmentación",
+  pigmentacion: "Pigmentación",
+  vascularization: "Vascularización",
+  vascularizacion: "Vascularización",
+  pliability: "Flexibilidad",
+  flexibility: "Flexibilidad",
+  flexibilidad: "Flexibilidad",
+  height: "Altura",
+  altura: "Altura",
+};
+
+const PART_NAMES: Record<string, string> = {
+  shoulder: "Hombro",
+  elbow: "Codo",
+  wrist: "Muñeca",
+  hand: "Mano",
+  thumb: "Pulgar",
+};
+
+function MeasurementsBlock({ e }: { e: any }) {
+  const nn = (v: any) => v != null && v !== "";
+
+  const SubSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
+      <div className="space-y-1 text-sm text-foreground">{children}</div>
+    </div>
+  );
+
+  const FieldLine = ({ label, value }: { label: string; value: any }) => {
+    if (!nn(value)) return null;
+    return (
+      <p className="text-sm whitespace-pre-wrap"><span className="font-medium text-gray-700">{label}:</span> {value}</p>
+    );
+  };
+
+  // ---------- DOLOR ----------
+  const evaColor = (n: number) =>
+    n <= 3 ? "bg-green-100 text-green-700 border-green-200"
+    : n <= 6 ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+    : "bg-red-100 text-red-700 border-red-200";
+
+  const hasPain = nn(e.pain_score) || nn(e.pain_appearance) || nn(e.pain_location)
+    || nn(e.pain_radiation) || nn(e.pain_characteristics) || nn(e.pain_aggravating_factors) || nn(e.pain);
+
+  // ---------- EDEMA ----------
+  const hasEdema = nn(e.edema) || nn(e.edema_circummetry) || nn(e.godet_test);
+
+  // ---------- MOVILIDAD ----------
+  const renderGonio = () => {
+    const g = e.goniometry;
+    if (!g || typeof g !== "object") return [];
+    const parts: JSX.Element[] = [];
+    const renderPart = (which: "pre" | "post", data: any) => {
+      if (!data || !data.values || typeof data.values !== "object") return null;
+      const vals = Object.entries(data.values).filter(([, v]) => v != null && v !== "").map(([k, v]) => `${k} ${v}°`);
+      if (vals.length === 0) return null;
+      const partLabel = PART_NAMES[data.body_part] || data.body_part || "";
+      return (
+        <p key={`${which}-${partLabel}`} className="text-sm">
+          <span className="font-medium text-gray-700">[{partLabel}]</span>{" "}
+          <span className="text-xs font-semibold text-gray-500 uppercase">{which.toUpperCase()}:</span>{" "}
+          {vals.join(" · ")}
+        </p>
+      );
+    };
+    const pre = renderPart("pre", g.pre);
+    const post = renderPart("post", g.post);
+    if (pre) parts.push(pre);
+    if (post) parts.push(post);
+    return parts;
+  };
+  const gonioParts = renderGonio();
+  const hasMobility = gonioParts.length > 0 || nn(e.arom) || nn(e.prom) || nn(e.kapandji);
+  // Detect "cierre de puño" inside arom/prom strings (no dedicated column)
+  // Render arom/prom as fallback if no jsonb goniometry
+  const showAromFallback = gonioParts.length === 0 && (nn(e.arom) || nn(e.prom));
+
+  // ---------- FUERZA ----------
+  const renderDppd = () => {
+    const f = e.dppd_fingers;
+    if (!f || typeof f !== "object") return null;
+    const entries = Object.entries(f).filter(([, v]) => nn(v));
+    if (entries.length === 0) return null;
+    return (
+      <p className="text-sm">
+        <span className="font-medium text-gray-700">DPPD:</span>{" "}
+        {entries.map(([k, v]) => `${FINGER_LABELS[k] || k}: ${v}cm`).join(", ")}
+      </p>
+    );
+  };
+  const dppdNode = renderDppd();
+  const hasDppdJson = dppdNode !== null;
+
+  const renderNerve = (label: string, raw: string) => {
+    try {
+      const obj = JSON.parse(raw);
+      const entries = Object.entries(obj).filter(([, v]) => nn(v));
+      if (entries.length === 0) return null;
+      return (
+        <p key={label} className="text-sm">
+          <span className="font-medium text-gray-700">{label}:</span>{" "}
+          {entries.map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join(", ")}
+        </p>
+      );
+    } catch {
+      return <p key={label} className="text-sm"><span className="font-medium text-gray-700">{label}:</span> {raw}</p>;
+    }
+  };
+  const hasKendall = nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
+  const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
+    || nn(e.muscle_strength) || hasDppdJson || hasKendall;
+
+  // ---------- SENSIBILIDAD ----------
+  const epi = {
+    tacto: e.sensitivity_tacto_ligero,
+    dos: e.sensitivity_dos_puntos,
+    pick: e.sensitivity_picking_up,
+    sw: e.sensitivity_semmes_weinstein,
+  };
+  const proto = {
+    toco: e.sensitivity_toco_pincho,
+    temp: e.sensitivity_temperatura,
+  };
+  const hasEpi = nn(epi.tacto) || nn(epi.dos) || nn(epi.pick) || nn(epi.sw);
+  const hasProto = nn(proto.toco) || nn(proto.temp);
+  const hasOldEpi = !hasEpi && nn(e.sensitivity_functional);
+  const hasOldProto = !hasProto && nn(e.sensitivity_protective);
+  const hasSensitivity = hasEpi || hasProto || hasOldEpi || hasOldProto || nn(e.sensitivity);
+
+  // ---------- PRUEBAS ESPECÍFICAS ----------
+  const renderTests = () => {
+    const t = e.specific_tests;
+    if (!t || typeof t !== "object") return null;
+    const filled = Object.entries(t).filter(([, v]) => v === "positive" || v === "negative");
+    if (filled.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {filled.map(([name, result]) => (
+          <span
+            key={name}
+            className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
+              result === "positive"
+                ? "bg-red-100 text-red-700 border-red-200"
+                : "bg-green-100 text-green-700 border-green-200"
+            }`}
+          >
+            {TEST_LABELS[name] || name} {result === "positive" ? "+" : "−"}
+          </span>
+        ))}
+      </div>
+    );
+  };
+  const testsNode = renderTests();
+  const hasTests = testsNode !== null;
+
+  // ---------- CICATRIZ ----------
+  const renderScar = () => {
+    const s = e.scar_evaluation;
+    if (!s || typeof s !== "object") return { fields: [] as JSX.Element[], vss: null as JSX.Element | null };
+    const fieldOrder = ["location", "localizacion", "length", "longitud", "vascularization", "vascularizacion",
+      "pigmentation", "pigmentacion", "flexibility", "flexibilidad", "sensitivity", "sensibilidad",
+      "relief", "relieve", "temperature", "temperatura", "observations", "observaciones", "notes"];
+    const seen = new Set<string>();
+    const fields: JSX.Element[] = [];
+    fieldOrder.forEach((k) => {
+      const labelKey = SCAR_LABELS[k];
+      if (!labelKey || seen.has(labelKey)) return;
+      const v = s[k];
+      if (!nn(v)) return;
+      seen.add(labelKey);
+      fields.push(<FieldLine key={k} label={labelKey} value={v} />);
+    });
+
+    // VSS sub-scores
+    const vssSrc = s.vss || s.vancouver || s;
+    const vssParts: string[] = [];
+    ["pigmentation", "pigmentacion", "vascularization", "vascularizacion", "pliability", "flexibility", "flexibilidad", "height", "altura"].forEach((k) => {
+      const lbl = VSS_LABELS[k];
+      if (!lbl) return;
+      const v = vssSrc?.[k];
+      if (v == null || v === "") return;
+      if (vssParts.find(p => p.startsWith(lbl + ":"))) return;
+      vssParts.push(`${lbl}: ${v}`);
+    });
+    const vssNode = vssParts.length > 0
+      ? <p className="text-xs text-gray-600">{vssParts.join(" | ")}</p>
+      : null;
+
+    return { fields, vss: vssNode };
+  };
+  const scarRendered = renderScar();
+  const hasScar = scarRendered.fields.length > 0 || nn(e.scar) || nn(e.vancouver_score) || scarRendered.vss !== null;
+
+  // ---------- OTROS ----------
+  const hasOthers = nn(e.trophic_state) || nn(e.posture) || nn(e.emotional_state);
+
+  const hasAny = hasPain || hasEdema || hasMobility || hasStrength || hasSensitivity
+    || hasTests || hasScar || hasOthers || nn(e.osas_score) || nn(e.notes);
+
+  if (!hasAny) return null;
+
+  return (
+    <div className="bg-white rounded-lg border border-border/40 p-3 space-y-3">
+      {hasPain && (
+        <SubSection label="Dolor">
+          {nn(e.pain_score) && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-500 uppercase">EVA</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${evaColor(Number(e.pain_score))}`}>
+                {e.pain_score}/10
+              </span>
+            </div>
+          )}
+          <FieldLine label="Aparición" value={e.pain_appearance} />
+          <FieldLine label="Localización" value={e.pain_location} />
+          <FieldLine label="Irradiación" value={e.pain_radiation} />
+          <FieldLine label="Características" value={e.pain_characteristics} />
+          <FieldLine label="Agravantes" value={e.pain_aggravating_factors} />
+          {nn(e.pain) && <p className="text-sm text-muted-foreground italic">{e.pain}</p>}
+        </SubSection>
+      )}
+
+      {hasEdema && (
+        <SubSection label="Edema">
+          <FieldLine label="Observación" value={e.edema} />
+          <FieldLine label="Circometría" value={e.edema_circummetry} />
+          <FieldLine label="Godet" value={e.godet_test} />
+        </SubSection>
+      )}
+
+      {hasMobility && (
+        <SubSection label="Movilidad">
+          {gonioParts.length > 0 && <div className="space-y-0.5">{gonioParts}</div>}
+          {showAromFallback && (
+            <>
+              {nn(e.arom) && <FieldLine label="Goniometría PRE" value={e.arom} />}
+              {nn(e.prom) && <FieldLine label="Goniometría POST" value={e.prom} />}
+            </>
+          )}
+          <FieldLine label="Kapandji" value={e.kapandji} />
+        </SubSection>
+      )}
+
+      {hasStrength && (
+        <SubSection label="Fuerza">
+          {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
+            <p className="text-sm">
+              <span className="font-medium text-gray-700">Dinamómetro:</span>{" "}
+              {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}
+              {nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}
+              {nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}
+            </p>
+          )}
+          <FieldLine label="Nota evaluación" value={e.dynamometer_notes} />
+          {!hasDppdJson && <FieldLine label="Fuerza muscular" value={e.muscle_strength} />}
+          {dppdNode}
+          {hasKendall && (
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase">Kendall</p>
+              {nn(e.muscle_strength_median) && renderNerve("N. Mediano", e.muscle_strength_median)}
+              {nn(e.muscle_strength_cubital) && renderNerve("N. Cubital", e.muscle_strength_cubital)}
+              {nn(e.muscle_strength_radial) && renderNerve("N. Radial", e.muscle_strength_radial)}
+            </div>
+          )}
+          {hasDppdJson && nn(e.muscle_strength) && <FieldLine label="Notas" value={e.muscle_strength} />}
+        </SubSection>
+      )}
+
+      {hasSensitivity && (
+        <SubSection label="Sensibilidad">
+          {(hasEpi || hasOldEpi) && (
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase">Epicrítica</p>
+              {hasEpi ? (
+                <>
+                  <FieldLine label="Tacto ligero" value={epi.tacto} />
+                  <FieldLine label="2 puntos" value={epi.dos} />
+                  <FieldLine label="Picking up" value={epi.pick} />
+                  <FieldLine label="Semmes-Weinstein" value={epi.sw} />
+                </>
+              ) : (
+                <FieldLine label="Sensibilidad epicrítica" value={e.sensitivity_functional} />
+              )}
+            </div>
+          )}
+          {(hasProto || hasOldProto) && (
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase">Protopática</p>
+              {hasProto ? (
+                <>
+                  <FieldLine label="Toco-pincho" value={proto.toco} />
+                  <FieldLine label="Temperatura" value={proto.temp} />
+                </>
+              ) : (
+                <FieldLine label="Sensibilidad protopática" value={e.sensitivity_protective} />
+              )}
+            </div>
+          )}
+          {nn(e.sensitivity) && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
+        </SubSection>
+      )}
+
+      {hasTests && (
+        <SubSection label="Pruebas específicas">
+          {testsNode}
+        </SubSection>
+      )}
+
+      {hasScar && (
+        <SubSection label="Cicatriz">
+          {scarRendered.fields}
+          {scarRendered.fields.length === 0 && nn(e.scar) && <p className="text-sm whitespace-pre-wrap">{e.scar}</p>}
+          {scarRendered.vss}
+          {nn(e.vancouver_score) && (
+            <span className="inline-block text-xs px-2 py-0.5 rounded-full font-bold bg-teal-100 text-teal-800 border border-teal-200">
+              VSS: {e.vancouver_score}/15
+            </span>
+          )}
+        </SubSection>
+      )}
+
+      {hasOthers && (
+        <SubSection label="Otros">
+          <FieldLine label="Estado trófico" value={e.trophic_state} />
+          <FieldLine label="Postura" value={e.posture} />
+          <FieldLine label="Emotividad" value={e.emotional_state} />
+        </SubSection>
+      )}
+
+      {nn(e.osas_score) && (
+        <p className="text-xs text-muted-foreground">OSAS: {e.osas_score}/60</p>
+      )}
+      {nn(e.notes) && (
+        <p className="text-sm italic text-muted-foreground border-t border-border/30 pt-2">{e.notes}</p>
+      )}
+    </div>
+  );
+}
+
 function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: any[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
@@ -873,91 +1196,15 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                   )}
 
                   {/* MEDICIONES DEL DÍA */}
-                  {linkedEval && (() => {
-                    const e = linkedEval;
-                    const hasPain = nn(e.pain_score) || nn(e.pain_location) || nn(e.pain_characteristics) || nn(e.pain_appearance) || nn(e.pain_radiation) || nn(e.pain_aggravating_factors) || nn(e.pain);
-                    const hasEdema = nn(e.edema) || nn(e.edema_circummetry) || nn(e.godet_test);
-                    const hasMobility = nn(e.arom) || nn(e.prom) || nn(e.kapandji) || (e.goniometry && typeof e.goniometry === "object");
-                    const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.muscle_strength) || nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
-                    const hasSensitivity = nn(e.sensitivity_functional) || nn(e.sensitivity_protective) || nn(e.sensitivity);
-                    const hasTrophic = nn(e.trophic_state) || nn(e.scar) || nn(e.vancouver_score) || nn(e.osas_score);
-                    const hasTests = e.specific_tests && typeof e.specific_tests === "object" && Object.values(e.specific_tests).some((v: any) => nn(v));
-                    const hasPosture = nn(e.posture) || nn(e.emotional_state);
-                    const hasAny = hasPain || hasEdema || hasMobility || hasStrength || hasSensitivity || hasTrophic || hasTests || hasPosture;
-
-                    if (!hasAny && !nn(e.notes)) return null;
-
-                    return (
-                      <div className="space-y-2">
-                        <SectionHeading>Mediciones del día</SectionHeading>
-                        <div className="bg-white rounded-lg border border-border/40 p-3 space-y-2">
-                          {hasPain && (
-                            <div>
-                              <Line>
-                                {[
-                                  nn(e.pain_score) && `Dolor: ${e.pain_score}/10`,
-                                  nn(e.pain_location) && e.pain_location,
-                                  nn(e.pain_characteristics) && e.pain_characteristics,
-                                  nn(e.pain_appearance) && e.pain_appearance,
-                                  nn(e.pain_radiation) && `Irradia: ${e.pain_radiation}`,
-                                  nn(e.pain_aggravating_factors) && `Agravantes: ${e.pain_aggravating_factors}`,
-                                ].filter(Boolean).join(" — ")}
-                              </Line>
-                              {nn(e.pain) && <Line>{e.pain}</Line>}
-                            </div>
-                          )}
-                          {hasEdema && (
-                            <div>
-                              {nn(e.edema) && <Line>Edema: {e.edema}</Line>}
-                              {nn(e.edema_circummetry) && <Line>Circometría: {e.edema_circummetry}</Line>}
-                              {nn(e.godet_test) && <Line>Test de Godet: {e.godet_test}</Line>}
-                            </div>
-                          )}
-                          {hasMobility && (
-                            <div>
-                              {nn(e.arom) && <Line>Goniometría PRE: {e.arom}</Line>}
-                              {nn(e.prom) && <Line>Goniometría POST: {e.prom}</Line>}
-                              {nn(e.kapandji) && <Line>Kapandji: {e.kapandji}</Line>}
-                              {renderGonioJsonb(e.goniometry)}
-                            </div>
-                          )}
-                          {hasStrength && (
-                            <div>
-                              {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
-                                <Line>Dinamómetro: {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}{nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}{nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}</Line>
-                              )}
-                              {nn(e.muscle_strength) && <Line>{e.muscle_strength}</Line>}
-                              {renderNerveStrength(e)}
-                            </div>
-                          )}
-                          {nn(s.avd_followup) && <Line>AVD en sesión: {s.avd_followup}</Line>}
-                          {hasSensitivity && (
-                            <div>
-                              {nn(e.sensitivity_functional) && <Line>Epicrítica: {e.sensitivity_functional}</Line>}
-                              {nn(e.sensitivity_protective) && <Line>Protopática: {e.sensitivity_protective}</Line>}
-                              {nn(e.sensitivity) && <Line>{e.sensitivity}</Line>}
-                            </div>
-                          )}
-                          {hasTrophic && (
-                            <div>
-                              {nn(e.trophic_state) && <Line>Estado trófico: {e.trophic_state}</Line>}
-                              {nn(e.scar) && <Line>Cicatriz: {e.scar}</Line>}
-                              {nn(e.vancouver_score) && <Line>Vancouver VSS: {e.vancouver_score}/15</Line>}
-                              {nn(e.osas_score) && <Line>OSAS: {e.osas_score}/60</Line>}
-                            </div>
-                          )}
-                          {hasTests && renderSpecificTests(e.specific_tests)}
-                          {hasPosture && (
-                            <div>
-                              {nn(e.posture) && <Line>Postura: {e.posture}</Line>}
-                              {nn(e.emotional_state) && <Line>Emotividad: {e.emotional_state}</Line>}
-                            </div>
-                          )}
-                          {nn(e.notes) && <p className="text-sm italic text-muted-foreground">{e.notes}</p>}
-                        </div>
-                      </div>
-                    );
-                  })()}
+                  {linkedEval && (
+                    <div className="space-y-2">
+                      <SectionHeading>Mediciones del día</SectionHeading>
+                      <MeasurementsBlock e={linkedEval} />
+                      {nn(s.avd_followup) && (
+                        <p className="text-sm pl-1"><span className="font-medium text-gray-700">AVD en sesión:</span> {s.avd_followup}</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* EN EL DÍA DE HOY SE ABORDÓ */}
                   {nn(s.interventions) && (
@@ -1170,47 +1417,63 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
             <DialogTitle>Evaluación Funcional — {detail && format(new Date(detail.evaluation_date), "dd/MM/yyyy")}</DialogTitle>
             <DialogDescription className="sr-only">Detalle de evaluación funcional</DialogDescription>
           </DialogHeader>
-          {detail && (
-            <div className="space-y-5 text-sm">
-              {/* General */}
-              <div>
-                <h3 className="font-semibold text-foreground mb-2">Datos Generales</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {detail.dominance && <div><p className="text-muted-foreground text-xs font-medium">Lateralidad</p><p>{dominanceMap[detail.dominance] || detail.dominance}</p></div>}
-                  {detail.barthel_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje Barthel</p><p>{detail.barthel_score}/100</p></div>}
-                  {detail.dash_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje DASH</p><p>{detail.dash_score}/100</p></div>}
+          {detail && (() => {
+            const Field = ({ label, value }: { label: string; value: any }) => {
+              if (value == null || value === "") return null;
+              return (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{label}</p>
+                  <p className="text-sm whitespace-pre-wrap">{value}</p>
                 </div>
+              );
+            };
+            const hasOccup = detail.avd || detail.aivd || detail.barthel_score != null || detail.dash_score != null;
+            const hasHealth = detail.physical_activity || detail.sleep_rest || detail.health_management;
+            return (
+              <div className="space-y-5 text-sm">
+                {/* General */}
+                {detail.dominance && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lateralidad</p>
+                    <p>{dominanceMap[detail.dominance] || detail.dominance}</p>
+                  </div>
+                )}
+
+                {/* Desempeño + scores */}
+                {hasOccup && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Desempeño Ocupacional</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Field label="AVD" value={detail.avd} />
+                      <Field label="AIVD" value={detail.aivd} />
+                      <Field label="Puntaje Barthel" value={detail.barthel_score != null ? `${detail.barthel_score}/100` : null} />
+                      <Field label="Puntaje DASH" value={detail.dash_score != null ? `${detail.dash_score}/100` : null} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Health */}
+                {hasHealth && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Hábitos de Salud</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Field label="Actividad física" value={detail.physical_activity} />
+                      <Field label="Descanso y sueño" value={detail.sleep_rest} />
+                      <Field label="Gestión de la salud" value={detail.health_management} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {detail.notes && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Notas</p>
+                    <p className="whitespace-pre-wrap text-sm">{detail.notes}</p>
+                  </div>
+                )}
               </div>
-              {/* Occupational */}
-              {(detail.avd || detail.aivd || (detail.notes && (detail.notes.includes("Trabajo/Educación:") || detail.notes.includes("Ocio:")))) && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Desempeño Ocupacional</h3>
-                  <div className="space-y-2">
-                    {detail.avd && <div><p className="text-muted-foreground text-xs font-medium">AVD</p><p className="whitespace-pre-wrap">{detail.avd}</p></div>}
-                    {detail.aivd && <div><p className="text-muted-foreground text-xs font-medium">AIVD</p><p className="whitespace-pre-wrap">{detail.aivd}</p></div>}
-                  </div>
-                </div>
-              )}
-              {/* Health */}
-              {(detail.physical_activity || detail.sleep_rest || detail.health_management) && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Hábitos de Salud</h3>
-                  <div className="space-y-2">
-                    {detail.physical_activity && <div><p className="text-muted-foreground text-xs font-medium">Actividad física</p><p className="whitespace-pre-wrap">{detail.physical_activity}</p></div>}
-                    {detail.sleep_rest && <div><p className="text-muted-foreground text-xs font-medium">Descanso y sueño</p><p className="whitespace-pre-wrap">{detail.sleep_rest}</p></div>}
-                    {detail.health_management && <div><p className="text-muted-foreground text-xs font-medium">Gestión de la salud</p><p className="whitespace-pre-wrap">{detail.health_management}</p></div>}
-                  </div>
-                </div>
-              )}
-              {/* Notes */}
-              {detail.notes && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Notas</h3>
-                  <p className="whitespace-pre-wrap">{detail.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
