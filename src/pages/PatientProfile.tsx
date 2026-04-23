@@ -1196,91 +1196,15 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                   )}
 
                   {/* MEDICIONES DEL DÍA */}
-                  {linkedEval && (() => {
-                    const e = linkedEval;
-                    const hasPain = nn(e.pain_score) || nn(e.pain_location) || nn(e.pain_characteristics) || nn(e.pain_appearance) || nn(e.pain_radiation) || nn(e.pain_aggravating_factors) || nn(e.pain);
-                    const hasEdema = nn(e.edema) || nn(e.edema_circummetry) || nn(e.godet_test);
-                    const hasMobility = nn(e.arom) || nn(e.prom) || nn(e.kapandji) || (e.goniometry && typeof e.goniometry === "object");
-                    const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.muscle_strength) || nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
-                    const hasSensitivity = nn(e.sensitivity_functional) || nn(e.sensitivity_protective) || nn(e.sensitivity);
-                    const hasTrophic = nn(e.trophic_state) || nn(e.scar) || nn(e.vancouver_score) || nn(e.osas_score);
-                    const hasTests = e.specific_tests && typeof e.specific_tests === "object" && Object.values(e.specific_tests).some((v: any) => nn(v));
-                    const hasPosture = nn(e.posture) || nn(e.emotional_state);
-                    const hasAny = hasPain || hasEdema || hasMobility || hasStrength || hasSensitivity || hasTrophic || hasTests || hasPosture;
-
-                    if (!hasAny && !nn(e.notes)) return null;
-
-                    return (
-                      <div className="space-y-2">
-                        <SectionHeading>Mediciones del día</SectionHeading>
-                        <div className="bg-white rounded-lg border border-border/40 p-3 space-y-2">
-                          {hasPain && (
-                            <div>
-                              <Line>
-                                {[
-                                  nn(e.pain_score) && `Dolor: ${e.pain_score}/10`,
-                                  nn(e.pain_location) && e.pain_location,
-                                  nn(e.pain_characteristics) && e.pain_characteristics,
-                                  nn(e.pain_appearance) && e.pain_appearance,
-                                  nn(e.pain_radiation) && `Irradia: ${e.pain_radiation}`,
-                                  nn(e.pain_aggravating_factors) && `Agravantes: ${e.pain_aggravating_factors}`,
-                                ].filter(Boolean).join(" — ")}
-                              </Line>
-                              {nn(e.pain) && <Line>{e.pain}</Line>}
-                            </div>
-                          )}
-                          {hasEdema && (
-                            <div>
-                              {nn(e.edema) && <Line>Edema: {e.edema}</Line>}
-                              {nn(e.edema_circummetry) && <Line>Circometría: {e.edema_circummetry}</Line>}
-                              {nn(e.godet_test) && <Line>Test de Godet: {e.godet_test}</Line>}
-                            </div>
-                          )}
-                          {hasMobility && (
-                            <div>
-                              {nn(e.arom) && <Line>Goniometría PRE: {e.arom}</Line>}
-                              {nn(e.prom) && <Line>Goniometría POST: {e.prom}</Line>}
-                              {nn(e.kapandji) && <Line>Kapandji: {e.kapandji}</Line>}
-                              {renderGonioJsonb(e.goniometry)}
-                            </div>
-                          )}
-                          {hasStrength && (
-                            <div>
-                              {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
-                                <Line>Dinamómetro: {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}{nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}{nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}</Line>
-                              )}
-                              {nn(e.muscle_strength) && <Line>{e.muscle_strength}</Line>}
-                              {renderNerveStrength(e)}
-                            </div>
-                          )}
-                          {nn(s.avd_followup) && <Line>AVD en sesión: {s.avd_followup}</Line>}
-                          {hasSensitivity && (
-                            <div>
-                              {nn(e.sensitivity_functional) && <Line>Epicrítica: {e.sensitivity_functional}</Line>}
-                              {nn(e.sensitivity_protective) && <Line>Protopática: {e.sensitivity_protective}</Line>}
-                              {nn(e.sensitivity) && <Line>{e.sensitivity}</Line>}
-                            </div>
-                          )}
-                          {hasTrophic && (
-                            <div>
-                              {nn(e.trophic_state) && <Line>Estado trófico: {e.trophic_state}</Line>}
-                              {nn(e.scar) && <Line>Cicatriz: {e.scar}</Line>}
-                              {nn(e.vancouver_score) && <Line>Vancouver VSS: {e.vancouver_score}/15</Line>}
-                              {nn(e.osas_score) && <Line>OSAS: {e.osas_score}/60</Line>}
-                            </div>
-                          )}
-                          {hasTests && renderSpecificTests(e.specific_tests)}
-                          {hasPosture && (
-                            <div>
-                              {nn(e.posture) && <Line>Postura: {e.posture}</Line>}
-                              {nn(e.emotional_state) && <Line>Emotividad: {e.emotional_state}</Line>}
-                            </div>
-                          )}
-                          {nn(e.notes) && <p className="text-sm italic text-muted-foreground">{e.notes}</p>}
-                        </div>
-                      </div>
-                    );
-                  })()}
+                  {linkedEval && (
+                    <div className="space-y-2">
+                      <SectionHeading>Mediciones del día</SectionHeading>
+                      <MeasurementsBlock e={linkedEval} />
+                      {nn(s.avd_followup) && (
+                        <p className="text-sm pl-1"><span className="font-medium text-gray-700">AVD en sesión:</span> {s.avd_followup}</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* EN EL DÍA DE HOY SE ABORDÓ */}
                   {nn(s.interventions) && (
