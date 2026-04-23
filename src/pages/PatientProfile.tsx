@@ -848,9 +848,10 @@ function MeasurementsBlock({ e }: { e: any }) {
   };
   const hasEpi = nn(epi.tacto) || nn(epi.dos) || nn(epi.pick) || nn(epi.sw);
   const hasProto = nn(proto.toco) || nn(proto.temp);
-  const hasOldEpi = !hasEpi && nn(e.sensitivity_functional);
-  const hasOldProto = !hasProto && nn(e.sensitivity_protective);
-  const hasSensitivity = hasEpi || hasProto || hasOldEpi || hasOldProto || nn(e.sensitivity);
+  const hasSensitivity = nn(e.sensitivity_tacto_ligero) || nn(e.sensitivity_dos_puntos)
+    || nn(e.sensitivity_picking_up) || nn(e.sensitivity_semmes_weinstein)
+    || nn(e.sensitivity_toco_pincho) || nn(e.sensitivity_temperatura)
+    || nn(e.sensitivity);
 
   // ---------- PRUEBAS ESPECÍFICAS ----------
   const renderTests = () => {
