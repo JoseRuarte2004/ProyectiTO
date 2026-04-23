@@ -1148,6 +1148,22 @@ export default function SessionForm() {
               <Textarea rows={2} value={edema_obs} onChange={(e) => setEdemaObs(e.target.value)} className={textareaClass} />
             </div>
             <div>
+              <FieldLabel>Test de Godet</FieldLabel>
+              <Select value={godet_test} onValueChange={setGodetTest}>
+                <SelectTrigger className={inputClass}>
+                  <SelectValue placeholder="No evaluado" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="not_evaluated">No evaluado</SelectItem>
+                  <SelectItem value="negative">Negativo</SelectItem>
+                  <SelectItem value="1+">1+</SelectItem>
+                  <SelectItem value="2+">2+</SelectItem>
+                  <SelectItem value="3+">3+</SelectItem>
+                  <SelectItem value="4+">4+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <p className="text-xs font-semibold text-gray-600 mb-2">Circometría</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -1167,22 +1183,6 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" value={circ_global_msi} onChange={(e) => setCircGlobalMsi(e.target.value)} className={inputClass} />
                 </div>
               </div>
-            </div>
-            <div>
-              <FieldLabel>Test de Godet</FieldLabel>
-              <Select value={godet_test} onValueChange={setGodetTest}>
-                <SelectTrigger className={inputClass}>
-                  <SelectValue placeholder="No evaluado" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="not_evaluated">No evaluado</SelectItem>
-                  <SelectItem value="negative">Negativo</SelectItem>
-                  <SelectItem value="1+">1+</SelectItem>
-                  <SelectItem value="2+">2+</SelectItem>
-                  <SelectItem value="3+">3+</SelectItem>
-                  <SelectItem value="4+">4+</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </SubSection>
 
