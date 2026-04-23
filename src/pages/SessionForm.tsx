@@ -1347,10 +1347,6 @@ export default function SessionForm() {
                 </div>
               </div>
             </div>
-            <div>
-              <FieldLabel>Observaciones</FieldLabel>
-              <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
-            </div>
 
             {/* Tabla Kendall */}
             <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
@@ -1379,6 +1375,10 @@ export default function SessionForm() {
                 </Tabs>
               </CollapsibleContent>
             </Collapsible>
+            <div>
+              <FieldLabel>Observaciones</FieldLabel>
+              <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
+            </div>
           </SubSection>
 
           {/* Cicatriz */}
