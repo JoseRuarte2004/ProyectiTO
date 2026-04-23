@@ -835,27 +835,14 @@ function MeasurementsBlock({ e }: { e: any }) {
       </p>
     );
   };
-  const hasKendall = nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
+  const hasKendall = !!(e.muscle_strength_median || e.muscle_strength_cubital || e.muscle_strength_radial);
   const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
     || nn(e.muscle_strength) || hasDppdJson || hasKendall;
 
   // ---------- SENSIBILIDAD ----------
-  const epi = {
-    tacto: e.sensitivity_tacto_ligero,
-    dos: e.sensitivity_dos_puntos,
-    pick: e.sensitivity_picking_up,
-    sw: e.sensitivity_semmes_weinstein,
-  };
-  const proto = {
-    toco: e.sensitivity_toco_pincho,
-    temp: e.sensitivity_temperatura,
-  };
-  const hasEpi = nn(epi.tacto) || nn(epi.dos) || nn(epi.pick) || nn(epi.sw);
-  const hasProto = nn(proto.toco) || nn(proto.temp);
-  const hasSensitivity = nn(e.sensitivity_tacto_ligero) || nn(e.sensitivity_dos_puntos)
-    || nn(e.sensitivity_picking_up) || nn(e.sensitivity_semmes_weinstein)
-    || nn(e.sensitivity_toco_pincho) || nn(e.sensitivity_temperatura)
-    || nn(e.sensitivity);
+  const hasEpi = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein);
+  const hasProto = !!(e.sensitivity_toco_pincho || e.sensitivity_temperatura);
+  const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
 
   // ---------- PRUEBAS ESPECÍFICAS ----------
   const renderTests = () => {
