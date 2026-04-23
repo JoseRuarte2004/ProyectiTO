@@ -1270,21 +1270,6 @@ export default function SessionForm() {
               />
             </div>
             <div>
-              <FieldLabel>Daniels</FieldLabel>
-              <Select value={muscle_strength} onValueChange={setMuscleStrength}>
-                <SelectTrigger className={inputClass}>
-                  <SelectValue placeholder="Seleccionar grado" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {DANIELS_FULL_GRADES.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <FieldLabel>DPPD (cm) — distancia pulpejo-pliegue distal</FieldLabel>
               <div className="grid grid-cols-5 gap-2">
                 <div>
@@ -1308,6 +1293,21 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" value={dppd_menique} onChange={(e) => setDppdMenique(e.target.value)} className={inputClass} />
                 </div>
               </div>
+            </div>
+            <div>
+              <FieldLabel>Daniels</FieldLabel>
+              <Select value={muscle_strength} onValueChange={setMuscleStrength}>
+                <SelectTrigger className={inputClass}>
+                  <SelectValue placeholder="Seleccionar grado" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {DANIELS_FULL_GRADES.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </SubSection>
 
