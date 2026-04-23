@@ -816,20 +816,24 @@ function MeasurementsBlock({ e }: { e: any }) {
   const dppdNode = renderDppd();
   const hasDppdJson = dppdNode !== null;
 
-  const renderNerve = (label: string, raw: string) => {
-    try {
-      const obj = JSON.parse(raw);
-      const entries = Object.entries(obj).filter(([, v]) => nn(v));
-      if (entries.length === 0) return null;
-      return (
-        <p key={label} className="text-sm">
-          <span className="font-medium text-gray-700">{label}:</span>{" "}
-          {entries.map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join(", ")}
-        </p>
-      );
-    } catch {
-      return <p key={label} className="text-sm"><span className="font-medium text-gray-700">{label}:</span> {raw}</p>;
+  const renderNerve = (label: string, raw: any) => {
+    if (raw == null || raw === "") return null;
+    let obj: any = raw;
+    if (typeof raw === "string") {
+      try { obj = JSON.parse(raw); }
+      catch { return <p key={label} className="text-sm"><span className="font-medium text-gray-700">{label}:</span> {raw}</p>; }
     }
+    if (!obj || typeof obj !== "object") {
+      return <p key={label} className="text-sm"><span className="font-medium text-gray-700">{label}:</span> {String(raw)}</p>;
+    }
+    const entries = Object.entries(obj).filter(([, v]) => nn(v));
+    if (entries.length === 0) return null;
+    return (
+      <p key={label} className="text-sm">
+        <span className="font-medium text-gray-700">{label}:</span>{" "}
+        {entries.map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join(", ")}
+      </p>
+    );
   };
   const hasKendall = nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
   const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
