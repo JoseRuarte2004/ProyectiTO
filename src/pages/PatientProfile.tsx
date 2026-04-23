@@ -1058,14 +1058,19 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                     </div>
                   )}
 
-                  {/* MEDICIONES DEL DÍA */}
+                  {/* AVD EN SESIÓN */}
+                  {nn(s.avd_followup) && (
+                    <div className="space-y-2">
+                      <SectionHeading>AVD en sesión</SectionHeading>
+                      <Line>{s.avd_followup}</Line>
+                    </div>
+                  )}
+
+                  {/* EVALUACIÓN ANALÍTICA */}
                   {linkedEval && (
                     <div className="space-y-2">
-                      <SectionHeading>Mediciones del día</SectionHeading>
+                      <SectionHeading>Evaluación analítica</SectionHeading>
                       <MeasurementsBlock e={linkedEval} />
-                      {nn(s.avd_followup) && (
-                        <p className="text-sm pl-1"><span className="font-medium text-gray-700">AVD en sesión:</span> {s.avd_followup}</p>
-                      )}
                     </div>
                   )}
 
