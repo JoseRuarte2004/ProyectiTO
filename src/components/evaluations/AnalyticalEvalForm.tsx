@@ -471,10 +471,28 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
 
           <AccordionItem value="sensibilidad">
             <AccordionTrigger className="text-sm font-semibold">Sensibilidad</AccordionTrigger>
-            <AccordionContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <Row label="Epicrítica (funcional)" value={e.sensitivity_functional} />
-              <Row label="Protopática (protectora)" value={e.sensitivity_protective} />
-              <Row label="General" value={e.sensitivity} />
+            <AccordionContent className="space-y-3 pt-2">
+              {(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein) && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Epicrítica</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Row label="Tacto ligero" value={e.sensitivity_tacto_ligero} />
+                    <Row label="Discriminación 2 puntos" value={e.sensitivity_dos_puntos} />
+                    <Row label="Picking up" value={e.sensitivity_picking_up} />
+                    <Row label="Semmes-Weinstein" value={e.sensitivity_semmes_weinstein} />
+                  </div>
+                </div>
+              )}
+              {(e.sensitivity_toco_pincho || e.sensitivity_temperatura) && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Protopática</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Row label="Toco-pincho" value={e.sensitivity_toco_pincho} />
+                    <Row label="Temperatura" value={e.sensitivity_temperatura} />
+                  </div>
+                </div>
+              )}
+              {e.sensitivity && <Row label="General" value={e.sensitivity} />}
             </AccordionContent>
           </AccordionItem>
 
