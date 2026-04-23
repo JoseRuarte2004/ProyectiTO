@@ -928,6 +928,11 @@ export default function SessionForm() {
                 onChange={(e) => setWeekAtSession(e.target.value)}
                 className={inputClass}
               />
+              {weekCalcSource && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Calculado desde {weekCalcSource === "injury" ? "fecha de lesión" : "inicio de síntomas"} (editable)
+                </p>
+              )}
             </div>
           </div>
           {session_type === "discharge" && (
