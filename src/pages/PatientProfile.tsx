@@ -224,9 +224,8 @@ export default function PatientProfile() {
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="resumen" className="space-y-4">
+      <Tabs defaultValue="ficha" className="space-y-4">
         <TabsList className="bg-muted">
-          <TabsTrigger value="resumen">Historia</TabsTrigger>
           <TabsTrigger value="ficha">Ficha</TabsTrigger>
           <TabsTrigger value="sessions">Sesiones</TabsTrigger>
           <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
@@ -235,190 +234,164 @@ export default function PatientProfile() {
           <TabsTrigger value="archivos">Archivos</TabsTrigger>
         </TabsList>
 
-        {/* RESUMEN */}
-        <TabsContent value="resumen">
+        {/* FICHA */}
+        <TabsContent value="ficha" className="space-y-4">
           {(() => {
-            const ordinalR = (n: number | null) => {
-              if (!n) return "";
-              const m: Record<number, string> = {1:"1ra",2:"2da",3:"3ra",4:"4ta",5:"5ta",6:"6ta",7:"7ma",8:"8va",9:"9na",10:"10ma"};
-              return m[n] || `${n}ra`;
+            const treatmentLabel = clinical?.treatment_type
+              ? ({ conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" } as Record<string, string>)[clinical.treatment_type] || clinical.treatment_type
+              : null;
+            const dominanceLabel = occupational?.dominance
+              ? ({ right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance
+              : null;
+            const fmtDate = (d: string | null | undefined) =>
+              d ? format(new Date(d + "T12:00:00"), "dd/MM/yyyy") : null;
+            const periodStr = (w: number | null | undefined, d: number | null | undefined) => {
+              if (w == null && d == null) return null;
+              return [w != null ? `${w} sem` : "", d != null ? `${d} d` : ""].filter(Boolean).join(" · ");
             };
-            const sortedSessions = [...sessions].sort((a, b) => a.session_date.localeCompare(b.session_date));
+
+            const InfoRow = ({ label, value }: { label: string; value: any }) => {
+              if (value == null || value === "") return null;
+              return (
+                <div className="flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+                  <span className="text-sm text-foreground whitespace-pre-wrap">{value}</span>
+                </div>
+              );
+            };
+
+            const InfoCard = ({ title, icon, accent, children }: { title: string; icon: string; accent: string; children: React.ReactNode }) => (
+              <div className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
+                <div className={`px-4 py-2.5 border-b border-border/40 flex items-center gap-2 ${accent}`}>
+                  <span className="text-base">{icon}</span>
+                  <h3 className="text-sm font-semibold">{title}</h3>
+                </div>
+                <div className="p-4">{children}</div>
+              </div>
+            );
 
             return (
-              <div className="max-w-3xl mx-auto space-y-0 text-sm text-foreground">
-                {/* ENCABEZADO */}
-                <div className="pb-4 border-b border-border">
-                  <h2 className="text-xl font-bold">{patient.last_name}, {patient.first_name}</h2>
-                  <p className="text-muted-foreground mt-1">
-                    DNI: {patient.dni} · {age !== null ? `${age} años` : "Edad desconocida"} · {patient.insurance || "Sin obra social"} · Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}
-                  </p>
-                  {clinical?.diagnosis && (
-                    <p className="mt-2 font-semibold text-teal-700">Dx: {clinical.diagnosis}</p>
-                  )}
-                </div>
-
-                {/* HISTORIAL DE VISITAS */}
-                {sortedSessions.length > 0 ? (
-                  <div>
-                    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase pt-5 pb-2">HISTORIAL DE VISITAS</p>
-                    {sortedSessions.map((s) => {
-                      const linkedEval = analEvals.find((e: any) => e.session_id === s.id);
-                      return (
-                        <div key={s.id} className="pt-4 pb-4 border-b border-border/40 last:border-0">
-                          <div className="flex items-center gap-3 mb-3 flex-wrap">
-                            <span className="font-semibold">
-                              {format(new Date(s.session_date + "T12:00:00"), "EEEE d 'de' MMMM yyyy", { locale: es })}
-                            </span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              s.session_type === "admission" ? "bg-purple-100 text-purple-700" :
-                              s.session_type === "discharge" ? "bg-green-100 text-green-700" :
-                              "bg-teal-50 text-teal-700"
-                            }`}>
-                              {s.session_type === "admission" ? "Admisión" : s.session_type === "discharge" ? "Alta" : "Seguimiento"}
-                            </span>
-                            {s.session_number && (
-                              <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>
-                            )}
-                            {s.week_at_session != null && (
-                              <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>
-                            )}
-                          </div>
-
-                          {(s.session_number || s.week_at_session != null) && (
-                            <p className="italic text-muted-foreground text-xs mb-3">
-                              Paciente asiste a {ordinalR(s.session_number)} sesión
-                              {s.week_at_session != null ? `, cursando su ${s.week_at_session}ma semana POP/PL` : ""}.
-                            </p>
-                          )}
-
-                          {(s.general_observations || s.evolution || s.symptom_changes || s.clinical_changes || s.treatment_adjustments) && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Evolución</p>
-                              {s.general_observations && <p className="whitespace-pre-wrap">{s.general_observations}</p>}
-                              {s.evolution && <p className="whitespace-pre-wrap">{s.evolution}</p>}
-                              {s.symptom_changes && <p><span className="font-medium">Cambios en síntomas:</span> {s.symptom_changes}</p>}
-                              {s.clinical_changes && <p><span className="font-medium">Cambios clínicos:</span> {s.clinical_changes}</p>}
-                              {s.treatment_adjustments && <p><span className="font-medium">Ajustes:</span> {s.treatment_adjustments}</p>}
-                            </div>
-                          )}
-
-                          {s.avd_followup && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">AVD en sesión</p>
-                              <p className="whitespace-pre-wrap">{s.avd_followup}</p>
-                            </div>
-                          )}
-
-                          {linkedEval && (
-                            <div className="mb-3 space-y-1">
-                              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">Mediciones del día</p>
-                              <MeasurementsBlock e={linkedEval} />
-                            </div>
-                          )}
-
-                          {s.interventions && (
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">En el día de hoy se abordó</p>
-                              <p className="whitespace-pre-wrap">{s.interventions}</p>
-                            </div>
-                          )}
-
-                          {s.home_instructions_sent && (
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Indicaciones enviadas</p>
-                              <p className="whitespace-pre-wrap">{s.home_instructions_sent}</p>
-                            </div>
-                          )}
-
-                          {s.notes && (
-                            <p className="italic text-muted-foreground text-xs mt-2">{s.notes}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="pt-8 text-center text-muted-foreground text-sm">
-                    <p>Aún no hay visitas registradas.</p>
-                    <p className="text-xs mt-1">Registrá la primera visita desde el tab Sesiones.</p>
+              <div className="space-y-4">
+                {clinical?.diagnosis && (
+                  <div className="bg-gradient-to-br from-teal-50 via-white to-blue-50 rounded-xl border border-teal-100 p-5">
+                    <p className="text-[11px] font-bold tracking-widest text-teal-700 uppercase mb-1">Diagnóstico actual</p>
+                    <p className="text-lg font-semibold text-foreground leading-snug">{clinical.diagnosis}</p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {treatmentLabel && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-teal-600 text-white font-medium">
+                          {treatmentLabel}
+                        </span>
+                      )}
+                      {clinical.injury_date && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-white border border-teal-200 text-teal-700 font-medium">
+                          📅 Lesión: {fmtDate(clinical.injury_date)}
+                        </span>
+                      )}
+                      {clinical.doctor_name && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-white border border-border text-muted-foreground">
+                          👨‍⚕️ {clinical.doctor_name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {clinical ? (
+                    <div className="space-y-4">
+                      {(clinical.injury_date || clinical.symptom_start_date || periodStr(clinical.weeks_post_injury, clinical.days_post_injury) || periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery) || periodStr(clinical.immobilization_weeks, clinical.immobilization_days) || clinical.immobilization_type || clinical.next_oyt_appointment) && (
+                        <InfoCard title="Cronología" icon="🗓️" accent="bg-blue-50 text-blue-800">
+                          <div className="grid grid-cols-2 gap-x-4">
+                            <InfoRow label="Fecha de lesión" value={fmtDate(clinical.injury_date)} />
+                            <InfoRow label="Inicio síntomas" value={fmtDate(clinical.symptom_start_date)} />
+                            <InfoRow label="Post lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury)} />
+                            <InfoRow label="Post cirugía" value={periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery)} />
+                            <InfoRow label="Inmovilización" value={periodStr(clinical.immobilization_weeks, clinical.immobilization_days)} />
+                            <InfoRow label="Tipo inmovilización" value={clinical.immobilization_type} />
+                            <InfoRow label="Próximo OyT" value={fmtDate(clinical.next_oyt_appointment)} />
+                          </div>
+                        </InfoCard>
+                      )}
+
+                      {(clinical.injury_mechanism || clinical.current_treatment || clinical.pharmacological_treatment) && (
+                        <InfoCard title="Mecanismo y tratamiento" icon="🩺" accent="bg-teal-50 text-teal-800">
+                          <InfoRow label="Mecanismo de lesión" value={clinical.injury_mechanism} />
+                          <InfoRow label="Tratamiento actual" value={clinical.current_treatment} />
+                          <InfoRow label="Tratamiento farmacológico" value={clinical.pharmacological_treatment} />
+                        </InfoCard>
+                      )}
+
+                      {(clinical.medical_history || clinical.studies || clinical.notes) && (
+                        <InfoCard title="Antecedentes y estudios" icon="📋" accent="bg-amber-50 text-amber-800">
+                          <InfoRow label="Antecedentes personales" value={clinical.medical_history} />
+                          <InfoRow label="Estudios" value={clinical.studies} />
+                          <InfoRow label="Notas" value={clinical.notes} />
+                        </InfoCard>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-card rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground text-sm">
+                      Sin datos clínicos registrados.
+                    </div>
+                  )}
+
+                  {occupational ? (
+                    <div className="space-y-4">
+                      <InfoCard title="Identidad ocupacional" icon="👤" accent="bg-purple-50 text-purple-800">
+                        {dominanceLabel && (
+                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/30">
+                            <span className="text-xs text-muted-foreground">Lateralidad:</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-semibold">
+                              {dominanceLabel}
+                            </span>
+                          </div>
+                        )}
+                        <InfoRow label="Trabajo" value={occupational.job} />
+                        <InfoRow label="Educación" value={occupational.education} />
+                        <InfoRow label="Red de apoyo" value={occupational.support_network} />
+                      </InfoCard>
+
+                      {(occupational.leisure || occupational.physical_activity || occupational.sleep_rest) && (
+                        <InfoCard title="Estilo de vida" icon="🌿" accent="bg-emerald-50 text-emerald-800">
+                          <InfoRow label="Ocio" value={occupational.leisure} />
+                          <InfoRow label="Actividad física" value={occupational.physical_activity} />
+                          <InfoRow label="Sueño y descanso" value={occupational.sleep_rest} />
+                        </InfoCard>
+                      )}
+
+                      {occupational.dash_score != null && (
+                        <InfoCard title="Puntaje DASH" icon="📊" accent="bg-rose-50 text-rose-800">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-rose-700">{occupational.dash_score}</span>
+                            <span className="text-sm text-muted-foreground">/100</span>
+                          </div>
+                          <div className="mt-2 h-2 w-full bg-rose-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-rose-500 transition-all"
+                              style={{ width: `${Math.min(100, Math.max(0, occupational.dash_score))}%` }}
+                            />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-2">
+                            A menor puntaje, mejor función del miembro superior.
+                          </p>
+                        </InfoCard>
+                      )}
+
+                      {occupational.notes && (
+                        <InfoCard title="Notas" icon="📝" accent="bg-muted text-foreground">
+                          <p className="text-sm whitespace-pre-wrap">{occupational.notes}</p>
+                        </InfoCard>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-card rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground text-sm">
+                      Sin perfil ocupacional registrado.
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })()}
-        </TabsContent>
-
-        {/* FICHA */}
-        <TabsContent value="ficha" className="space-y-4">
-          <Card className="border-border/50">
-            <CardHeader><CardTitle className="text-base">Datos Clínicos</CardTitle></CardHeader>
-            <CardContent>
-              {clinical ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  {[
-                    ["Diagnóstico", clinical.diagnosis],
-                    ["Tipo de tratamiento", clinical.treatment_type ? ({ conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" } as Record<string, string>)[clinical.treatment_type] || clinical.treatment_type : null],
-                    ["Fecha de lesión", clinical.injury_date ? format(new Date(clinical.injury_date + "T12:00:00"), "dd/MM/yyyy") : null],
-                    ["Inicio de síntomas", clinical.symptom_start_date ? format(new Date(clinical.symptom_start_date + "T12:00:00"), "dd/MM/yyyy") : null],
-                    ["Mecanismo de lesión", clinical.injury_mechanism],
-                    ["Tratamiento actual", clinical.current_treatment],
-                    ["Semanas post lesión", (() => {
-                      const w = clinical.weeks_post_injury; const d = clinical.days_post_injury;
-                      if (w == null && d == null) return null;
-                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
-                    })()],
-                    ["Semanas post cirugía", (() => {
-                      const w = clinical.weeks_post_surgery; const d = clinical.days_post_surgery;
-                      if (w == null && d == null) return null;
-                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
-                    })()],
-                    ["Semanas de inmovilización", (() => {
-                      const w = clinical.immobilization_weeks; const d = clinical.immobilization_days;
-                      if (w == null && d == null) return null;
-                      return [w != null ? `${w} semanas` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" ");
-                    })()],
-                    ["Médico derivante", clinical.doctor_name],
-                    ["Próximo OyT", clinical.next_oyt_appointment ? format(new Date(clinical.next_oyt_appointment + "T12:00:00"), "dd/MM/yyyy") : null],
-                    ["Estudios", clinical.studies],
-                    ["Antecedentes personales", clinical.medical_history],
-                    ["Tratamiento farmacológico", clinical.pharmacological_treatment],
-                    ["Notas", clinical.notes],
-                  ].filter(([, value]) => value != null && value !== "").map(([label, value]) => (
-                    <div key={label as string}>
-                      <p className="text-muted-foreground text-xs">{label as string}</p>
-                      <p className="text-foreground">{(value as string) || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className="text-muted-foreground text-sm">Sin datos clínicos registrados.</p>}
-            </CardContent>
-          </Card>
-          <Card className="border-border/50">
-            <CardHeader><CardTitle className="text-base">Perfil Ocupacional</CardTitle></CardHeader>
-            <CardContent>
-              {occupational ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  {[
-                    ["Lateralidad", occupational.dominance ? ({ right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance : null],
-                    ["Red de apoyo", occupational.support_network],
-                    ["Educación", occupational.education],
-                    ["Trabajo", occupational.job],
-                    ["Ocio", occupational.leisure],
-                    ["Actividad física", occupational.physical_activity],
-                    ["Sueño y descanso", occupational.sleep_rest],
-                    ["Puntaje DASH", occupational.dash_score != null ? `${occupational.dash_score}/100` : null],
-                    ["Notas", occupational.notes],
-                  ].filter(([, value]) => value != null && value !== "").map(([label, value]) => (
-                    <div key={label as string}>
-                      <p className="text-muted-foreground text-xs">{label as string}</p>
-                      <p className="text-foreground">{(value as string) || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className="text-muted-foreground text-sm">Sin perfil ocupacional.</p>}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="sessions" className="space-y-4">
@@ -969,14 +942,59 @@ function MeasurementsBlock({ e }: { e: any }) {
           <FieldLine label="Nota evaluación" value={e.dynamometer_notes} />
           {!hasDppdJson && <FieldLine label="Fuerza muscular" value={e.muscle_strength} />}
           {dppdNode}
-          {hasKendall && (
-            <div className="space-y-0.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase">Kendall</p>
-              {nn(e.muscle_strength_median) && renderNerve("N. Mediano", e.muscle_strength_median)}
-              {nn(e.muscle_strength_cubital) && renderNerve("N. Cubital", e.muscle_strength_cubital)}
-              {nn(e.muscle_strength_radial) && renderNerve("N. Radial", e.muscle_strength_radial)}
-            </div>
-          )}
+          {hasKendall && (() => {
+            const nerves: { label: string; raw: any; cls: string }[] = [
+              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-teal-50 border-teal-200 text-teal-800" },
+              { label: "N. Cubital", raw: e.muscle_strength_cubital, cls: "bg-blue-50 border-blue-200 text-blue-800" },
+              { label: "N. Radial", raw: e.muscle_strength_radial, cls: "bg-amber-50 border-amber-200 text-amber-800" },
+            ];
+            const parsed = nerves.map(n => {
+              if (!nn(n.raw)) return { ...n, entries: [] as [string, string][] };
+              let obj: any = n.raw;
+              if (typeof n.raw === "string") {
+                try { obj = JSON.parse(n.raw); } catch { return { ...n, entries: [["", String(n.raw)]] as [string, string][] }; }
+              }
+              if (!obj || typeof obj !== "object") return { ...n, entries: [["", String(n.raw)]] as [string, string][] };
+              const entries = Object.entries(obj).filter(([, v]) => nn(v)) as [string, string][];
+              return { ...n, entries };
+            }).filter(n => n.entries.length > 0);
+            if (parsed.length === 0) return null;
+            const fmt = (k: string) => k.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+            const gradeBadge = (grade: string) => {
+              const g = parseInt(grade);
+              let cls = "bg-muted text-muted-foreground";
+              if (!isNaN(g)) {
+                if (g >= 4) cls = "bg-emerald-100 text-emerald-700";
+                else if (g === 3) cls = "bg-amber-100 text-amber-700";
+                else if (g <= 2 && g >= 0) cls = "bg-rose-100 text-rose-700";
+              }
+              return (
+                <span className={`inline-flex items-center justify-center min-w-[32px] h-5 px-1.5 text-[11px] font-semibold rounded ${cls}`}>
+                  {isNaN(g) ? grade : `${grade}/5`}
+                </span>
+              );
+            };
+            return (
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold text-gray-500 uppercase">Kendall / Daniels</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {parsed.map(n => (
+                    <div key={n.label} className={`rounded-md border p-2 ${n.cls}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide mb-1.5">{n.label}</p>
+                      <div className="space-y-1">
+                        {n.entries.map(([muscle, grade], i) => (
+                          <div key={i} className="flex items-center justify-between gap-2 bg-white/70 rounded px-1.5 py-0.5">
+                            {muscle && <span className="text-[11px] text-foreground/80 truncate">{fmt(muscle)}</span>}
+                            {gradeBadge(grade)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           {hasDppdJson && nn(e.muscle_strength) && <FieldLine label="Notas" value={e.muscle_strength} />}
         </SubSection>
       )}
@@ -1173,14 +1191,19 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                     </div>
                   )}
 
-                  {/* MEDICIONES DEL DÍA */}
+                  {/* AVD EN SESIÓN */}
+                  {nn(s.avd_followup) && (
+                    <div className="space-y-2">
+                      <SectionHeading>AVD en sesión</SectionHeading>
+                      <Line>{s.avd_followup}</Line>
+                    </div>
+                  )}
+
+                  {/* EVALUACIÓN ANALÍTICA */}
                   {linkedEval && (
                     <div className="space-y-2">
-                      <SectionHeading>Mediciones del día</SectionHeading>
+                      <SectionHeading>Evaluación analítica</SectionHeading>
                       <MeasurementsBlock e={linkedEval} />
-                      {nn(s.avd_followup) && (
-                        <p className="text-sm pl-1"><span className="font-medium text-gray-700">AVD en sesión:</span> {s.avd_followup}</p>
-                      )}
                     </div>
                   )}
 
