@@ -840,8 +840,6 @@ function MeasurementsBlock({ e }: { e: any }) {
     || nn(e.muscle_strength) || hasDppdJson || hasKendall;
 
   // ---------- SENSIBILIDAD ----------
-  const hasEpi = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein);
-  const hasProto = !!(e.sensitivity_toco_pincho || e.sensitivity_temperatura);
   const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
 
   // ---------- PRUEBAS ESPECÍFICAS ----------
