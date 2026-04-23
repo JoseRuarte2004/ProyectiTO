@@ -1417,47 +1417,63 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
             <DialogTitle>Evaluación Funcional — {detail && format(new Date(detail.evaluation_date), "dd/MM/yyyy")}</DialogTitle>
             <DialogDescription className="sr-only">Detalle de evaluación funcional</DialogDescription>
           </DialogHeader>
-          {detail && (
-            <div className="space-y-5 text-sm">
-              {/* General */}
-              <div>
-                <h3 className="font-semibold text-foreground mb-2">Datos Generales</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {detail.dominance && <div><p className="text-muted-foreground text-xs font-medium">Lateralidad</p><p>{dominanceMap[detail.dominance] || detail.dominance}</p></div>}
-                  {detail.barthel_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje Barthel</p><p>{detail.barthel_score}/100</p></div>}
-                  {detail.dash_score != null && <div><p className="text-muted-foreground text-xs font-medium">Puntaje DASH</p><p>{detail.dash_score}/100</p></div>}
+          {detail && (() => {
+            const Field = ({ label, value }: { label: string; value: any }) => {
+              if (value == null || value === "") return null;
+              return (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{label}</p>
+                  <p className="text-sm whitespace-pre-wrap">{value}</p>
                 </div>
+              );
+            };
+            const hasOccup = detail.avd || detail.aivd || detail.barthel_score != null || detail.dash_score != null;
+            const hasHealth = detail.physical_activity || detail.sleep_rest || detail.health_management;
+            return (
+              <div className="space-y-5 text-sm">
+                {/* General */}
+                {detail.dominance && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lateralidad</p>
+                    <p>{dominanceMap[detail.dominance] || detail.dominance}</p>
+                  </div>
+                )}
+
+                {/* Desempeño + scores */}
+                {hasOccup && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Desempeño Ocupacional</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Field label="AVD" value={detail.avd} />
+                      <Field label="AIVD" value={detail.aivd} />
+                      <Field label="Puntaje Barthel" value={detail.barthel_score != null ? `${detail.barthel_score}/100` : null} />
+                      <Field label="Puntaje DASH" value={detail.dash_score != null ? `${detail.dash_score}/100` : null} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Health */}
+                {hasHealth && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Hábitos de Salud</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Field label="Actividad física" value={detail.physical_activity} />
+                      <Field label="Descanso y sueño" value={detail.sleep_rest} />
+                      <Field label="Gestión de la salud" value={detail.health_management} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {detail.notes && (
+                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Notas</p>
+                    <p className="whitespace-pre-wrap text-sm">{detail.notes}</p>
+                  </div>
+                )}
               </div>
-              {/* Occupational */}
-              {(detail.avd || detail.aivd || (detail.notes && (detail.notes.includes("Trabajo/Educación:") || detail.notes.includes("Ocio:")))) && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Desempeño Ocupacional</h3>
-                  <div className="space-y-2">
-                    {detail.avd && <div><p className="text-muted-foreground text-xs font-medium">AVD</p><p className="whitespace-pre-wrap">{detail.avd}</p></div>}
-                    {detail.aivd && <div><p className="text-muted-foreground text-xs font-medium">AIVD</p><p className="whitespace-pre-wrap">{detail.aivd}</p></div>}
-                  </div>
-                </div>
-              )}
-              {/* Health */}
-              {(detail.physical_activity || detail.sleep_rest || detail.health_management) && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Hábitos de Salud</h3>
-                  <div className="space-y-2">
-                    {detail.physical_activity && <div><p className="text-muted-foreground text-xs font-medium">Actividad física</p><p className="whitespace-pre-wrap">{detail.physical_activity}</p></div>}
-                    {detail.sleep_rest && <div><p className="text-muted-foreground text-xs font-medium">Descanso y sueño</p><p className="whitespace-pre-wrap">{detail.sleep_rest}</p></div>}
-                    {detail.health_management && <div><p className="text-muted-foreground text-xs font-medium">Gestión de la salud</p><p className="whitespace-pre-wrap">{detail.health_management}</p></div>}
-                  </div>
-                </div>
-              )}
-              {/* Notes */}
-              {detail.notes && (
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">Notas</h3>
-                  <p className="whitespace-pre-wrap">{detail.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
