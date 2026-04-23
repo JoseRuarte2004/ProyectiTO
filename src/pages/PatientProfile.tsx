@@ -835,27 +835,14 @@ function MeasurementsBlock({ e }: { e: any }) {
       </p>
     );
   };
-  const hasKendall = nn(e.muscle_strength_median) || nn(e.muscle_strength_cubital) || nn(e.muscle_strength_radial);
+  const hasKendall = !!(e.muscle_strength_median || e.muscle_strength_cubital || e.muscle_strength_radial);
   const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
     || nn(e.muscle_strength) || hasDppdJson || hasKendall;
 
   // ---------- SENSIBILIDAD ----------
-  const epi = {
-    tacto: e.sensitivity_tacto_ligero,
-    dos: e.sensitivity_dos_puntos,
-    pick: e.sensitivity_picking_up,
-    sw: e.sensitivity_semmes_weinstein,
-  };
-  const proto = {
-    toco: e.sensitivity_toco_pincho,
-    temp: e.sensitivity_temperatura,
-  };
-  const hasEpi = nn(epi.tacto) || nn(epi.dos) || nn(epi.pick) || nn(epi.sw);
-  const hasProto = nn(proto.toco) || nn(proto.temp);
-  const hasSensitivity = nn(e.sensitivity_tacto_ligero) || nn(e.sensitivity_dos_puntos)
-    || nn(e.sensitivity_picking_up) || nn(e.sensitivity_semmes_weinstein)
-    || nn(e.sensitivity_toco_pincho) || nn(e.sensitivity_temperatura)
-    || nn(e.sensitivity);
+  const hasEpi = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein);
+  const hasProto = !!(e.sensitivity_toco_pincho || e.sensitivity_temperatura);
+  const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
 
   // ---------- PRUEBAS ESPECÍFICAS ----------
   const renderTests = () => {
@@ -1001,17 +988,17 @@ function MeasurementsBlock({ e }: { e: any }) {
           {hasEpi && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Epicrítica</p>
-              <FieldLine label="Tacto ligero" value={epi.tacto} />
-              <FieldLine label="Discriminación 2 puntos" value={epi.dos} />
-              <FieldLine label="Picking up" value={epi.pick} />
-              <FieldLine label="Semmes-Weinstein" value={epi.sw} />
+              <FieldLine label="Tacto ligero" value={e.sensitivity_tacto_ligero} />
+              <FieldLine label="Discriminación 2 puntos" value={e.sensitivity_dos_puntos} />
+              <FieldLine label="Picking up" value={e.sensitivity_picking_up} />
+              <FieldLine label="Semmes-Weinstein" value={e.sensitivity_semmes_weinstein} />
             </div>
           )}
           {hasProto && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Protopática</p>
-              <FieldLine label="Toco-pincho" value={proto.toco} />
-              <FieldLine label="Temperatura" value={proto.temp} />
+              <FieldLine label="Toco-pincho" value={e.sensitivity_toco_pincho} />
+              <FieldLine label="Temperatura" value={e.sensitivity_temperatura} />
             </div>
           )}
           {nn(e.sensitivity) && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
