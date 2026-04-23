@@ -988,17 +988,17 @@ function MeasurementsBlock({ e }: { e: any }) {
           {hasEpi && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Epicrítica</p>
-              <FieldLine label="Tacto ligero" value={epi.tacto} />
-              <FieldLine label="Discriminación 2 puntos" value={epi.dos} />
-              <FieldLine label="Picking up" value={epi.pick} />
-              <FieldLine label="Semmes-Weinstein" value={epi.sw} />
+              <FieldLine label="Tacto ligero" value={e.sensitivity_tacto_ligero} />
+              <FieldLine label="Discriminación 2 puntos" value={e.sensitivity_dos_puntos} />
+              <FieldLine label="Picking up" value={e.sensitivity_picking_up} />
+              <FieldLine label="Semmes-Weinstein" value={e.sensitivity_semmes_weinstein} />
             </div>
           )}
           {hasProto && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Protopática</p>
-              <FieldLine label="Toco-pincho" value={proto.toco} />
-              <FieldLine label="Temperatura" value={proto.temp} />
+              <FieldLine label="Toco-pincho" value={e.sensitivity_toco_pincho} />
+              <FieldLine label="Temperatura" value={e.sensitivity_temperatura} />
             </div>
           )}
           {nn(e.sensitivity) && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
