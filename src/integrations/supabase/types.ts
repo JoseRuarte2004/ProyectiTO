@@ -561,12 +561,16 @@ export type Database = {
           dominance: Database["public"]["Enums"]["dominance_type"] | null
           episode_id: string | null
           evaluation_date: string
+          fim_items: Json | null
+          fim_score: number | null
           health_management: string | null
           id: string
           notes: string | null
           patient_id: string
           physical_activity: string | null
           professional_id: string
+          quickdash_items: Json | null
+          quickdash_score: number | null
           session_id: string | null
           sleep_rest: string | null
           updated_at: string
@@ -580,12 +584,16 @@ export type Database = {
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
           episode_id?: string | null
           evaluation_date?: string
+          fim_items?: Json | null
+          fim_score?: number | null
           health_management?: string | null
           id?: string
           notes?: string | null
           patient_id: string
           physical_activity?: string | null
           professional_id: string
+          quickdash_items?: Json | null
+          quickdash_score?: number | null
           session_id?: string | null
           sleep_rest?: string | null
           updated_at?: string
@@ -599,12 +607,16 @@ export type Database = {
           dominance?: Database["public"]["Enums"]["dominance_type"] | null
           episode_id?: string | null
           evaluation_date?: string
+          fim_items?: Json | null
+          fim_score?: number | null
           health_management?: string | null
           id?: string
           notes?: string | null
           patient_id?: string
           physical_activity?: string | null
           professional_id?: string
+          quickdash_items?: Json | null
+          quickdash_score?: number | null
           session_id?: string | null
           sleep_rest?: string | null
           updated_at?: string

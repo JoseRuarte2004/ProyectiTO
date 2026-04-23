@@ -21,6 +21,14 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
+import {
+  QuickDashSection,
+  FimSection,
+  emptyQuickDash,
+  emptyFim,
+  calcQuickDashScore,
+  calcFimTotal,
+} from "@/components/evaluations/FunctionalScales";
 
 // ── Section card wrapper ──
 function SectionCard({
@@ -531,9 +539,8 @@ export function NewPatientForm() {
   // Card 4 — Functional evaluation
   const [avd, setAvd] = useState("");
   const [aivd, setAivd] = useState("");
-  const [barthelScore, setBarthelScore] = useState("");
-  const [dashScore, setDashScore] = useState("");
-  const [funcNotes, setFuncNotes] = useState("");
+  const [qdItems, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
+  const [fimItems, setFimItems] = useState<Record<string, number | null>>(emptyFim());
 
   // Card 5 — Analytical evaluation
   const [painScore, setPainScore] = useState<number>(0);
@@ -780,8 +787,12 @@ export function NewPatientForm() {
       });
 
       // 4. Functional evaluation
-      const funcFields = showFunctional ? [avd, aivd, barthelScore, dashScore, funcNotes] : [];
-      if (showFunctional && funcFields.some((f) => f.trim())) {
+      const qdAnswered = qdItems.some((v) => v !== null);
+      const fimAnswered = Object.values(fimItems).some((v) => v !== null);
+      const qdScore = calcQuickDashScore(qdItems);
+      const fimTotal = calcFimTotal(fimItems);
+      const hasFunc = !!(avd.trim() || aivd.trim() || qdAnswered || fimAnswered);
+      if (showFunctional && hasFunc) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
           professional_id: user!.id,
@@ -790,10 +801,11 @@ export function NewPatientForm() {
           dominance: showOccupational ? (or(dominance) as any) : null,
           avd: or(avd),
           aivd: or(aivd),
-          barthel_score: orNum(barthelScore),
-          dash_score: orNum(dashScore),
-          notes: or(funcNotes),
-        });
+          quickdash_items: qdAnswered ? (qdItems as any) : null,
+          quickdash_score: qdScore as any,
+          fim_items: fimAnswered ? (fimItems as any) : null,
+          fim_score: fimTotal,
+        } as any);
       }
 
       // 5. Analytical evaluation — build structured fields (gated by sub-section toggles)
@@ -1215,7 +1227,9 @@ export function NewPatientForm() {
 
         {/* Card 4 — Evaluación funcional */}
         <SectionCard icon={Activity} title="Evaluación funcional" toggle={{ checked: showFunctional, onChange: setShowFunctional }}>
-          <div className="space-y-4">
+          <div className="space-y-5">
+            <QuickDashSection items={qdItems} onChange={setQdItems} />
+            <FimSection items={fimItems} onChange={setFimItems} />
             <div>
               <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
               <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={`${textareaClass} ${fieldClass("avd")}`} />
@@ -1224,21 +1238,6 @@ export function NewPatientForm() {
             <div>
               <FieldLabel>AIVD — Actividades instrumentales</FieldLabel>
               <Textarea value={aivd} onChange={(e) => setAivd(e.target.value)} rows={3} placeholder="Dificultad para cocinar, escurrir trapos..." className={textareaClass} />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <FieldLabel>Barthel (0-100)</FieldLabel>
-                <Input type="number" min={0} max={100} value={barthelScore} onChange={(e) => setBarthelScore(e.target.value)} className={inputClass} />
-              </div>
-              <div>
-                <FieldLabel>DASH (0-100)</FieldLabel>
-                <Input type="number" min={0} max={100} value={dashScore} onChange={(e) => setDashScore(e.target.value)} className={inputClass} />
-                <p className="text-xs text-muted-foreground mt-1">0 = sin discapacidad · 100 = máxima discapacidad</p>
-              </div>
-            </div>
-            <div>
-              <FieldLabel>Notas</FieldLabel>
-              <Textarea value={funcNotes} onChange={(e) => setFuncNotes(e.target.value)} rows={2} className={textareaClass} />
             </div>
           </div>
         </SectionCard>

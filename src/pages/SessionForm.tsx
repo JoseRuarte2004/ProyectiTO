@@ -27,6 +27,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import {
+  QuickDashSection,
+  FimSection,
+  emptyQuickDash,
+  emptyFim,
+  calcQuickDashScore,
+  calcFimTotal,
+} from "@/components/evaluations/FunctionalScales";
 
 // ── Goniometry config by body part ──
 const GONIO_PARTS = {
@@ -321,8 +329,8 @@ export default function SessionForm() {
   const [func_aivd, setFuncAivd] = useState("");
   const [func_sleep, setFuncSleep] = useState("");
   const [func_health, setFuncHealth] = useState("");
-  const [func_barthel, setFuncBarthel] = useState("");
-  const [func_dash, setFuncDash] = useState("");
+  const [qd_items, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
+  const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
 
   // Analytical evaluation (master toggle)
   const [show_measurements, setShowMeasurements] = useState(false);
@@ -639,24 +647,30 @@ export default function SessionForm() {
     }
 
     // Functional eval for admission
+    const qd_answered = qd_items.some((v) => v !== null);
+    const fim_answered = Object.values(fim_items).some((v) => v !== null);
     if (
       session_type === "admission" &&
-      [func_dominance, func_avd, func_aivd, func_sleep, func_health, func_barthel, func_dash].some((v) => v)
+      [func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered
     ) {
-      const { error: feErr } = await supabase.from("functional_evaluations").insert({
-        patient_id: patientId!,
-        professional_id: user.id,
-        episode_id: activeEpisodeId,
-        evaluation_date: session_date,
-        dominance: (func_dominance || null) as any,
-        avd: func_avd || null,
-        aivd: func_aivd || null,
-        sleep_rest: func_sleep || null,
-        health_management: func_health || null,
-        barthel_score: func_barthel ? parseInt(func_barthel) : null,
-        dash_score: func_dash ? parseInt(func_dash) : null,
-      } as any);
-      if (feErr) console.error("Error inserting func eval:", feErr);
+      if (session_type === "admission") {
+        const { error: feErr } = await supabase.from("functional_evaluations").insert({
+          patient_id: patientId!,
+          professional_id: user.id,
+          episode_id: activeEpisodeId,
+          evaluation_date: session_date,
+          dominance: (func_dominance || null) as any,
+          avd: func_avd || null,
+          aivd: func_aivd || null,
+          sleep_rest: func_sleep || null,
+          health_management: func_health || null,
+          quickdash_items: qd_answered ? (qd_items as any) : null,
+          quickdash_score: calcQuickDashScore(qd_items) as any,
+          fim_items: fim_answered ? (fim_items as any) : null,
+          fim_score: calcFimTotal(fim_items),
+        } as any);
+        if (feErr) console.error("Error inserting func eval:", feErr);
+      }
     }
 
     // ── Cicatriz (gated) ──
@@ -952,7 +966,7 @@ export default function SessionForm() {
         {/* Functional eval (admission only) */}
         {session_type === "admission" && (
           <SectionCard icon={ClipboardList} title="Evaluación funcional">
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <FieldLabel>Lateralidad</FieldLabel>
                 <Select value={func_dominance} onValueChange={setFuncDominance}>
@@ -966,6 +980,8 @@ export default function SessionForm() {
                   </SelectContent>
                 </Select>
               </div>
+              <QuickDashSection items={qd_items} onChange={setQdItems} />
+              <FimSection items={fim_items} onChange={setFimItems} />
               <div>
                 <FieldLabel>AVD — Actividades de la vida diaria</FieldLabel>
                 <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} className={textareaClass} />
@@ -981,31 +997,6 @@ export default function SessionForm() {
               <div>
                 <FieldLabel>Gestión de la salud</FieldLabel>
                 <Textarea rows={2} value={func_health} onChange={(e) => setFuncHealth(e.target.value)} className={textareaClass} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <FieldLabel>Puntaje Barthel (0-100)</FieldLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={func_barthel}
-                    onChange={(e) => setFuncBarthel(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <FieldLabel>Puntaje DASH (0-100)</FieldLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={func_dash}
-                    onChange={(e) => setFuncDash(e.target.value)}
-                    className={inputClass}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">0 = sin discapacidad · 100 = máxima</p>
-                </div>
               </div>
             </div>
           </SectionCard>

@@ -1403,7 +1403,12 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
-                <ScoreBadge label="Barthel" value={e.barthel_score} max={100} />
+                {e.quickdash_score != null && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-teal-100 text-teal-800">QuickDASH: {e.quickdash_score}/100</span>
+                )}
+                {e.fim_score != null && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">FIM: {e.fim_score}/126</span>
+                )}
                 <ScoreBadge label="DASH" value={e.dash_score} max={100} />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setDetail(e)}><Eye className="h-4 w-4" /></Button>
@@ -1428,7 +1433,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                 </div>
               );
             };
-            const hasOccup = detail.avd || detail.aivd || detail.barthel_score != null || detail.dash_score != null;
+            const hasOccup = detail.avd || detail.aivd || detail.quickdash_score != null || detail.fim_score != null || detail.dash_score != null;
             const hasHealth = detail.physical_activity || detail.sleep_rest || detail.health_management;
             return (
               <div className="space-y-5 text-sm">
@@ -1444,10 +1449,19 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                 {hasOccup && (
                   <div className="border-l-2 border-teal-300 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Desempeño Ocupacional</p>
+                    {(detail.quickdash_score != null || detail.fim_score != null) && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {detail.quickdash_score != null && (
+                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {detail.quickdash_score}/100</span>
+                        )}
+                        {detail.fim_score != null && (
+                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {detail.fim_score}/126</span>
+                        )}
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="AVD" value={detail.avd} />
                       <Field label="AIVD" value={detail.aivd} />
-                      <Field label="Puntaje Barthel" value={detail.barthel_score != null ? `${detail.barthel_score}/100` : null} />
                       <Field label="Puntaje DASH" value={detail.dash_score != null ? `${detail.dash_score}/100` : null} />
                     </div>
                   </div>
