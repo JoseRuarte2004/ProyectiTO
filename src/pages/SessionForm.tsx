@@ -27,6 +27,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import {
+  QuickDashSection,
+  FimSection,
+  emptyQuickDash,
+  emptyFim,
+  calcQuickDashScore,
+  calcFimTotal,
+} from "@/components/evaluations/FunctionalScales";
 
 // ── Goniometry config by body part ──
 const GONIO_PARTS = {
@@ -321,8 +329,8 @@ export default function SessionForm() {
   const [func_aivd, setFuncAivd] = useState("");
   const [func_sleep, setFuncSleep] = useState("");
   const [func_health, setFuncHealth] = useState("");
-  const [func_barthel, setFuncBarthel] = useState("");
-  const [func_dash, setFuncDash] = useState("");
+  const [qd_items, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
+  const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
 
   // Analytical evaluation (master toggle)
   const [show_measurements, setShowMeasurements] = useState(false);
