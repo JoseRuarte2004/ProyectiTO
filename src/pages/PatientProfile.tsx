@@ -994,32 +994,20 @@ function MeasurementsBlock({ e }: { e: any }) {
 
       {hasSensitivity && (
         <SubSection label="Sensibilidad">
-          {(hasEpi || hasOldEpi) && (
+          {hasEpi && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Epicrítica</p>
-              {hasEpi ? (
-                <>
-                  <FieldLine label="Tacto ligero" value={epi.tacto} />
-                  <FieldLine label="2 puntos" value={epi.dos} />
-                  <FieldLine label="Picking up" value={epi.pick} />
-                  <FieldLine label="Semmes-Weinstein" value={epi.sw} />
-                </>
-              ) : (
-                <FieldLine label="Sensibilidad epicrítica" value={e.sensitivity_functional} />
-              )}
+              <FieldLine label="Tacto ligero" value={epi.tacto} />
+              <FieldLine label="Discriminación 2 puntos" value={epi.dos} />
+              <FieldLine label="Picking up" value={epi.pick} />
+              <FieldLine label="Semmes-Weinstein" value={epi.sw} />
             </div>
           )}
-          {(hasProto || hasOldProto) && (
+          {hasProto && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Protopática</p>
-              {hasProto ? (
-                <>
-                  <FieldLine label="Toco-pincho" value={proto.toco} />
-                  <FieldLine label="Temperatura" value={proto.temp} />
-                </>
-              ) : (
-                <FieldLine label="Sensibilidad protopática" value={e.sensitivity_protective} />
-              )}
+              <FieldLine label="Toco-pincho" value={proto.toco} />
+              <FieldLine label="Temperatura" value={proto.temp} />
             </div>
           )}
           {nn(e.sensitivity) && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
