@@ -647,24 +647,30 @@ export default function SessionForm() {
     }
 
     // Functional eval for admission
+    const qd_answered = qd_items.some((v) => v !== null);
+    const fim_answered = Object.values(fim_items).some((v) => v !== null);
     if (
       session_type === "admission" &&
-      [func_dominance, func_avd, func_aivd, func_sleep, func_health, func_barthel, func_dash].some((v) => v)
+      [func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered
     ) {
-      const { error: feErr } = await supabase.from("functional_evaluations").insert({
-        patient_id: patientId!,
-        professional_id: user.id,
-        episode_id: activeEpisodeId,
-        evaluation_date: session_date,
-        dominance: (func_dominance || null) as any,
-        avd: func_avd || null,
-        aivd: func_aivd || null,
-        sleep_rest: func_sleep || null,
-        health_management: func_health || null,
-        barthel_score: func_barthel ? parseInt(func_barthel) : null,
-        dash_score: func_dash ? parseInt(func_dash) : null,
-      } as any);
-      if (feErr) console.error("Error inserting func eval:", feErr);
+      if (session_type === "admission") {
+        const { error: feErr } = await supabase.from("functional_evaluations").insert({
+          patient_id: patientId!,
+          professional_id: user.id,
+          episode_id: activeEpisodeId,
+          evaluation_date: session_date,
+          dominance: (func_dominance || null) as any,
+          avd: func_avd || null,
+          aivd: func_aivd || null,
+          sleep_rest: func_sleep || null,
+          health_management: func_health || null,
+          quickdash_items: qd_answered ? (qd_items as any) : null,
+          quickdash_score: calcQuickDashScore(qd_items) as any,
+          fim_items: fim_answered ? (fim_items as any) : null,
+          fim_score: calcFimTotal(fim_items),
+        } as any);
+        if (feErr) console.error("Error inserting func eval:", feErr);
+      }
     }
 
     // ── Cicatriz (gated) ──
