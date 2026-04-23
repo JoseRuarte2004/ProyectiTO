@@ -311,79 +311,9 @@ export default function PatientProfile() {
                           )}
 
                           {linkedEval && (
-                            <div className="mb-3 bg-blue-50/40 rounded-lg p-3 space-y-1 border border-blue-100/60">
-                              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Mediciones del día</p>
-                              {linkedEval.pain_score != null && (
-                                <p><span className="font-medium">Dolor EVA:</span> {linkedEval.pain_score}/10
-                                  {linkedEval.pain_location ? ` — ${linkedEval.pain_location}` : ""}
-                                  {linkedEval.pain_characteristics ? ` — ${linkedEval.pain_characteristics}` : ""}
-                                </p>
-                              )}
-                              {linkedEval.pain && <p className="text-muted-foreground">{linkedEval.pain}</p>}
-                              {linkedEval.pain_aggravating_factors && <p><span className="font-medium">Agravantes/Atenuantes:</span> {linkedEval.pain_aggravating_factors}</p>}
-                              {linkedEval.edema && <p><span className="font-medium">Edema:</span> {linkedEval.edema}</p>}
-                              {linkedEval.edema_circummetry && <p><span className="font-medium">Circometría:</span> {linkedEval.edema_circummetry}</p>}
-                              {linkedEval.godet_test && <p><span className="font-medium">Godet:</span> {linkedEval.godet_test}</p>}
-                              {linkedEval.arom && <p><span className="font-medium">Goniometría PRE:</span> {linkedEval.arom}</p>}
-                              {linkedEval.prom && <p><span className="font-medium">Goniometría POST:</span> {linkedEval.prom}</p>}
-                              {linkedEval.goniometry && typeof linkedEval.goniometry === "object" && (() => {
-                                const g = linkedEval.goniometry as any;
-                                const partNames: Record<string, string> = { shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar" };
-                                const renderPart = (label: string, data: any) => {
-                                  if (!data || !data.values || typeof data.values !== "object") return null;
-                                  const vals = Object.entries(data.values).filter(([,v]) => v != null).map(([k,v]) => `${k}: ${v}°`);
-                                  if (vals.length === 0) return null;
-                                  return <p key={label}><span className="font-medium">{label} ({partNames[data.body_part] || data.body_part}):</span> {vals.join(" · ")}</p>;
-                                };
-                                return <>{renderPart("Goniometría PRE", g.pre)}{renderPart("Goniometría POST", g.post)}</>;
-                              })()}
-                              {linkedEval.kapandji && <p><span className="font-medium">Kapandji:</span> {linkedEval.kapandji}</p>}
-                              {(linkedEval.dynamometer_msd || linkedEval.dynamometer_msi) && (
-                                <p><span className="font-medium">Dinamómetro:</span>
-                                  {linkedEval.dynamometer_msd ? ` MSD ${linkedEval.dynamometer_msd}kg` : ""}
-                                  {linkedEval.dynamometer_msi ? ` / MSI ${linkedEval.dynamometer_msi}kg` : ""}
-                                </p>
-                              )}
-                              {linkedEval.muscle_strength && <p><span className="font-medium">Fuerza:</span> {linkedEval.muscle_strength}</p>}
-                              {(linkedEval.muscle_strength_median || linkedEval.muscle_strength_cubital || linkedEval.muscle_strength_radial) && (() => {
-                                const renderNerve = (label: string, raw: string) => {
-                                  try {
-                                    const obj = JSON.parse(raw);
-                                    const entries = Object.entries(obj).filter(([,v]) => v);
-                                    if (entries.length === 0) return null;
-                                    return <p key={label}><span className="font-medium">{label}:</span> {entries.map(([k,v]) => `${k.replace(/_/g," ")}: ${v}`).join(", ")}</p>;
-                                  } catch { return <p><span className="font-medium">{label}:</span> {raw}</p>; }
-                                };
-                                return <>
-                                  {linkedEval.muscle_strength_median && renderNerve("N. Mediano", linkedEval.muscle_strength_median)}
-                                  {linkedEval.muscle_strength_cubital && renderNerve("N. Cubital", linkedEval.muscle_strength_cubital)}
-                                  {linkedEval.muscle_strength_radial && renderNerve("N. Radial", linkedEval.muscle_strength_radial)}
-                                </>;
-                              })()}
-                              {linkedEval.specific_tests && typeof linkedEval.specific_tests === "object" && (() => {
-                                const tests = linkedEval.specific_tests as Record<string, string | null>;
-                                const filled = Object.entries(tests).filter(([,v]) => v != null);
-                                if (filled.length === 0) return null;
-                                return (
-                                  <div>
-                                    <span className="font-medium">Pruebas específicas: </span>
-                                    {filled.map(([name, result]) => (
-                                      <span key={name} className={`inline-block text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5 ${result === "positive" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
-                                        {name} {result === "positive" ? "+" : "−"}
-                                      </span>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-                              {linkedEval.sensitivity_functional && <p><span className="font-medium">Sensibilidad epicrítica:</span> {linkedEval.sensitivity_functional}</p>}
-                              {linkedEval.sensitivity_protective && <p><span className="font-medium">Sensibilidad protopática:</span> {linkedEval.sensitivity_protective}</p>}
-                              {linkedEval.sensitivity && <p><span className="font-medium">Sensibilidad:</span> {linkedEval.sensitivity}</p>}
-                              {linkedEval.trophic_state && <p><span className="font-medium">Estado trófico:</span> {linkedEval.trophic_state}</p>}
-                              {linkedEval.scar && <p><span className="font-medium">Cicatriz:</span> {linkedEval.scar}</p>}
-                              {linkedEval.vancouver_score != null && <p><span className="font-medium">Vancouver VSS:</span> {linkedEval.vancouver_score}/15</p>}
-                              {linkedEval.osas_score != null && <p><span className="font-medium">OSAS:</span> {linkedEval.osas_score}/60</p>}
-                              {linkedEval.posture && <p><span className="font-medium">Postura:</span> {linkedEval.posture}</p>}
-                              {linkedEval.emotional_state && <p><span className="font-medium">Emotividad:</span> {linkedEval.emotional_state}</p>}
+                            <div className="mb-3 space-y-1">
+                              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">Mediciones del día</p>
+                              <MeasurementsBlock e={linkedEval} />
                             </div>
                           )}
 
