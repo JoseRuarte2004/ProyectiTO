@@ -840,8 +840,6 @@ function MeasurementsBlock({ e }: { e: any }) {
     || nn(e.muscle_strength) || hasDppdJson || hasKendall;
 
   // ---------- SENSIBILIDAD ----------
-  const hasEpi = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein);
-  const hasProto = !!(e.sensitivity_toco_pincho || e.sensitivity_temperatura);
   const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
 
   // ---------- PRUEBAS ESPECÍFICAS ----------
@@ -985,23 +983,23 @@ function MeasurementsBlock({ e }: { e: any }) {
 
       {hasSensitivity && (
         <SubSection label="Sensibilidad">
-          {hasEpi && (
+          {(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein) && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Epicrítica</p>
-              <FieldLine label="Tacto ligero" value={e.sensitivity_tacto_ligero} />
-              <FieldLine label="Discriminación 2 puntos" value={e.sensitivity_dos_puntos} />
-              <FieldLine label="Picking up" value={e.sensitivity_picking_up} />
-              <FieldLine label="Semmes-Weinstein" value={e.sensitivity_semmes_weinstein} />
+              {e.sensitivity_tacto_ligero && <FieldLine label="Tacto ligero" value={e.sensitivity_tacto_ligero} />}
+              {e.sensitivity_dos_puntos && <FieldLine label="Discriminación 2 puntos" value={e.sensitivity_dos_puntos} />}
+              {e.sensitivity_picking_up && <FieldLine label="Picking up" value={e.sensitivity_picking_up} />}
+              {e.sensitivity_semmes_weinstein && <FieldLine label="Semmes-Weinstein" value={e.sensitivity_semmes_weinstein} />}
             </div>
           )}
-          {hasProto && (
+          {(e.sensitivity_toco_pincho || e.sensitivity_temperatura) && (
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-gray-500 uppercase">Protopática</p>
-              <FieldLine label="Toco-pincho" value={e.sensitivity_toco_pincho} />
-              <FieldLine label="Temperatura" value={e.sensitivity_temperatura} />
+              {e.sensitivity_toco_pincho && <FieldLine label="Toco-pincho" value={e.sensitivity_toco_pincho} />}
+              {e.sensitivity_temperatura && <FieldLine label="Temperatura" value={e.sensitivity_temperatura} />}
             </div>
           )}
-          {nn(e.sensitivity) && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
+          {e.sensitivity && <p className="text-sm text-muted-foreground italic">{e.sensitivity}</p>}
         </SubSection>
       )}
 
