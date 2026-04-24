@@ -18,7 +18,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
+import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList, X, Plus } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
 import {
