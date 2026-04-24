@@ -33,6 +33,7 @@ export type Database = {
           kapandji: string | null
           muscle_strength: string | null
           muscle_strength_cubital: string | null
+          muscle_strength_daniels: Json | null
           muscle_strength_median: string | null
           muscle_strength_radial: string | null
           notes: string | null
@@ -83,6 +84,7 @@ export type Database = {
           kapandji?: string | null
           muscle_strength?: string | null
           muscle_strength_cubital?: string | null
+          muscle_strength_daniels?: Json | null
           muscle_strength_median?: string | null
           muscle_strength_radial?: string | null
           notes?: string | null
@@ -133,6 +135,7 @@ export type Database = {
           kapandji?: string | null
           muscle_strength?: string | null
           muscle_strength_cubital?: string | null
+          muscle_strength_daniels?: Json | null
           muscle_strength_median?: string | null
           muscle_strength_radial?: string | null
           notes?: string | null

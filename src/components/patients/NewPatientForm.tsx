@@ -18,7 +18,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList } from "lucide-react";
+import { Loader2, ArrowLeft, ChevronDown, User, FileText, Briefcase, Activity, BarChart2, ClipboardList, X, Plus } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { useRef } from "react";
 import {
@@ -559,7 +559,7 @@ export function NewPatientForm() {
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
   const [dynamometerNotes, setDynamometerNotes] = useState("");
-  const [muscleStrength, setMuscleStrength] = useState("");
+  const [danielsRows, setDanielsRows] = useState<{ muscle: string; grade: string }[]>([{ muscle: "", grade: "" }]);
   const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
   const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
   const [sensitivityPickingUp, setSensitivityPickingUp] = useState("");
@@ -832,8 +832,13 @@ export function NewPatientForm() {
 
       const msParts: string[] = [];
       if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
-      if (showFuerza && muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
+
+      // Daniels rows → JSON array
+      const danielsFiltered = showFuerza
+        ? danielsRows.filter(r => r.muscle.trim() && r.grade.trim()).map(r => ({ muscle: r.muscle.trim(), grade: r.grade }))
+        : [];
+      const danielsJson = danielsFiltered.length > 0 ? danielsFiltered : null;
 
       const kapandjiFinal = showMovilidad && kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
 
@@ -870,7 +875,8 @@ export function NewPatientForm() {
         showDolor ? painCharacteristics : "", showDolor ? painAggravating : "", showDolor ? painFree : "",
         showEdema ? edema : "", showEdema ? godetTest : "",
         kapandjiFinal, showMovilidad ? fistClosure : "",
-        showFuerza ? dynamometerMsd : "", showFuerza ? dynamometerMsi : "", showFuerza ? muscleStrength : "",
+        showFuerza ? dynamometerMsd : "", showFuerza ? dynamometerMsi : "",
+        showFuerza && danielsFiltered.length > 0 ? danielsFiltered.map(r => `${r.muscle}: ${r.grade}`).join("; ") : "",
         showSensibilidad ? sensitivityTactoLigero : "", showSensibilidad ? sensitivityDosPuntos : "",
         showSensibilidad ? sensitivityPickingUp : "", showSensibilidad ? sensitivitySemmesWeinstein : "",
         showSensibilidad ? sensitivityTocoPincho : "", showSensibilidad ? sensitivityTemperatura : "",
@@ -934,6 +940,7 @@ export function NewPatientForm() {
           muscle_strength_median: medianJson,
           muscle_strength_cubital: cubitalJson,
           muscle_strength_radial: radialJson,
+          muscle_strength_daniels: danielsJson as any,
           specific_tests: specificTestsJson,
           dppd_fingers: dppdFingersJson,
           sensitivity: showSensibilidad ? or(sensitivity) : null,
@@ -1427,13 +1434,56 @@ export function NewPatientForm() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Fuerza muscular (Daniels)</Label>
-                <Select value={muscleStrength} onValueChange={setMuscleStrength}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar grado" /></SelectTrigger>
-                  <SelectContent position="popper">
-                    {DANIELS_FULL_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label>Fuerza muscular (Daniels) — Músculos evaluados</Label>
+                <div className="space-y-2">
+                  {danielsRows.map((row, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={row.muscle}
+                        onChange={(ev) =>
+                          setDanielsRows((prev) => prev.map((r, i) => (i === idx ? { ...r, muscle: ev.target.value } : r)))
+                        }
+                        placeholder="Ej: Flexor superficial de los dedos"
+                        className="flex-1"
+                      />
+                      <Select
+                        value={row.grade}
+                        onValueChange={(v) =>
+                          setDanielsRows((prev) => prev.map((r, i) => (i === idx ? { ...r, grade: v } : r)))
+                        }
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="Grado" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          {DANIELS_FULL_GRADES.map((g) => (
+                            <SelectItem key={g} value={g}>{g}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {danielsRows.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDanielsRows((prev) => prev.filter((_, i) => i !== idx))}
+                          aria-label="Eliminar fila"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDanielsRows((prev) => [...prev, { muscle: "", grade: "" }])}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Agregar músculo
+                  </Button>
+                </div>
               </div>
             </SubSection>
 

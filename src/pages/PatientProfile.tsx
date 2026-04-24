@@ -809,8 +809,17 @@ function MeasurementsBlock({ e }: { e: any }) {
     );
   };
   const hasKendall = !!(e.muscle_strength_median || e.muscle_strength_cubital || e.muscle_strength_radial);
+  const danielsArr: { muscle: string; grade: string }[] = (() => {
+    const raw = e.muscle_strength_daniels;
+    if (!raw) return [];
+    let arr: any = raw;
+    if (typeof raw === "string") { try { arr = JSON.parse(raw); } catch { return []; } }
+    if (!Array.isArray(arr)) return [];
+    return arr.filter((r: any) => r && typeof r === "object" && r.muscle && r.grade);
+  })();
+  const hasDaniels = danielsArr.length > 0;
   const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
-    || nn(e.muscle_strength) || hasDppdJson || hasKendall;
+    || nn(e.muscle_strength) || hasDppdJson || hasKendall || hasDaniels;
 
   // ---------- SENSIBILIDAD ----------
   const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
@@ -995,6 +1004,18 @@ function MeasurementsBlock({ e }: { e: any }) {
               </div>
             );
           })()}
+          {hasDaniels && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-gray-500 uppercase">Daniels — Músculos evaluados</p>
+              <div className="space-y-0.5">
+                {danielsArr.map((r, i) => (
+                  <p key={i} className="text-sm">
+                    <span className="font-medium text-gray-700">{r.muscle}:</span> Daniels {r.grade}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
           {hasDppdJson && nn(e.muscle_strength) && <FieldLine label="Notas" value={e.muscle_strength} />}
         </SubSection>
       )}
