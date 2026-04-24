@@ -388,8 +388,8 @@ export default function SessionForm() {
   const [dppd_medio, setDppdMedio] = useState("");
   const [dppd_anular, setDppdAnular] = useState("");
   const [dppd_menique, setDppdMenique] = useState("");
-  const [muscle_strength, setMuscleStrength] = useState("");
   const [strength_notes, setStrengthNotes] = useState("");
+  const [danielsRows, setDanielsRows] = useState<{ muscle: string; grade: string }[]>([{ muscle: "", grade: "" }]);
 
   // Daniels by nerve
   const [daniels_median, setDanielsMedian] = useState<Record<string, string>>({});
