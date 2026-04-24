@@ -776,6 +776,7 @@ export default function SessionForm() {
         muscle_strength_median: medianJson,
         muscle_strength_cubital: cubitalJson,
         muscle_strength_radial: radialJson,
+        muscle_strength_daniels: danielsJson as any,
         specific_tests: specificTestsJson,
         dppd_fingers: dppdFingersJson,
         sensitivity: showSensitivity ? sensitivity || null : null,
