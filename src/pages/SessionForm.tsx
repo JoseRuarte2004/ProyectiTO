@@ -582,9 +582,14 @@ export default function SessionForm() {
     // ── Strength (gated) ──
     const msParts: string[] = [];
     if (showMobility && fist_closure) msParts.push(`Cierre de puño: ${fist_closure}`);
-    if (showStrength && muscle_strength) msParts.push(`Daniels: ${muscle_strength}`);
     if (showStrength && strength_notes) msParts.push(strength_notes);
     const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
+
+    // ── Daniels rows (gated by strength) ──
+    const danielsFiltered = showStrength
+      ? danielsRows.filter(r => r.muscle.trim() && r.grade.trim()).map(r => ({ muscle: r.muscle.trim(), grade: r.grade }))
+      : [];
+    const danielsJson = danielsFiltered.length > 0 ? danielsFiltered : null;
 
     const dppdEntries: [string, string][] = showStrength
       ? ([
