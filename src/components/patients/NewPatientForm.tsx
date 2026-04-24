@@ -832,8 +832,13 @@ export function NewPatientForm() {
 
       const msParts: string[] = [];
       if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
-      if (showFuerza && muscleStrength.trim()) msParts.push(muscleStrength);
       const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
+
+      // Daniels rows → JSON array
+      const danielsFiltered = showFuerza
+        ? danielsRows.filter(r => r.muscle.trim() && r.grade.trim()).map(r => ({ muscle: r.muscle.trim(), grade: r.grade }))
+        : [];
+      const danielsJson = danielsFiltered.length > 0 ? danielsFiltered : null;
 
       const kapandjiFinal = showMovilidad && kapandjiVal ? `${kapandjiVal}/10${kapandjiPain ? " con dolor" : ""}` : "";
 
