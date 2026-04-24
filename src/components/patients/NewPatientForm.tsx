@@ -559,7 +559,7 @@ export function NewPatientForm() {
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
   const [dynamometerNotes, setDynamometerNotes] = useState("");
-  const [muscleStrength, setMuscleStrength] = useState("");
+  const [danielsRows, setDanielsRows] = useState<{ muscle: string; grade: string }[]>([{ muscle: "", grade: "" }]);
   const [sensitivityTactoLigero, setSensitivityTactoLigero] = useState("");
   const [sensitivityDosPuntos, setSensitivityDosPuntos] = useState("");
   const [sensitivityPickingUp, setSensitivityPickingUp] = useState("");
