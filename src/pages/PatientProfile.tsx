@@ -1004,6 +1004,18 @@ function MeasurementsBlock({ e }: { e: any }) {
               </div>
             );
           })()}
+          {hasDaniels && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-gray-500 uppercase">Daniels — Músculos evaluados</p>
+              <div className="space-y-0.5">
+                {danielsArr.map((r, i) => (
+                  <p key={i} className="text-sm">
+                    <span className="font-medium text-gray-700">{r.muscle}:</span> Daniels {r.grade}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
           {hasDppdJson && nn(e.muscle_strength) && <FieldLine label="Notas" value={e.muscle_strength} />}
         </SubSection>
       )}
