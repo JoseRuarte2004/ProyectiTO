@@ -658,18 +658,24 @@ export type Database = {
       obras_sociales: {
         Row: {
           id: number
+          is_active: boolean | null
           name: string
           name_search: string | null
+          type: string | null
         }
         Insert: {
           id?: number
+          is_active?: boolean | null
           name: string
           name_search?: string | null
+          type?: string | null
         }
         Update: {
           id?: number
+          is_active?: boolean | null
           name?: string
           name_search?: string | null
+          type?: string | null
         }
         Relationships: []
       }

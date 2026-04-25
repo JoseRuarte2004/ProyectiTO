@@ -213,12 +213,21 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
   value: string; onChange: (v: string) => void; placeholder?: string; className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [results, setResults] = useState<Array<{ name: string }>>([]);
+  const [results, setResults] = useState<Array<{ name: string; type: string | null }>>([]);
   const [loading, setLoading] = useState(false);
   const [rect, setRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const wrapperRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const lastSelectedRef = useRef<string>("");
+  const visibleTypes = Array.from(new Set(results.map((r) => r.type).filter(Boolean)));
+  const showTypeGroups = visibleTypes.length > 1;
+  const typeLabel = (type: string | null) => {
+    if (!type) return "OTRAS";
+    const normalized = type.toLowerCase();
+    if (normalized === "prepaga") return "PREPAGAS";
+    if (normalized === "sindical") return "SINDICALES";
+    return type.toUpperCase();
+  };
 
   const updateRect = () => {
     if (wrapperRef.current) {
@@ -237,11 +246,12 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
     const t = setTimeout(async () => {
       const { data } = await supabase
         .from("obras_sociales")
-        .select("name")
+        .select("name, type")
+        .eq("is_active", true)
         .ilike("name_search", `%${searchTerm}%`)
         .limit(10);
       if (cancelled) return;
-      setResults((data as Array<{ name: string }>) || []);
+      setResults((data as Array<{ name: string; type: string | null }>) || []);
       updateRect();
       setOpen(true);
       setLoading(false);
@@ -293,17 +303,27 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
           style={{ position: "fixed", top: rect.top + rect.height + 4, left: rect.left, width: rect.width, zIndex: 60 }}
           className="max-h-64 overflow-auto rounded-md border bg-popover shadow-md"
         >
-          {results.map((r) => (
-            <button
-              key={r.name}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { lastSelectedRef.current = r.name; onChange(r.name); setOpen(false); }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-            >
-              {r.name}
-            </button>
-          ))}
+          {results.map((r, index) => {
+            const previous = results[index - 1];
+            const showLabel = showTypeGroups && (!previous || previous.type !== r.type);
+            return (
+              <div key={`${r.name}-${r.type || "sin-tipo"}`}>
+                {showLabel && (
+                  <div className="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {typeLabel(r.type)}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => { lastSelectedRef.current = r.name; onChange(r.name); setOpen(false); }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  {r.name}
+                </button>
+              </div>
+            );
+          })}
         </div>,
         document.body
       )}
