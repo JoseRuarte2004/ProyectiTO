@@ -847,6 +847,7 @@ export type Database = {
           first_name: string
           id: string
           insurance: string | null
+          insurances: Json | null
           is_deleted: boolean
           last_name: string
           nationality: string | null
@@ -868,6 +869,7 @@ export type Database = {
           first_name: string
           id?: string
           insurance?: string | null
+          insurances?: Json | null
           is_deleted?: boolean
           last_name: string
           nationality?: string | null
@@ -889,6 +891,7 @@ export type Database = {
           first_name?: string
           id?: string
           insurance?: string | null
+          insurances?: Json | null
           is_deleted?: boolean
           last_name?: string
           nationality?: string | null
