@@ -219,7 +219,6 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const lastSelectedRef = useRef<string>("");
-  const inputValue = value.trim();
 
   const updateRect = () => {
     if (wrapperRef.current) {
@@ -275,28 +274,12 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
     return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
   }, []);
 
-  const handleCreate = async () => {
-    if (!inputValue) return;
-    const { error } = await supabase
-      .from("obras_sociales")
-      .insert({ name: inputValue, name_search: inputValue.toLowerCase() });
-
-    if (error) {
-      toast.error("No se pudo crear la obra social");
-      return;
-    }
-
-    lastSelectedRef.current = inputValue;
-    onChange(inputValue);
-    setOpen(false);
-  };
-
   return (
     <div ref={wrapperRef} className="relative">
       <Input
         value={value}
         onChange={(e) => { lastSelectedRef.current = ""; onChange(e.target.value); }}
-        onFocus={() => { if (inputValue && inputValue !== lastSelectedRef.current) { updateRect(); setOpen(true); } }}
+        onFocus={() => { if (results.length > 0) { updateRect(); setOpen(true); } }}
         placeholder={placeholder}
         className={className}
         autoComplete="off"
@@ -304,7 +287,7 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
       {loading && (
         <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
       )}
-      {open && inputValue && inputValue !== lastSelectedRef.current && createPortal(
+      {open && results.length > 0 && createPortal(
         <div
           ref={panelRef}
           style={{ position: "fixed", top: rect.top + rect.height + 4, left: rect.left, width: rect.width, zIndex: 60 }}
@@ -321,14 +304,6 @@ function ObrasSocialesAutocomplete({ value, onChange, placeholder, className }: 
               {r.name}
             </button>
           ))}
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleCreate}
-            className="w-full border-t text-left px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            + Crear &quot;{inputValue}&quot;
-          </button>
         </div>,
         document.body
       )}
