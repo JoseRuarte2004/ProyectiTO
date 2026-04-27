@@ -1,43 +1,30 @@
+Voy a ajustar la visualización del perfil del paciente para que muestre correctamente los datos nuevos que ya se cargan en admisión/sesión.
 
+Cambios propuestos:
 
-## Fix dropdown clipping in Obra social autocomplete
+1. En `src/pages/PatientProfile.tsx`, en el historial de visitas:
+   - Vincular cada visita no solo con evaluaciones analíticas por `session_id`, sino también con evaluaciones guardadas en admisión que tienen `episode_id` y la misma fecha de la visita.
+   - Esto corrige el caso actual donde la admisión guarda las mediciones, pero no quedan asociadas por `session_id`, entonces no aparecen al visualizar la visita.
 
-**Problem**: In the screenshot, the "OSDE" suggestion appears cut off / barely visible below the input. The cause is that the parent `SectionCard` wrapper uses `overflow-hidden` (line 40 of `NewPatientForm.tsx`), which clips the absolutely-positioned dropdown panel whenever it extends past the card's boundary. The same issue affects the CIE-10 autocomplete (`Cie10Autocomplete`) when the diagnosis field sits near the bottom of its card.
+2. En la visita expandida, agregar una sección de `Evaluación funcional` cuando exista para esa visita/admisión:
+   - Mostrar badge `QuickDASH: XX/100` si hay `quickdash_score`.
+   - Mostrar badge `FIM: XX/126` si hay `fim_score`.
+   - Mostrar `AVD` y `AIVD` si tienen contenido.
 
-## Change (single file: `src/components/patients/NewPatientForm.tsx`)
+3. Mantener y reforzar la visualización de `Fuerza muscular (Daniels) — Músculos evaluados` dentro de `Evaluación analítica`:
+   - Usar el campo `muscle_strength_daniels` ya guardado.
+   - Mostrar cada fila como: `[Músculo]: Daniels [grado]`.
+   - Asegurar que también aparezca para admisiones donde la evaluación analítica fue creada con `episode_id` y fecha, aunque no tenga `session_id`.
 
-Switch the dropdown rendering strategy from "absolutely-positioned div inside the card" to a portal-based floating panel anchored to the input, so it can escape the card's `overflow-hidden`.
+Detalles técnicos:
 
-The simplest, no-new-package fix: use the existing shadcn `Popover` primitive (already in the project, used elsewhere) which uses Radix Portal under the hood, OR render the dropdown via `createPortal` to `document.body` and position it using `getBoundingClientRect()` of the input.
+- No voy a crear columnas nuevas en Supabase.
+- No voy a agregar paquetes.
+- No voy a tocar el formulario de admisión salvo que sea necesario para compatibilidad mínima.
+- El cambio principal será pasar `funcEvals` al componente `SessionTimeline` y mejorar la lógica de matching de evaluaciones por:
+  - `session_id`, o
+  - misma `episode_id` + misma fecha de la sesión/evaluación.
 
-**Approach chosen**: keep behaviour identical (free typing in the `Input`, dropdown shows results, click-outside / Escape close, fallback free text), but render the results panel via `ReactDOM.createPortal` to `document.body` with fixed positioning anchored to the input's bounding rect. This avoids touching `SectionCard` (`overflow-hidden` is intentional for the rounded teal-border accent) and avoids restructuring with `Popover` which would change focus/typing behaviour.
+Resultado esperado:
 
-Steps applied to BOTH `ObrasSocialesAutocomplete` (lines 173-243) and `Cie10Autocomplete` (lines ~100-171):
-
-1. Import `createPortal` from `react-dom`.
-2. Add a `rect` state `{ top, left, width }` updated:
-   - when `open` becomes true,
-   - on window `resize` and `scroll` (capture phase) while open.
-3. Replace the inline `<div className="absolute z-50 mt-1 w-full ...">` with a portal:
-   ```tsx
-   {open && results.length > 0 && createPortal(
-     <div
-       style={{ position: "fixed", top: rect.top, left: rect.left, width: rect.width, zIndex: 60 }}
-       className="max-h-64 overflow-auto rounded-md border bg-popover shadow-md"
-     >
-       {/* same buttons as before */}
-     </div>,
-     document.body
-   )}
-   ```
-4. Click-outside handler: extend the existing `mousedown` listener to also ignore clicks inside the portal panel (track with a second `panelRef`).
-5. No visual changes — same `bg-popover`, `shadow-md`, `text-sm`, hover styles. Same Spanish labels. Same Supabase query.
-
-## Hard constraints respected
-
-- Only `src/components/patients/NewPatientForm.tsx` is modified.
-- No new packages (`react-dom` already present).
-- No Supabase column or schema changes.
-- No state variable, field name, or save-logic changes.
-- All labels stay in Spanish.
-
+Al entrar al perfil del paciente y abrir la visita/admisión en “Historial de visitas”, se verán QuickDASH, FIM, AVD/AIVD y Fuerza muscular Daniels cuando esos datos hayan sido cargados.
