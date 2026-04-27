@@ -412,7 +412,7 @@ export default function PatientProfile() {
             </div>
           ) : (
             <>
-              <SessionTimeline sessions={sessions} analEvals={analEvals} />
+              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} />
               {(() => {
                 const dischargeSession = sessions.find(s => s.session_type === "discharge");
                 if (!dischargeSession) return null;
@@ -1079,7 +1079,7 @@ function MeasurementsBlock({ e }: { e: any }) {
   );
 }
 
-function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: any[] }) {
+function SessionTimeline({ sessions, analEvals, funcEvals }: { sessions: any[]; analEvals: any[]; funcEvals: any[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
   const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
@@ -1102,6 +1102,48 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
   );
 
   const nn = (v: any) => v != null && v !== "";
+
+  const sameDate = (a: string | null | undefined, b: string | null | undefined) => {
+    if (!a || !b) return false;
+    return a.slice(0, 10) === b.slice(0, 10);
+  };
+
+  const matchesSessionEval = (session: any, evaluation: any) => {
+    if (evaluation.session_id && evaluation.session_id === session.id) return true;
+    return !!(
+      evaluation.episode_id &&
+      session.episode_id &&
+      evaluation.episode_id === session.episode_id &&
+      sameDate(evaluation.evaluation_date, session.session_date)
+    );
+  };
+
+  const FunctionalEvalBlock = ({ e }: { e: any }) => {
+    const hasScores = e.quickdash_score != null || e.fim_score != null;
+    const hasFields = nn(e.avd) || nn(e.aivd);
+    if (!hasScores && !hasFields) return null;
+
+    return (
+      <div className="bg-white rounded-lg border border-border/40 p-3 space-y-3">
+        {hasScores && (
+          <div className="flex flex-wrap gap-2">
+            {e.quickdash_score != null && (
+              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {e.quickdash_score}/100</span>
+            )}
+            {e.fim_score != null && (
+              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {e.fim_score}/126</span>
+            )}
+          </div>
+        )}
+        {hasFields && (
+          <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
+            {nn(e.avd) && <Line><span className="font-medium text-gray-700">AVD:</span> {e.avd}</Line>}
+            {nn(e.aivd) && <Line><span className="font-medium text-gray-700">AIVD:</span> {e.aivd}</Line>}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const partNames: Record<string, string> = { shoulder: "Hombro", elbow: "Codo", wrist: "Muñeca", hand: "Mano", thumb: "Pulgar" };
 
@@ -1155,7 +1197,8 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
       {sessions.map((s) => {
         const isOpen = expanded === s.id;
-        const linkedEval = analEvals.find(e => e.session_id === s.id);
+        const linkedEval = analEvals.find(e => matchesSessionEval(s, e));
+        const linkedFuncEval = funcEvals.find(e => matchesSessionEval(s, e));
 
         return (
           <div key={s.id} className="relative pl-12 pb-8">
@@ -1170,7 +1213,7 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                     {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
                     {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                   </div>
-                  {linkedEval && (
+                  {(linkedEval || linkedFuncEval) && (
                     <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
                       📊 Con mediciones
                     </span>
@@ -1217,6 +1260,14 @@ function SessionTimeline({ sessions, analEvals }: { sessions: any[]; analEvals: 
                     <div className="space-y-2">
                       <SectionHeading>AVD en sesión</SectionHeading>
                       <Line>{s.avd_followup}</Line>
+                    </div>
+                  )}
+
+                  {/* EVALUACIÓN FUNCIONAL */}
+                  {linkedFuncEval && (
+                    <div className="space-y-2">
+                      <SectionHeading>Evaluación funcional</SectionHeading>
+                      <FunctionalEvalBlock e={linkedFuncEval} />
                     </div>
                   )}
 
