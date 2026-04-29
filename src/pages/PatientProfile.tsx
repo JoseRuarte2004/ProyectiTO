@@ -24,6 +24,7 @@ import { format, differenceInYears } from "date-fns";
 import { es } from "date-fns/locale";
 import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
+import { QUICKDASH_QUESTIONS, FIM_MOTOR, FIM_COGNITIVE } from "@/components/evaluations/FunctionalScales";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
