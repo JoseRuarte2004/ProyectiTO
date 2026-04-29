@@ -831,7 +831,24 @@ export function NewPatientForm() {
         } as any);
       }
 
-      // 5. Analytical evaluation — build structured fields (gated by sub-section toggles)
+      // 5. Admission session
+      const { data: admissionSession, error: sessionErr } = await supabase.from("therapy_sessions").insert({
+        patient_id: pid,
+        professional_id: user!.id,
+        episode_id: episodeId,
+        session_date: admissionDate,
+        session_type: "admission",
+        session_number: 1,
+        interventions: or(interventions),
+        home_instructions_sent: or(homeInstructions),
+        notes: or(sessionNotes),
+        is_deleted: false,
+      }).select("id").single();
+
+      if (sessionErr) throw sessionErr;
+      const sessionId = admissionSession.id;
+
+      // 6. Analytical evaluation — build structured fields (gated by sub-section toggles)
       const aromVal = showMovilidad ? buildAllGonioText(allPreGonio) : null;
       const promVal = showMovilidad && showPostGonio ? buildAllGonioText(allPostGonio) : null;
       const preJsonArr = showMovilidad ? buildAllGonioJsonArray(allPreGonio) : null;
@@ -932,6 +949,7 @@ export function NewPatientForm() {
           patient_id: pid,
           professional_id: user!.id,
           episode_id: episodeId,
+          session_id: sessionId,
           evaluation_date: admissionDate,
           pain_score: showDolor && evaTouched ? painScore : null,
           pain_appearance: showDolor ? or(painAppearance) : null,
@@ -985,20 +1003,6 @@ export function NewPatientForm() {
           notes: showOtros ? or(analNotes) : null,
         });
       }
-
-      // 6. Admission session
-      await supabase.from("therapy_sessions").insert({
-        patient_id: pid,
-        professional_id: user!.id,
-        episode_id: episodeId,
-        session_date: admissionDate,
-        session_type: "admission",
-        session_number: 1,
-        interventions: or(interventions),
-        home_instructions_sent: or(homeInstructions),
-        notes: or(sessionNotes),
-        is_deleted: false,
-      });
 
       toast.success("Paciente admitido correctamente");
       navigate(`/patients/${pid}`);
