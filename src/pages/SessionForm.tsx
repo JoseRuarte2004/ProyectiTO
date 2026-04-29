@@ -757,60 +757,64 @@ export default function SessionForm() {
     const cubitalJson = hasCubital ? JSON.stringify(daniels_cubital) : null;
     const radialJson = hasRadial ? JSON.stringify(daniels_radial) : null;
 
-    // Insert session
-    const { data: session, error } = await supabase
-      .from("therapy_sessions")
-      .insert({
-        patient_id: patientId!,
-        professional_id: user.id,
-        is_deleted: false,
-        episode_id: activeEpisodeId,
-        session_date,
-        session_type: session_type || null,
-        session_number: session_number ? parseInt(session_number) : null,
-        week_at_session: week_at_session ? parseInt(week_at_session) : null,
-        general_observations: generalObsFinal,
-        symptom_changes: symptom_changes || null,
-        clinical_changes: clinical_changes || null,
-        avd_followup: avd_followup || null,
-        interventions: interventions || null,
-        home_instructions_sent: home_instructions_sent || null,
-        notes: notes || null,
-      } as any)
-      .select()
-      .single();
+    const sessionPayload = {
+      patient_id: patientId!,
+      professional_id: user.id,
+      is_deleted: false,
+      episode_id: activeEpisodeId,
+      session_date,
+      session_type: session_type || null,
+      session_number: session_number ? parseInt(session_number) : null,
+      week_at_session: week_at_session ? parseInt(week_at_session) : null,
+      general_observations: generalObsFinal,
+      symptom_changes: symptom_changes || null,
+      clinical_changes: clinical_changes || null,
+      avd_followup: avd_followup || null,
+      interventions: interventions || null,
+      home_instructions_sent: home_instructions_sent || null,
+      notes: notes || null,
+    } as any;
+
+    const { data: session, error } = isEditMode && sessionId
+      ? await supabase.from("therapy_sessions").update(sessionPayload).eq("id", sessionId).eq("patient_id", patientId!).select().single()
+      : await supabase.from("therapy_sessions").insert(sessionPayload).select().single();
 
     if (error || !session) {
       setSaving(false);
-      toast.error("Error al guardar la sesión");
+      toast.error(isEditMode ? "Error al actualizar la sesión" : "Error al guardar la sesión");
       return;
     }
 
     // Functional eval for admission
     const qd_answered = qd_items.some((v) => v !== null);
     const fim_answered = Object.values(fim_items).some((v) => v !== null);
-    if (
+    const hasFunctionalData =
       session_type === "admission" &&
-      [func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered
-    ) {
-      if (session_type === "admission") {
-        const { error: feErr } = await supabase.from("functional_evaluations").insert({
-          patient_id: patientId!,
-          professional_id: user.id,
-          episode_id: activeEpisodeId,
-          evaluation_date: session_date,
-          dominance: (func_dominance || null) as any,
-          avd: func_avd || null,
-          aivd: func_aivd || null,
-          sleep_rest: func_sleep || null,
-          health_management: func_health || null,
-          quickdash_items: qd_answered ? (qd_items as any) : null,
-          quickdash_score: calcQuickDashScore(qd_items) as any,
-          fim_items: fim_answered ? (fim_items as any) : null,
-          fim_score: calcFimTotal(fim_items),
-        } as any);
-        if (feErr) console.error("Error inserting func eval:", feErr);
-      }
+      ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered);
+
+    const functionalPayload = {
+      patient_id: patientId!,
+      professional_id: user.id,
+      episode_id: activeEpisodeId,
+      session_id: session.id,
+      evaluation_date: session_date,
+      dominance: (func_dominance || null) as any,
+      avd: func_avd || null,
+      aivd: func_aivd || null,
+      sleep_rest: func_sleep || null,
+      health_management: func_health || null,
+      quickdash_items: qd_answered ? (qd_items as any) : null,
+      quickdash_score: qd_answered ? (calcQuickDashScore(qd_items) as any) : null,
+      fim_items: fim_answered ? (fim_items as any) : null,
+      fim_score: fim_answered ? calcFimTotal(fim_items) : null,
+    } as any;
+
+    if (editingFuncEval) {
+      const { error: feErr } = await supabase.from("functional_evaluations").update(functionalPayload).eq("id", editingFuncEval.id);
+      if (feErr) console.error("Error updating func eval:", feErr);
+    } else if (hasFunctionalData) {
+      const { error: feErr } = await supabase.from("functional_evaluations").insert(functionalPayload);
+      if (feErr) console.error("Error inserting func eval:", feErr);
     }
 
     // ── Cicatriz (gated) ──
@@ -885,53 +889,62 @@ export default function SessionForm() {
         scarEvalJson,
       ].some((v) => v !== "" && v !== null && v !== undefined && v !== false);
 
-    if (hasMeasurements) {
-      const { error: aeErr } = await supabase.from("analytical_evaluations").insert({
-        patient_id: patientId!,
-        professional_id: user.id,
-        episode_id: activeEpisodeId,
-        session_id: session.id,
-        evaluation_date: session_date,
-        pain_score: showPain && pain_touched ? pain_score : null,
-        pain_appearance: showPain ? pain_appearance || null : null,
-        pain_location: painLocFinal,
-        pain_radiation: painRadiationFinal,
-        pain_characteristics: showPain ? pain_characteristics || null : null,
-        pain_aggravating_factors: showPain ? pain_aggravating_factors || null : null,
-        pain: showPain ? pain_free || null : null,
-        edema: showEdema ? edema_obs || null : null,
-        godet_test: showEdema ? godet_test || null : null,
-        edema_circummetry: edemaCirc,
-        arom: aromVal,
-        prom: promVal,
-        goniometry: gonioJsonb,
-        dynamometer_msd: showStrength && dyn_msd ? parseFloat(dyn_msd) : null,
-        dynamometer_msi: showStrength && dyn_msi ? parseFloat(dyn_msi) : null,
-        kapandji: kapandjiFinal,
-        muscle_strength: msVal,
-        muscle_strength_median: medianJson,
-        muscle_strength_cubital: cubitalJson,
-        muscle_strength_radial: radialJson,
-        muscle_strength_daniels: danielsJson as any,
-        specific_tests: specificTestsJson,
-        dppd_fingers: dppdFingersJson,
-        sensitivity: showSensitivity ? sensitivity || null : null,
-        sensitivity_functional: null,
-        sensitivity_protective: null,
-        sensitivity_tacto_ligero: showSensitivity ? sensitivity_tacto_ligero || null : null,
-        sensitivity_dos_puntos: showSensitivity ? sensitivity_dos_puntos || null : null,
-        sensitivity_picking_up: showSensitivity ? sensitivity_picking_up || null : null,
-        sensitivity_semmes_weinstein: showSensitivity ? sensitivity_semmes_weinstein || null : null,
-        sensitivity_toco_pincho: showSensitivity ? sensitivity_toco_pincho || null : null,
-        sensitivity_temperatura: showSensitivity ? sensitivity_temperatura || null : null,
-        trophic_state: showOtros ? trophic_state || null : null,
-        scar: showCicatriz ? scar_observaciones || null : null,
-        scar_evaluation: scarEvalJson,
-        vancouver_score: showCicatriz && hasVss ? vssTotal : null,
-        osas_score: null,
-        posture: showOtros ? posture || null : null,
-        emotional_state: showOtros ? emotional_state || null : null,
-      });
+    const analyticalPayload = {
+      patient_id: patientId!,
+      professional_id: user.id,
+      episode_id: activeEpisodeId,
+      session_id: session.id,
+      evaluation_date: session_date,
+      pain_score: showPain && pain_touched ? pain_score : null,
+      pain_appearance: showPain ? pain_appearance || null : null,
+      pain_location: painLocFinal,
+      pain_radiation: painRadiationFinal,
+      pain_characteristics: showPain ? pain_characteristics || null : null,
+      pain_aggravating_factors: showPain ? pain_aggravating_factors || null : null,
+      pain: showPain ? pain_free || null : null,
+      edema: showEdema ? edema_obs || null : null,
+      godet_test: showEdema ? godet_test || null : null,
+      edema_circummetry: edemaCirc,
+      arom: aromVal,
+      prom: promVal,
+      goniometry: gonioJsonb,
+      dynamometer_msd: showStrength && dyn_msd ? parseFloat(dyn_msd) : null,
+      dynamometer_msi: showStrength && dyn_msi ? parseFloat(dyn_msi) : null,
+      kapandji: kapandjiFinal,
+      muscle_strength: msVal,
+      muscle_strength_median: medianJson,
+      muscle_strength_cubital: cubitalJson,
+      muscle_strength_radial: radialJson,
+      muscle_strength_daniels: danielsJson as any,
+      specific_tests: specificTestsJson,
+      dppd_fingers: dppdFingersJson,
+      sensitivity: showSensitivity ? sensitivity || null : null,
+      sensitivity_functional: null,
+      sensitivity_protective: null,
+      sensitivity_tacto_ligero: showSensitivity ? sensitivity_tacto_ligero || null : null,
+      sensitivity_dos_puntos: showSensitivity ? sensitivity_dos_puntos || null : null,
+      sensitivity_picking_up: showSensitivity ? sensitivity_picking_up || null : null,
+      sensitivity_semmes_weinstein: showSensitivity ? sensitivity_semmes_weinstein || null : null,
+      sensitivity_toco_pincho: showSensitivity ? sensitivity_toco_pincho || null : null,
+      sensitivity_temperatura: showSensitivity ? sensitivity_temperatura || null : null,
+      trophic_state: showOtros ? trophic_state || null : null,
+      scar: showCicatriz ? scar_observaciones || null : null,
+      scar_evaluation: scarEvalJson,
+      vancouver_score: showCicatriz && hasVss ? vssTotal : null,
+      osas_score: null,
+      posture: showOtros ? posture || null : null,
+      emotional_state: showOtros ? emotional_state || null : null,
+    } as any;
+
+    if (editingAnalEval) {
+      const { error: aeErr } = await supabase.from("analytical_evaluations").update(analyticalPayload).eq("id", editingAnalEval.id);
+      if (aeErr) {
+        setSaving(false);
+        toast.error("Error al actualizar la evaluación de la sesión");
+        return;
+      }
+    } else if (hasMeasurements) {
+      const { error: aeErr } = await supabase.from("analytical_evaluations").insert(analyticalPayload);
       if (aeErr) {
         setSaving(false);
         toast.error("Error al guardar la sesión");
@@ -940,7 +953,7 @@ export default function SessionForm() {
     }
 
     setSaving(false);
-    toast.success("Sesión registrada correctamente");
+    toast.success(isEditMode ? "Sesión actualizada correctamente" : "Sesión registrada correctamente");
     navigate(`/patients/${patientId}`);
   };
 
