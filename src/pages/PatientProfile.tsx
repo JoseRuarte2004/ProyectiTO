@@ -419,7 +419,7 @@ export default function PatientProfile() {
             </div>
           ) : (
             <>
-              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} patientId={id!} />
+              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} patientId={id!} onDeleted={fetchAll} />
               {(() => {
                 const dischargeSession = sessions.find(s => s.session_type === "discharge");
                 if (!dischargeSession) return null;
@@ -1262,9 +1262,11 @@ function MeasurementsBlock({ e }: { e: any }) {
   );
 }
 
-function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessions: any[]; analEvals: any[]; funcEvals: any[]; patientId: string }) {
+function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted }: { sessions: any[]; analEvals: any[]; funcEvals: any[]; patientId: string; onDeleted: () => void }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [deleteSession, setDeleteSession] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
   const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
 
@@ -1377,7 +1379,22 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
     </>;
   };
 
+  const handleDeleteSession = async () => {
+    if (!deleteSession || deleteSession.session_type === "admission") return;
+    setDeleting(true);
+    const { error } = await supabase.from("therapy_sessions").update({ is_deleted: true }).eq("id", deleteSession.id).eq("patient_id", patientId);
+    setDeleting(false);
+    if (error) {
+      toast.error("Error al eliminar la sesión");
+      return;
+    }
+    toast.success("Sesión eliminada correctamente");
+    setDeleteSession(null);
+    onDeleted();
+  };
+
   return (
+    <>
     <div className="relative">
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
       {sessions.map((s) => {
@@ -1390,7 +1407,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
             <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
             <div className="bg-white rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex items-center justify-between gap-3 p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -1402,6 +1419,16 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
                     <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
                       📊 Con mediciones
                     </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  {s.session_type !== "admission" && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
                 <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
@@ -1488,16 +1515,6 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
                     </div>
                   )}
 
-                  <div className="flex justify-end pt-2 border-t border-border/20">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" /> Editar sesión
-                    </Button>
-                  </div>
-
                   {/* Closing date */}
                   <p className="text-right text-xs text-muted-foreground pt-2">
                     {format(new Date(s.session_date), "dd/MM/yyyy")}
@@ -1509,6 +1526,23 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
         );
       })}
     </div>
+    <AlertDialog open={!!deleteSession} onOpenChange={(open) => !open && setDeleteSession(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eliminar sesión</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción ocultará la sesión del historial. No se puede eliminar la sesión de admisión.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteSession} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            {deleting ? "Eliminando..." : "Eliminar"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
 
