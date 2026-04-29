@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -391,7 +391,10 @@ export default function SessionForm() {
   const [dppd_anular, setDppdAnular] = useState("");
   const [dppd_menique, setDppdMenique] = useState("");
   const [strength_notes, setStrengthNotes] = useState("");
-  const [danielsRows, setDanielsRows] = useState<{ muscle: string; grade: string }[]>([{ muscle: "", grade: "" }]);
+  const [danielsRows, setDanielsRows] = useState<{ id: number; muscle: string; grade: string }[]>([
+    { id: 1, muscle: "", grade: "" },
+  ]);
+  const danielsNextId = useRef(2);
 
   // Daniels by nerve
   const [daniels_median, setDanielsMedian] = useState<Record<string, string>>({});
