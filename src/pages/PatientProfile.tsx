@@ -419,7 +419,7 @@ export default function PatientProfile() {
             </div>
           ) : (
             <>
-              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} patientId={id!} />
+              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} patientId={id!} onDeleted={fetchAll} />
               {(() => {
                 const dischargeSession = sessions.find(s => s.session_type === "discharge");
                 if (!dischargeSession) return null;
@@ -1262,9 +1262,11 @@ function MeasurementsBlock({ e }: { e: any }) {
   );
 }
 
-function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessions: any[]; analEvals: any[]; funcEvals: any[]; patientId: string }) {
+function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted }: { sessions: any[]; analEvals: any[]; funcEvals: any[]; patientId: string; onDeleted: () => void }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [deleteSession, setDeleteSession] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
   const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
 
@@ -1377,7 +1379,22 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessio
     </>;
   };
 
+  const handleDeleteSession = async () => {
+    if (!deleteSession || deleteSession.session_type === "admission") return;
+    setDeleting(true);
+    const { error } = await supabase.from("therapy_sessions").update({ is_deleted: true }).eq("id", deleteSession.id).eq("patient_id", patientId);
+    setDeleting(false);
+    if (error) {
+      toast.error("Error al eliminar la sesión");
+      return;
+    }
+    toast.success("Sesión eliminada correctamente");
+    setDeleteSession(null);
+    onDeleted();
+  };
+
   return (
+    <>
     <div className="relative">
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
       {sessions.map((s) => {
