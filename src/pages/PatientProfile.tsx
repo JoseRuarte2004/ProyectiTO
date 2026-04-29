@@ -1515,16 +1515,6 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
                     </div>
                   )}
 
-                  <div className="flex justify-end pt-2 border-t border-border/20">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" /> Editar sesión
-                    </Button>
-                  </div>
-
                   {/* Closing date */}
                   <p className="text-right text-xs text-muted-foreground pt-2">
                     {format(new Date(s.session_date), "dd/MM/yyyy")}
@@ -1536,6 +1526,23 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
         );
       })}
     </div>
+    <AlertDialog open={!!deleteSession} onOpenChange={(open) => !open && setDeleteSession(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eliminar sesión</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción ocultará la sesión del historial. No se puede eliminar la sesión de admisión.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteSession} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            {deleting ? "Eliminando..." : "Eliminar"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
 
