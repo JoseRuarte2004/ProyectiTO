@@ -314,7 +314,6 @@ export default function SessionForm() {
   const [activeEpisodeId, setActiveEpisodeId] = useState<string | null>(episodeIdParam);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editingSession, setEditingSession] = useState<any>(null);
   const [editingFuncEval, setEditingFuncEval] = useState<any>(null);
   const [editingAnalEval, setEditingAnalEval] = useState<any>(null);
 
@@ -472,7 +471,6 @@ export default function SessionForm() {
           return;
         }
         const s = sessionRes.data;
-        setEditingSession(s);
         setEditingFuncEval(funcRes.data);
         setEditingAnalEval(analRes.data);
         setActiveEpisodeId(s.episode_id || episodeIdParam || null);
@@ -1045,7 +1043,7 @@ export default function SessionForm() {
             className="bg-teal-600 hover:bg-teal-700 text-white"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
-            Guardar
+            {isEditMode ? "Actualizar" : "Guardar"}
           </Button>
         </div>
       </header>
@@ -1774,7 +1772,7 @@ export default function SessionForm() {
             className="bg-teal-600 hover:bg-teal-700 text-white"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Guardar sesión
+            {isEditMode ? "Actualizar sesión" : "Guardar sesión"}
           </Button>
         </div>
       </footer>
