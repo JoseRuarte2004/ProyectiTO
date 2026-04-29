@@ -301,18 +301,22 @@ function DanielsTable({
 }
 
 export default function SessionForm() {
-  const { patientId } = useParams<{ patientId: string }>();
+  const { patientId, sessionId } = useParams<{ patientId: string; sessionId?: string }>();
   const [searchParams] = useSearchParams();
   const episodeIdParam = searchParams.get("episode");
   const typeParam = searchParams.get("type");
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isEditMode = !!sessionId;
 
   const [patient, setPatient] = useState<any>(null);
   const [clinical, setClinical] = useState<any>(null);
   const [activeEpisodeId, setActiveEpisodeId] = useState<string | null>(episodeIdParam);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingSession, setEditingSession] = useState<any>(null);
+  const [editingFuncEval, setEditingFuncEval] = useState<any>(null);
+  const [editingAnalEval, setEditingAnalEval] = useState<any>(null);
 
   // Form state
   const [session_date, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
@@ -455,7 +459,133 @@ export default function SessionForm() {
       ]);
       setPatient(p.data);
       setClinical(c.data);
-      if (sc.count != null) setSessionNumber(String(sc.count + 1));
+      if (!isEditMode && sc.count != null) setSessionNumber(String(sc.count + 1));
+
+      if (sessionId) {
+        const [sessionRes, funcRes, analRes] = await Promise.all([
+          supabase.from("therapy_sessions").select("*").eq("id", sessionId).eq("patient_id", patientId).eq("is_deleted", false).single(),
+          supabase.from("functional_evaluations").select("*").eq("session_id", sessionId).maybeSingle(),
+          supabase.from("analytical_evaluations").select("*").eq("session_id", sessionId).maybeSingle(),
+        ]);
+        if (!sessionRes.data) {
+          setLoading(false);
+          return;
+        }
+        const s = sessionRes.data;
+        setEditingSession(s);
+        setEditingFuncEval(funcRes.data);
+        setEditingAnalEval(analRes.data);
+        setActiveEpisodeId(s.episode_id || episodeIdParam || null);
+        setSessionDate(s.session_date || new Date().toISOString().split("T")[0]);
+        setSessionType(s.session_type || "follow_up");
+        setSessionNumber(s.session_number != null ? String(s.session_number) : "");
+        setWeekAtSession(s.week_at_session != null ? String(s.week_at_session) : "");
+        setGeneralObservations(s.general_observations || "");
+        setSymptomChanges(s.symptom_changes || "");
+        setClinicalChanges(s.clinical_changes || "");
+        setAvdFollowup(s.avd_followup || "");
+        setInterventions(s.interventions || "");
+        setHomeInstructionsSent(s.home_instructions_sent || "");
+        setNotes(s.notes || "");
+
+        const fe = funcRes.data;
+        if (fe) {
+          setFuncDominance(fe.dominance || "");
+          setFuncAvd(fe.avd || "");
+          setFuncAivd(fe.aivd || "");
+          setFuncSleep(fe.sleep_rest || "");
+          setFuncHealth(fe.health_management || "");
+          if (Array.isArray(fe.quickdash_items)) setQdItems(fe.quickdash_items as any);
+          if (fe.fim_items && typeof fe.fim_items === "object") setFimItems(fe.fim_items as any);
+        }
+
+        const ae = analRes.data;
+        if (ae) {
+          setShowMeasurements(true);
+          setPainTouched(ae.pain_score != null);
+          setPainScore(ae.pain_score || 0);
+          setPainAppearance(ae.pain_appearance || "");
+          setPainLocation((ae.pain_location || "").replace(/ — Irradia a:.*/, ""));
+          setPainCharacteristics(ae.pain_characteristics || "");
+          setPainAggravatingFactors(ae.pain_aggravating_factors || "");
+          setPainFree(ae.pain || "");
+          if (ae.pain_radiation === "No irradia") setPainRadiatesChoice("no");
+          else if (ae.pain_radiation) { setPainRadiatesChoice("si"); setPainRadiation(ae.pain_radiation); }
+          setEdemaObs(ae.edema || "");
+          setGodetTest(ae.godet_test || "");
+          setShowEdema(!!(ae.edema || ae.godet_test || ae.edema_circummetry));
+          const circ = ae.edema_circummetry || "";
+          setCircWristMsd(circ.match(/MSD: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
+          setCircGlobalMsd(circ.match(/MSD: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
+          setCircWristMsi(circ.match(/MSI: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
+          setCircGlobalMsi(circ.match(/MSI: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
+          setShowMobility(!!(ae.goniometry || ae.arom || ae.prom || ae.kapandji));
+          if (ae.goniometry && typeof ae.goniometry === "object") {
+            const toGonio = (arr: any) => {
+              const base = emptyGonio();
+              if (Array.isArray(arr)) arr.forEach((g: any) => { if (g?.body_part && base[g.body_part as GonioPartKey]) base[g.body_part as GonioPartKey] = Object.fromEntries(Object.entries(g.values || {}).map(([k,v]) => [k, String(v)])); });
+              return base;
+            };
+            setAllPreGonio(toGonio((ae.goniometry as any).pre));
+            setAllPostGonio(toGonio((ae.goniometry as any).post));
+            setShowPostGonio(Array.isArray((ae.goniometry as any).post) && (ae.goniometry as any).post.length > 0);
+          }
+          const kap = ae.kapandji || "";
+          setKapandjiVal(kap.match(/^(\d+)/)?.[1] || "");
+          setKapandjiPain(kap.includes("dolor"));
+          setDynMsd(ae.dynamometer_msd != null ? String(ae.dynamometer_msd) : "");
+          setDynMsi(ae.dynamometer_msi != null ? String(ae.dynamometer_msi) : "");
+          setStrengthNotes((ae.muscle_strength || "").replace(/Cierre de puño: .*?( — )?/, ""));
+          setShowStrength(!!(ae.dynamometer_msd || ae.dynamometer_msi || ae.muscle_strength || ae.muscle_strength_daniels || ae.dppd_fingers));
+          const fist = (ae.muscle_strength || "").match(/Cierre de puño: ([^—]+)/)?.[1]?.trim() || "";
+          setFistClosure(fist);
+          if (Array.isArray(ae.muscle_strength_daniels) && ae.muscle_strength_daniels.length) {
+            const rows = ae.muscle_strength_daniels.map((r: any, i: number) => ({ id: i + 1, muscle: r.muscle || "", grade: r.grade || "" }));
+            setDanielsRows(rows);
+            danielsNextId.current = rows.length + 1;
+          }
+          const dppd = ae.dppd_fingers || {};
+          setDppdPulgar(dppd.pulgar != null ? String(dppd.pulgar) : "");
+          setDppdIndice(dppd.indice != null ? String(dppd.indice) : "");
+          setDppdMedio(dppd.medio != null ? String(dppd.medio) : "");
+          setDppdAnular(dppd.anular != null ? String(dppd.anular) : "");
+          setDppdMenique(dppd.menique != null ? String(dppd.menique) : "");
+          const parseJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : (v || {}); } catch { return {}; } };
+          setDanielsMedian(parseJson(ae.muscle_strength_median));
+          setDanielsCubital(parseJson(ae.muscle_strength_cubital));
+          setDanielsRadial(parseJson(ae.muscle_strength_radial));
+          setShowSensitivity(!!(ae.sensitivity || ae.sensitivity_tacto_ligero || ae.sensitivity_dos_puntos || ae.sensitivity_picking_up || ae.sensitivity_semmes_weinstein || ae.sensitivity_toco_pincho || ae.sensitivity_temperatura || ae.muscle_strength_median || ae.muscle_strength_cubital || ae.muscle_strength_radial));
+          setSensitivity(ae.sensitivity || "");
+          setSensitivityTactoLigero(ae.sensitivity_tacto_ligero || "");
+          setSensitivityDosPuntos(ae.sensitivity_dos_puntos || "");
+          setSensitivityPickingUp(ae.sensitivity_picking_up || "");
+          setSensitivitySemmesWeinstein(ae.sensitivity_semmes_weinstein || "");
+          setSensitivityTocoPincho(ae.sensitivity_toco_pincho || "");
+          setSensitivityTemperatura(ae.sensitivity_temperatura || "");
+          if (ae.specific_tests && typeof ae.specific_tests === "object") { setSpecificTests(ae.specific_tests as any); setShowSpecificTests(true); }
+          const scar = ae.scar_evaluation || {};
+          setShowCicatriz(!!(ae.scar || ae.scar_evaluation || ae.vancouver_score));
+          setScarLocalizacion(scar.localizacion || "");
+          setScarLongitud(scar.longitud_cm != null ? String(scar.longitud_cm) : "");
+          setScarVascularizacion(scar.vascularizacion || "");
+          setScarPigmentacion(scar.pigmentacion || "");
+          setScarFlexibilidad(scar.flexibilidad || "");
+          setScarSensibilidad(scar.sensibilidad || "");
+          setScarRelieve(scar.relieve || "");
+          setScarTemperatura(scar.temperatura || "");
+          setScarObservaciones(ae.scar || "");
+          setVssPigmentacion(scar.vss?.pigmentacion != null ? String(scar.vss.pigmentacion) : "");
+          setVssVascularizacion(scar.vss?.vascularizacion != null ? String(scar.vss.vascularizacion) : "");
+          setVssFlexibilidad(scar.vss?.flexibilidad != null ? String(scar.vss.flexibilidad) : "");
+          setVssAltura(scar.vss?.altura != null ? String(scar.vss.altura) : "");
+          setShowOtros(!!(ae.trophic_state || ae.posture || ae.emotional_state));
+          setTrophicState(ae.trophic_state || "");
+          setPosture(ae.posture || "");
+          setEmotionalState(ae.emotional_state || "");
+        }
+        setLoading(false);
+        return;
+      }
 
       if (!episodeIdParam) {
         const { data: ep } = await supabase
@@ -472,7 +602,7 @@ export default function SessionForm() {
       setLoading(false);
     };
     load();
-  }, [patientId]);
+  }, [patientId, sessionId]);
 
   // Auto-calculate weeks at session from injury date (or symptom start as fallback)
   const weekCalcSource: "injury" | "symptom" | null = clinical?.injury_date
