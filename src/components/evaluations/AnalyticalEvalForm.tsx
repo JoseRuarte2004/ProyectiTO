@@ -325,6 +325,15 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
     );
   };
 
+  const danielsArr: { muscle: string; grade: string }[] = (() => {
+    const raw = e.muscle_strength_daniels;
+    if (!raw) return [];
+    let arr: any = raw;
+    if (typeof raw === "string") { try { arr = JSON.parse(raw); } catch { return []; } }
+    if (!Array.isArray(arr)) return [];
+    return arr.filter((r: any) => r && typeof r === "object" && r.muscle && r.grade);
+  })();
+
   return (
     <Dialog open={!!evaluation} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -511,6 +520,21 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
                   </div>
                 );
               })()}
+              {danielsArr.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Daniels — Músculos evaluados</p>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <div className="space-y-1">
+                    {danielsArr.map((r, i) => (
+                      <p key={i} className="text-sm">
+                        <span className="font-medium text-foreground">{r.muscle}:</span> Daniels {r.grade}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
 

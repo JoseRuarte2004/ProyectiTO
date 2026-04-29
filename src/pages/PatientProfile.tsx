@@ -1110,6 +1110,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals }: { sessions: any[]; 
 
   const matchesSessionEval = (session: any, evaluation: any) => {
     if (evaluation.session_id && evaluation.session_id === session.id) return true;
+    if (evaluation.session_id) return false;
     return !!(
       evaluation.episode_id &&
       session.episode_id &&

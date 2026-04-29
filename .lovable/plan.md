@@ -1,27 +1,20 @@
-Voy a hacer un cambio mínimo en `src/pages/SessionForm.tsx`.
+Voy a corregir dos problemas de visualización relacionados con Daniels:
 
-Plan:
-1. Mantener/verificar `SelectContent position="popper"` dentro de `danielsRows.map(...)`.
-   - Ya está presente en la sección `Daniels — Músculos evaluados`, así que no requiere cambio ahí salvo confirmar que quede igual.
+1. En la línea de tiempo de sesiones
+   - Ajustar el vínculo entre una sesión y su evaluación analítica para que priorice estrictamente `session_id`.
+   - Si una evaluación tiene `session_id`, solo se mostrará en esa sesión exacta.
+   - El fallback por misma fecha/episodio quedará limitado a evaluaciones antiguas que no tengan `session_id`, evitando que la evaluación de admisión se repita en sesiones posteriores del mismo día o episodio.
 
-2. Mantener/verificar que `onValueChange` actualice la fila correcta.
-   - La lógica actual también está bien: usa `idx` y actualiza `grade` solo para esa fila.
+2. En la pestaña de evaluaciones analíticas
+   - Agregar la visualización de `muscle_strength_daniels` dentro del bloque de Fuerza Muscular.
+   - Mostrar los músculos cargados y su grado Daniels, igual que ya se ve correctamente dentro de sesiones.
 
-3. Corregir el motivo probable por el cual “no se guarda como debería”.
-   - Hoy `muscle_strength_daniels` se arma antes del cálculo de `hasMeasurements`, pero `hasMeasurements` no incluye `danielsJson`.
-   - Resultado: si cargás solo Daniels y no otros campos de fuerza/mediciones, no se inserta la evaluación analítica, entonces Daniels no queda guardado.
-   - Voy a agregar `danielsJson` al array que calcula `hasMeasurements`, sin cambiar el resto del flujo.
+3. Mantener compatibilidad con datos previos
+   - Las evaluaciones antiguas sin `session_id` seguirán pudiendo asociarse por fecha y episodio como respaldo.
+   - Las evaluaciones nuevas, incluida la admisión y las sesiones posteriores, se mostrarán asociadas por su `session_id` real.
 
-Cambio técnico esperado:
-```ts
-const hasMeasurements =
-  show_measurements &&
-  [
-    ...,
-    msVal,
-    danielsJson,
-    ...
-  ].some((v) => v !== "" && v !== null && v !== undefined && v !== false);
-```
+Archivos a modificar:
+- `src/pages/PatientProfile.tsx`
+- `src/components/evaluations/AnalyticalEvalForm.tsx`
 
-No voy a cambiar la estructura de la tabla, ni otros campos, ni el diseño del formulario.
+No voy a tocar la base de datos ni cambiar el guardado, salvo que luego encontremos datos históricos ya guardados incorrectamente que requieran una migración aparte.
