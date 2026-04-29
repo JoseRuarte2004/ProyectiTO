@@ -1307,7 +1307,6 @@ export type Database = {
           rank: number
         }[]
       }
-      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       appointment_status: "scheduled" | "completed" | "cancelled"
