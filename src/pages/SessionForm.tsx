@@ -542,7 +542,7 @@ export default function SessionForm() {
             setDanielsRows(rows);
             danielsNextId.current = rows.length + 1;
           }
-          const dppd = ae.dppd_fingers || {};
+          const dppd = (ae.dppd_fingers && typeof ae.dppd_fingers === "object" && !Array.isArray(ae.dppd_fingers) ? ae.dppd_fingers : {}) as Record<string, any>;
           setDppdPulgar(dppd.pulgar != null ? String(dppd.pulgar) : "");
           setDppdIndice(dppd.indice != null ? String(dppd.indice) : "");
           setDppdMedio(dppd.medio != null ? String(dppd.medio) : "");
@@ -561,7 +561,7 @@ export default function SessionForm() {
           setSensitivityTocoPincho(ae.sensitivity_toco_pincho || "");
           setSensitivityTemperatura(ae.sensitivity_temperatura || "");
           if (ae.specific_tests && typeof ae.specific_tests === "object") { setSpecificTests(ae.specific_tests as any); setShowSpecificTests(true); }
-          const scar = ae.scar_evaluation || {};
+          const scar = (ae.scar_evaluation && typeof ae.scar_evaluation === "object" && !Array.isArray(ae.scar_evaluation) ? ae.scar_evaluation : {}) as Record<string, any>;
           setShowCicatriz(!!(ae.scar || ae.scar_evaluation || ae.vancouver_score));
           setScarLocalizacion(scar.localizacion || "");
           setScarLongitud(scar.longitud_cm != null ? String(scar.longitud_cm) : "");
