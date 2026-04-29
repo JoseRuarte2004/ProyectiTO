@@ -732,6 +732,7 @@ export default function SessionForm() {
         showStrength && dyn_msi,
         kapandjiFinal,
         msVal,
+        danielsJson,
         showSensitivity && sensitivity,
         showSensitivity && sensitivity_tacto_ligero,
         showSensitivity && sensitivity_dos_puntos,
