@@ -1300,40 +1300,37 @@ export default function SessionForm() {
             <div>
               <FieldLabel>Daniels — Músculos evaluados</FieldLabel>
               <div className="space-y-2">
-                {danielsRows.map((row, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
+                {danielsRows.map((row) => (
+                  <div key={row.id} className="flex items-center gap-2">
                     <Input
                       value={row.muscle}
                       onChange={(ev) =>
-                        setDanielsRows((prev) => prev.map((r, i) => (i === idx ? { ...r, muscle: ev.target.value } : r)))
+                        setDanielsRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, muscle: ev.target.value } : r)))
                       }
                       placeholder="Ej: Flexor superficial de los dedos"
                       className={`${inputClass} flex-1`}
                     />
-                    <Select
+                    <select
                       value={row.grade}
-                      onValueChange={(v) =>
-                        setDanielsRows((prev) => prev.map((r, i) => (i === idx ? { ...r, grade: v } : r)))
+                      onChange={(ev) =>
+                        setDanielsRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, grade: ev.target.value } : r)))
                       }
+                      className={`${inputClass} w-24 px-3 py-2 text-sm bg-background`}
                     >
-                      <SelectTrigger className={`${inputClass} w-24`}>
-                        <SelectValue placeholder="Grado" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                        {DANIELS_FULL_GRADES.map((g) => (
-                          <SelectItem key={g} value={g}>
-                            {g}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <option value="">Grado</option>
+                      {DANIELS_FULL_GRADES.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
                     {danielsRows.length > 1 && (
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => setDanielsRows((prev) => prev.filter((_, i) => i !== idx))}
+                        onClick={() => setDanielsRows((prev) => prev.filter((r) => r.id !== row.id))}
                         aria-label="Eliminar fila"
                       >
                         <X className="h-4 w-4" />
@@ -1346,7 +1343,10 @@ export default function SessionForm() {
                   variant="ghost"
                   size="sm"
                   className="text-teal-600 hover:text-teal-700"
-                  onClick={() => setDanielsRows((prev) => [...prev, { muscle: "", grade: "" }])}
+                  onClick={() => {
+                    const id = danielsNextId.current++;
+                    setDanielsRows((prev) => [...prev, { id, muscle: "", grade: "" }]);
+                  }}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Agregar músculo
                 </Button>
