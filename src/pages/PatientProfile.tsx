@@ -24,6 +24,7 @@ import { format, differenceInYears } from "date-fns";
 import { es } from "date-fns/locale";
 import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
+import { QUICKDASH_QUESTIONS, FIM_MOTOR, FIM_COGNITIVE } from "@/components/evaluations/FunctionalScales";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -1508,6 +1509,10 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
             };
             const hasOccup = detail.avd || detail.aivd || detail.quickdash_score != null || detail.fim_score != null || detail.dash_score != null;
             const hasHealth = detail.physical_activity || detail.sleep_rest || detail.health_management;
+            const quickdashItems: (number | null)[] = Array.isArray(detail.quickdash_items) ? detail.quickdash_items : [];
+            const fimItems = detail.fim_items && typeof detail.fim_items === "object" && !Array.isArray(detail.fim_items) ? detail.fim_items : {};
+            const hasQuickdashItems = quickdashItems.some((v) => v !== null && v !== undefined);
+            const hasFimItems = [...FIM_MOTOR, ...FIM_COGNITIVE].some((item) => fimItems[item.key] !== null && fimItems[item.key] !== undefined);
             return (
               <div className="space-y-5 text-sm">
                 {/* General */}
@@ -1537,6 +1542,45 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                       <Field label="AIVD" value={detail.aivd} />
                       <Field label="Puntaje DASH" value={detail.dash_score != null ? `${detail.dash_score}/100` : null} />
                     </div>
+                    {hasQuickdashItems && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Detalle QuickDASH</p>
+                        <div className="space-y-1.5">
+                          {QUICKDASH_QUESTIONS.map((item, idx) => {
+                            const value = quickdashItems[idx];
+                            if (value === null || value === undefined) return null;
+                            return (
+                              <div key={idx} className="rounded-md border border-gray-100 bg-gray-50/60 px-3 py-2">
+                                <p className="text-xs text-gray-700"><span className="font-semibold text-teal-700">{idx + 1}.</span> {item.q}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{value}. {item.scale[value - 1] || ""}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {hasFimItems && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Detalle FIM</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {[{ label: "Motor", items: FIM_MOTOR }, { label: "Cognitivo", items: FIM_COGNITIVE }].map((group) => (
+                            <div key={group.label} className="space-y-1">
+                              <p className="text-xs font-semibold text-teal-700 uppercase">{group.label}</p>
+                              {group.items.map((item) => {
+                                const value = fimItems[item.key];
+                                if (value === null || value === undefined) return null;
+                                return (
+                                  <div key={item.key} className="flex items-center justify-between gap-3 border-b border-gray-100 py-1 text-xs">
+                                    <span className="text-gray-700">{item.label}</span>
+                                    <span className="font-semibold text-foreground">{value}/7</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
