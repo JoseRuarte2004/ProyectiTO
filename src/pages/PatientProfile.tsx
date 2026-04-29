@@ -26,6 +26,21 @@ import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
 import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
 import { QUICKDASH_QUESTIONS, FIM_MOTOR, FIM_COGNITIVE } from "@/components/evaluations/FunctionalScales";
 
+const ALLOWED_CLINICAL_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+  "video/mp4",
+  "video/quicktime",
+] as const;
+
+const CLINICAL_FILE_ACCEPT = ALLOWED_CLINICAL_FILE_TYPES.join(",");
+
+const isAllowedClinicalFileType = (type: string) =>
+  ALLOWED_CLINICAL_FILE_TYPES.includes(type as (typeof ALLOWED_CLINICAL_FILE_TYPES)[number]);
+
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -588,8 +603,10 @@ export default function PatientProfile() {
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {signedUrls[d.id] && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(signedUrls[d.id], "_blank")}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                              <a href={signedUrls[d.id]} download={d.file_name} rel="noopener noreferrer" aria-label={`Descargar ${d.file_name}`}>
                               <Download className="h-4 w-4" />
+                              </a>
                             </Button>
                           )}
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteFile(d)}>
@@ -2454,11 +2471,21 @@ function UploadFileDialog({ open, onClose, patientId, userId, onSaved, episodeId
     setFileError("");
     if (!f) { setFile(null); return; }
     if (f.size > 50 * 1024 * 1024) { setFileError("El archivo supera los 50MB permitidos."); setFile(null); return; }
+    if (!isAllowedClinicalFileType(f.type)) {
+      setFileError("Formato no permitido. Usá JPG, PNG, WebP, GIF, PDF, MP4 o MOV.");
+      setFile(null);
+      e.target.value = "";
+      return;
+    }
     setFile(f);
   };
 
   const handleSave = async () => {
     if (!category || !file) return;
+    if (!isAllowedClinicalFileType(file.type)) {
+      toast.error("Formato de archivo no permitido");
+      return;
+    }
     setSaving(true);
     const path = `${userId}/${patientId}/${Date.now()}_${file.name}`;
     const { error: upErr } = await supabase.storage.from("clinical-files").upload(path, file, { contentType: file.type });
@@ -2506,7 +2533,7 @@ function UploadFileDialog({ open, onClose, patientId, userId, onSaved, episodeId
           </div>
           <div className="space-y-2">
             <Label>Archivo *</Label>
-            <Input type="file" accept="image/*,application/pdf,video/mp4,video/quicktime" onChange={handleFileChange} />
+            <Input type="file" accept={CLINICAL_FILE_ACCEPT} onChange={handleFileChange} />
             {fileError && <p className="text-xs text-destructive">{fileError}</p>}
           </div>
           <div className="flex justify-end gap-2 pt-2">
