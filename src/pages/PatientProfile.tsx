@@ -55,6 +55,7 @@ export default function PatientProfile() {
   const [showPlanDetail, setShowPlanDetail] = useState<any>(null);
   const [editPlan, setEditPlan] = useState<any>(null);
   const [deletePlan, setDeletePlan] = useState<any>(null);
+  const [showEditFicha, setShowEditFicha] = useState(false);
   
   const [evalSubTab, setEvalSubTab] = useState("functional");
   const [showUploadFile, setShowUploadFile] = useState(false);
@@ -237,6 +238,11 @@ export default function PatientProfile() {
 
         {/* FICHA */}
         <TabsContent value="ficha" className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setShowEditFicha(true)}>
+              <Edit className="h-4 w-4 mr-1" /> Editar ficha
+            </Button>
+          </div>
           {(() => {
             const treatmentLabel = clinical?.treatment_type
               ? ({ conservative: "Conservador", surgery: "Quirúrgico", mixed: "Mixto" } as Record<string, string>)[clinical.treatment_type] || clinical.treatment_type
@@ -413,7 +419,7 @@ export default function PatientProfile() {
             </div>
           ) : (
             <>
-              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} />
+              <SessionTimeline sessions={sessions} analEvals={analEvals} funcEvals={funcEvals} patientId={id!} />
               {(() => {
                 const dischargeSession = sessions.find(s => s.session_type === "discharge");
                 if (!dischargeSession) return null;
@@ -609,6 +615,7 @@ export default function PatientProfile() {
 
 
       {/* New Functional Eval Dialog */}
+      <EditFichaDialog open={showEditFicha} onClose={() => setShowEditFicha(false)} patient={patient} clinical={clinical} occupational={occupational} activeEpisodeId={activeEpisodeId} onSaved={fetchAll} />
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
 
       {/* New Analytical Eval Dialog */}
@@ -1080,7 +1087,8 @@ function MeasurementsBlock({ e }: { e: any }) {
   );
 }
 
-function SessionTimeline({ sessions, analEvals, funcEvals }: { sessions: any[]; analEvals: any[]; funcEvals: any[] }) {
+function SessionTimeline({ sessions, analEvals, funcEvals, patientId }: { sessions: any[]; analEvals: any[]; funcEvals: any[]; patientId: string }) {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>(null);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
   const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
@@ -1305,8 +1313,18 @@ function SessionTimeline({ sessions, analEvals, funcEvals }: { sessions: any[]; 
                     </div>
                   )}
 
+                  <div className="flex justify-end pt-2 border-t border-border/20">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" /> Editar sesión
+                    </Button>
+                  </div>
+
                   {/* Closing date */}
-                  <p className="text-right text-xs text-muted-foreground pt-2 border-t border-border/20">
+                  <p className="text-right text-xs text-muted-foreground pt-2">
                     {format(new Date(s.session_date), "dd/MM/yyyy")}
                   </p>
                 </div>
