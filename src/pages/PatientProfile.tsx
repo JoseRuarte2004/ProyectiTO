@@ -1407,7 +1407,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
             <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
             <div className="bg-white rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex items-center justify-between gap-3 p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -1419,6 +1419,16 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
                     <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
                       📊 Con mediciones
                     </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  {s.session_type !== "admission" && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
                 <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
