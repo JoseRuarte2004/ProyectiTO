@@ -24,10 +24,13 @@ import { useRef } from "react";
 import {
   QuickDashSection,
   FimSection,
+  BarthelSection,
   emptyQuickDash,
   emptyFim,
+  emptyBarthel,
   calcQuickDashScore,
   calcFimTotal,
+  calcBarthelTotal,
 } from "@/components/evaluations/FunctionalScales";
 
 // ── Section card wrapper ──
@@ -525,6 +528,7 @@ export function NewPatientForm() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [insurance, setInsurance] = useState("");
+  const [insuranceNumber, setInsuranceNumber] = useState("");
   const [admissionDate, setAdmissionDate] = useState(new Date().toISOString().split("T")[0]);
 
   // Card 2 — Clinical data
@@ -561,6 +565,7 @@ export function NewPatientForm() {
   const [aivd, setAivd] = useState("");
   const [qdItems, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
   const [fimItems, setFimItems] = useState<Record<string, number | null>>(emptyFim());
+  const [barthelItems, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
   // Card 5 — Analytical evaluation
   const [painScore, setPainScore] = useState<number>(0);
@@ -748,6 +753,7 @@ export function NewPatientForm() {
           phone: or(phone),
           address: or(address),
           insurance: or(insurance),
+          insurance_number: or(insuranceNumber),
           admission_date: admissionDate,
           professional_id: user!.id,
         })
@@ -812,9 +818,11 @@ export function NewPatientForm() {
       // 4. Functional evaluation
       const qdAnswered = qdItems.some((v) => v !== null);
       const fimAnswered = Object.values(fimItems).some((v) => v !== null);
+      const barthelAnswered = Object.values(barthelItems).some((v) => v !== null);
       const qdScore = calcQuickDashScore(qdItems);
       const fimTotal = calcFimTotal(fimItems);
-      const hasFunc = !!(avd.trim() || aivd.trim() || qdAnswered || fimAnswered);
+      const barthelTotal = calcBarthelTotal(barthelItems);
+      const hasFunc = !!(avd.trim() || aivd.trim() || qdAnswered || fimAnswered || barthelAnswered);
       if (showFunctional && hasFunc) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
@@ -828,6 +836,8 @@ export function NewPatientForm() {
           quickdash_score: qdScore as any,
           fim_items: fimAnswered ? (fimItems as any) : null,
           fim_score: fimTotal,
+          barthel_items: barthelAnswered ? (barthelItems as any) : null,
+          barthel_score: barthelTotal,
         } as any);
       }
 
@@ -1118,6 +1128,10 @@ export function NewPatientForm() {
               <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." className={inputClass} />
             </div>
             <div>
+              <FieldLabel>Nº de afiliado</FieldLabel>
+              <Input value={insuranceNumber} onChange={(e) => setInsuranceNumber(e.target.value)} placeholder="Número de afiliado" className={inputClass} />
+            </div>
+            <div>
               <FieldLabel required>Fecha de admisión</FieldLabel>
               <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={`${inputClass} ${fieldClass("admissionDate")}`} />
               <ErrMsg field="admissionDate" />
@@ -1264,6 +1278,7 @@ export function NewPatientForm() {
           <div className="space-y-5">
             <QuickDashSection items={qdItems} onChange={setQdItems} />
             <FimSection items={fimItems} onChange={setFimItems} />
+            <BarthelSection items={barthelItems} onChange={setBarthelItems} />
             <div>
               <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
               <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={`${textareaClass} ${fieldClass("avd")}`} />

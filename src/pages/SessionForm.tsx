@@ -32,10 +32,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   QuickDashSection,
   FimSection,
+  BarthelSection,
   emptyQuickDash,
   emptyFim,
+  emptyBarthel,
   calcQuickDashScore,
   calcFimTotal,
+  calcBarthelTotal,
 } from "@/components/evaluations/FunctionalScales";
 
 // ── Goniometry config by body part ──
@@ -336,6 +339,7 @@ export default function SessionForm() {
   const [func_health, setFuncHealth] = useState("");
   const [qd_items, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
   const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
+  const [barthel_items, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
   // Analytical evaluation (master toggle)
   const [show_measurements, setShowMeasurements] = useState(false);
@@ -495,6 +499,7 @@ export default function SessionForm() {
           setFuncHealth(fe.health_management || "");
           if (Array.isArray(fe.quickdash_items)) setQdItems(fe.quickdash_items as any);
           if (fe.fim_items && typeof fe.fim_items === "object") setFimItems(fe.fim_items as any);
+          if (fe.barthel_items && typeof fe.barthel_items === "object") setBarthelItems(fe.barthel_items as any);
         }
 
         const ae = analRes.data;
@@ -786,9 +791,10 @@ export default function SessionForm() {
     // Functional eval for admission
     const qd_answered = qd_items.some((v) => v !== null);
     const fim_answered = Object.values(fim_items).some((v) => v !== null);
+    const barthel_answered = Object.values(barthel_items).some((v) => v !== null);
     const hasFunctionalData =
       session_type === "admission" &&
-      ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered);
+      ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered || barthel_answered);
 
     const functionalPayload = {
       patient_id: patientId!,
@@ -805,6 +811,8 @@ export default function SessionForm() {
       quickdash_score: qd_answered ? (calcQuickDashScore(qd_items) as any) : null,
       fim_items: fim_answered ? (fim_items as any) : null,
       fim_score: fim_answered ? calcFimTotal(fim_items) : null,
+      barthel_items: barthel_answered ? (barthel_items as any) : null,
+      barthel_score: barthel_answered ? calcBarthelTotal(barthel_items) : null,
     } as any;
 
     if (editingFuncEval) {
@@ -1135,6 +1143,7 @@ export default function SessionForm() {
               </div>
               <QuickDashSection items={qd_items} onChange={setQdItems} />
               <FimSection items={fim_items} onChange={setFimItems} />
+              <BarthelSection items={barthel_items} onChange={setBarthelItems} />
               <div>
                 <FieldLabel>AVD — Actividades de la vida diaria</FieldLabel>
                 <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} className={textareaClass} />

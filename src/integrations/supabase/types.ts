@@ -558,6 +558,7 @@ export type Database = {
         Row: {
           aivd: string | null
           avd: string | null
+          barthel_items: Json | null
           barthel_score: number | null
           created_at: string
           dash_score: number | null
@@ -581,6 +582,7 @@ export type Database = {
         Insert: {
           aivd?: string | null
           avd?: string | null
+          barthel_items?: Json | null
           barthel_score?: number | null
           created_at?: string
           dash_score?: number | null
@@ -604,6 +606,7 @@ export type Database = {
         Update: {
           aivd?: string | null
           avd?: string | null
+          barthel_items?: Json | null
           barthel_score?: number | null
           created_at?: string
           dash_score?: number | null
@@ -853,6 +856,7 @@ export type Database = {
           first_name: string
           id: string
           insurance: string | null
+          insurance_number: string | null
           insurances: Json | null
           is_deleted: boolean
           last_name: string
@@ -875,6 +879,7 @@ export type Database = {
           first_name: string
           id?: string
           insurance?: string | null
+          insurance_number?: string | null
           insurances?: Json | null
           is_deleted?: boolean
           last_name: string
@@ -897,6 +902,7 @@ export type Database = {
           first_name?: string
           id?: string
           insurance?: string | null
+          insurance_number?: string | null
           insurances?: Json | null
           is_deleted?: boolean
           last_name?: string
