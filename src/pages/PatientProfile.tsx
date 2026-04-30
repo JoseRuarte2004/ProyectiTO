@@ -1517,7 +1517,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
+                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-muted-foreground/30 text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
                     {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
                     {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                   </div>
