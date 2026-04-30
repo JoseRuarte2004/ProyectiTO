@@ -207,18 +207,21 @@ export default function PatientProfile() {
         <div className="space-y-6">
           {/* Avatar & identity */}
           <div className="text-center lg:text-left">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-4">
-              <span className="text-2xl font-serif font-semibold text-primary">{initials}</span>
+            <div className="flex items-start justify-between">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
+                <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono hidden lg:block">HC #{id?.slice(-5).toUpperCase()}</span>
             </div>
             <h1 className="text-xl leading-tight">
-              <span className="text-foreground">{patient.last_name},</span><br />
-              <em className="font-serif font-semibold text-foreground not-italic text-2xl">{patient.first_name}</em>
+              <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
+              <em className="font-accent font-normal text-foreground/80 text-lg not-italic">{patient.first_name}</em>
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {age !== null && <>{age} años · </>}DNI {patient.dni}
+            <p className="text-xs text-muted-foreground mt-1">
+              {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
             </p>
             {activeEpisode && (
-              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-border">
+              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-primary text-primary bg-transparent">
                 Episodio activo
               </Badge>
             )}
