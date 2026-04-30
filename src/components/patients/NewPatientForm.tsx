@@ -24,10 +24,13 @@ import { useRef } from "react";
 import {
   QuickDashSection,
   FimSection,
+  BarthelSection,
   emptyQuickDash,
   emptyFim,
+  emptyBarthel,
   calcQuickDashScore,
   calcFimTotal,
+  calcBarthelTotal,
 } from "@/components/evaluations/FunctionalScales";
 
 // ── Section card wrapper ──
