@@ -724,6 +724,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       phone: emptyToNull(form.phone),
       address: emptyToNull(form.address),
       insurance: emptyToNull(form.insurance),
+      insurance_number: emptyToNull(form.insurance_number),
       admission_date: form.admission_date || patient.admission_date,
     };
     const clinicalPayload = {
