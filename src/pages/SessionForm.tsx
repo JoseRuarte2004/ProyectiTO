@@ -32,10 +32,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   QuickDashSection,
   FimSection,
+  BarthelSection,
   emptyQuickDash,
   emptyFim,
+  emptyBarthel,
   calcQuickDashScore,
   calcFimTotal,
+  calcBarthelTotal,
 } from "@/components/evaluations/FunctionalScales";
 
 // ── Goniometry config by body part ──
