@@ -1,6 +1,5 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ChevronDown } from "lucide-react";
@@ -35,7 +34,6 @@ export function calcQuickDashScore(items: (number | null)[]): number | null {
   return Math.round(score * 10) / 10;
 }
 
-// Partial preview score (only counts answered, but only meaningful if all answered)
 export function calcQuickDashPartial(items: (number | null)[]): number | null {
   const answered = items.filter((v): v is number => v !== null && v !== undefined);
   if (answered.length === 0) return null;
@@ -117,31 +115,79 @@ export function QuickDashSection({
   );
 }
 
-// ── FIM definition ──
-export const FIM_MOTOR: Array<{ key: string; label: string }> = [
-  { key: "alimentacion", label: "Alimentación" },
-  { key: "aseo_personal", label: "Aseo personal" },
-  { key: "bano", label: "Baño" },
-  { key: "vestido_tren_superior", label: "Vestido tren superior" },
-  { key: "vestido_tren_inferior", label: "Vestido tren inferior" },
-  { key: "uso_del_bano", label: "Uso del baño" },
-  { key: "control_de_intestino", label: "Control de intestino" },
-  { key: "control_de_vejiga", label: "Control de vejiga" },
-  { key: "transferencia_cama_silla", label: "Transferencia cama-silla" },
-  { key: "transferencia_al_bano", label: "Transferencia al baño" },
-  { key: "transferencia_ducha_banera", label: "Transferencia ducha-bañera" },
-  { key: "marcha_o_silla_de_ruedas", label: "Marcha o silla de ruedas" },
-  { key: "escaleras", label: "Escaleras" },
+// ── FIM definition (grouped with subtotals) ──
+const FIM_LABELS: Record<number, string> = {
+  1: "Dependiente total (aporta <25%)",
+  2: "Asistencia máxima (aporta 25% o más)",
+  3: "Asistencia moderada (aporta 50% o más)",
+  4: "Asistencia mínima (aporta 75% o más)",
+  5: "Solo supervisión",
+  6: "Independiente con adaptaciones",
+  7: "Independencia total",
+};
+
+export const FIM_GROUPS = [
+  {
+    name: "AUTOCUIDADO",
+    max: 42,
+    items: [
+      { key: "alimentacion", label: "Alimentación" },
+      { key: "aseo_personal", label: "Aseo personal" },
+      { key: "bano", label: "Baño" },
+      { key: "vestido_tren_superior", label: "Vestido tren superior" },
+      { key: "vestido_tren_inferior", label: "Vestido tren inferior" },
+      { key: "uso_del_bano", label: "Uso del baño" },
+    ],
+  },
+  {
+    name: "CONTROL DE ESFÍNTERES",
+    max: 14,
+    items: [
+      { key: "control_de_intestino", label: "Control de intestino" },
+      { key: "control_de_vejiga", label: "Control de vejiga" },
+    ],
+  },
+  {
+    name: "TRANSFERENCIAS",
+    max: 21,
+    items: [
+      { key: "transferencia_cama_silla", label: "Transferencia cama-silla" },
+      { key: "transferencia_al_bano", label: "Transferencia al baño" },
+      { key: "transferencia_ducha_banera", label: "Transferencia ducha-bañera" },
+    ],
+  },
+  {
+    name: "LOCOMOCIÓN",
+    max: 14,
+    items: [
+      { key: "marcha_o_silla_de_ruedas", label: "Marcha o silla de ruedas" },
+      { key: "escaleras", label: "Escaleras" },
+    ],
+  },
 ];
 
-export const FIM_COGNITIVE: Array<{ key: string; label: string }> = [
-  { key: "comprension", label: "Comprensión" },
-  { key: "expresion", label: "Expresión" },
-  { key: "interaccion_social", label: "Interacción social" },
-  { key: "resolucion_de_problemas", label: "Resolución de problemas" },
-  { key: "memoria", label: "Memoria" },
+export const FIM_COGNITIVE_GROUPS = [
+  {
+    name: "COMUNICACIÓN",
+    max: 14,
+    items: [
+      { key: "comprension", label: "Comprensión" },
+      { key: "expresion", label: "Expresión" },
+    ],
+  },
+  {
+    name: "CONEXIÓN",
+    max: 21,
+    items: [
+      { key: "interaccion_social", label: "Interacción social" },
+      { key: "resolucion_de_problemas", label: "Resolución de problemas" },
+      { key: "memoria", label: "Memoria" },
+    ],
+  },
 ];
 
+export const FIM_MOTOR: Array<{ key: string; label: string }> = FIM_GROUPS.flatMap(g => g.items);
+export const FIM_COGNITIVE: Array<{ key: string; label: string }> = FIM_COGNITIVE_GROUPS.flatMap(g => g.items);
 export const FIM_ALL = [...FIM_MOTOR, ...FIM_COGNITIVE];
 
 export function emptyFim(): Record<string, number | null> {
@@ -154,31 +200,47 @@ export function calcFimTotal(items: Record<string, number | null>): number | nul
   return vals.reduce((a, b) => a + b, 0);
 }
 
-function FimItemRow({
-  item,
-  value,
+function calcGroupSubtotal(items: Record<string, number | null>, group: { items: Array<{ key: string }> }): number | null {
+  const vals = group.items.map(i => items[i.key]).filter((v): v is number => v !== null && v !== undefined);
+  if (vals.length === 0) return null;
+  return vals.reduce((a, b) => a + b, 0);
+}
+
+const selectClass = "h-8 w-full text-xs rounded-md border border-gray-200 bg-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent";
+
+function FimGroupSection({
+  group,
+  items,
   onChange,
 }: {
-  item: { key: string; label: string };
-  value: number | null;
-  onChange: (v: number | null) => void;
+  group: { name: string; max: number; items: Array<{ key: string; label: string }> };
+  items: Record<string, number | null>;
+  onChange: (items: Record<string, number | null>) => void;
 }) {
+  const subtotal = calcGroupSubtotal(items, group);
   return (
-    <div className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-100 last:border-0">
-      <span className="text-xs text-gray-700 flex-1 min-w-0">{item.label}</span>
-      <Select
-        value={value !== null && value !== undefined ? String(value) : ""}
-        onValueChange={(v) => onChange(v ? parseInt(v) : null)}
-      >
-        <SelectTrigger className="h-8 w-16 text-xs border-gray-200 rounded-md">
-          <SelectValue placeholder="—" />
-        </SelectTrigger>
-        <SelectContent position="popper">
-          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-            <SelectItem key={n} value={String(n)}>{n}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wide">{group.name}</p>
+        {subtotal !== null && (
+          <span className="text-[11px] font-semibold text-teal-600">{subtotal}/{group.max}</span>
+        )}
+      </div>
+      {group.items.map((item) => (
+        <div key={item.key} className="flex items-center justify-between gap-2 py-1 border-b border-gray-100 last:border-0">
+          <span className="text-xs text-gray-700 flex-1 min-w-0">{item.label}</span>
+          <select
+            value={items[item.key] != null ? String(items[item.key]) : ""}
+            onChange={(e) => onChange({ ...items, [item.key]: e.target.value ? parseInt(e.target.value) : null })}
+            className={`${selectClass} w-48`}
+          >
+            <option value="">—</option>
+            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+              <option key={n} value={String(n)}>{n} — {FIM_LABELS[n]}</option>
+            ))}
+          </select>
+        </div>
+      ))}
     </div>
   );
 }
@@ -192,6 +254,16 @@ export function FimSection({
 }) {
   const [open, setOpen] = useState(false);
   const total = calcFimTotal(items);
+  const motorSubtotal = FIM_GROUPS.reduce((sum, g) => {
+    const s = calcGroupSubtotal(items, g);
+    return s != null ? sum + s : sum;
+  }, 0);
+  const cogSubtotal = FIM_COGNITIVE_GROUPS.reduce((sum, g) => {
+    const s = calcGroupSubtotal(items, g);
+    return s != null ? sum + s : sum;
+  }, 0);
+  const hasMotor = FIM_MOTOR.some(i => items[i.key] != null);
+  const hasCog = FIM_COGNITIVE.some(i => items[i.key] != null);
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="rounded-lg border border-gray-200 bg-white">
@@ -208,36 +280,126 @@ export function FimSection({
       </CollapsibleTrigger>
       <CollapsibleContent className="px-4 pb-4 space-y-4">
         <p className="text-xs text-muted-foreground">
-          Escala 1–7: 1 = Asistencia total · 4 = Asistencia mínima · 6 = Supervisión · 7 = Independencia completa
+          Escala 1–7: 1 = Dependiente total · 4 = Asistencia mínima · 6 = Independiente con adaptaciones · 7 = Independencia total
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-          <div>
-            <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-2">Motor (13 ítems)</p>
-            <div>
-              {FIM_MOTOR.map((item) => (
-                <FimItemRow
-                  key={item.key}
-                  item={item}
-                  value={items[item.key] ?? null}
-                  onChange={(v) => onChange({ ...items, [item.key]: v })}
-                />
-              ))}
+        <div className="space-y-4">
+          {FIM_GROUPS.map((group) => (
+            <FimGroupSection key={group.name} group={group} items={items} onChange={onChange} />
+          ))}
+          {hasMotor && (
+            <div className="flex justify-end border-t border-teal-200 pt-2">
+              <Badge className="bg-teal-100 text-teal-800 border border-teal-300 hover:bg-teal-100">
+                Subtotal Motor: {motorSubtotal}/91
+              </Badge>
             </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-2">Cognitivo (5 ítems)</p>
-            <div>
-              {FIM_COGNITIVE.map((item) => (
-                <FimItemRow
-                  key={item.key}
-                  item={item}
-                  value={items[item.key] ?? null}
-                  onChange={(v) => onChange({ ...items, [item.key]: v })}
-                />
-              ))}
+          )}
+          {FIM_COGNITIVE_GROUPS.map((group) => (
+            <FimGroupSection key={group.name} group={group} items={items} onChange={onChange} />
+          ))}
+          {hasCog && (
+            <div className="flex justify-end border-t border-teal-200 pt-2">
+              <Badge className="bg-teal-100 text-teal-800 border border-teal-300 hover:bg-teal-100">
+                Subtotal Cognitivo: {cogSubtotal}/35
+              </Badge>
             </div>
-          </div>
+          )}
         </div>
+        {total !== null && (
+          <div className="flex justify-end border-t border-teal-300 pt-3">
+            <Badge className="bg-teal-600 text-white border-0 hover:bg-teal-600 text-sm px-3 py-1">
+              Total FIM: {total}/126
+            </Badge>
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+// ── Índice de Barthel ──
+export const BARTHEL_ITEMS = [
+  { key: "comer", label: "Comer", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Necesita ayuda" }, { v: 10, l: "Independiente" }] },
+  { key: "trasladarse", label: "Trasladarse cama-silla", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Necesita ayuda importante" }, { v: 10, l: "Necesita algo de ayuda" }, { v: 15, l: "Independiente" }] },
+  { key: "aseo_personal", label: "Aseo personal", options: [{ v: 0, l: "Necesita ayuda" }, { v: 5, l: "Independiente" }] },
+  { key: "uso_inodoro", label: "Uso de inodoro", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Necesita ayuda" }, { v: 10, l: "Independiente" }] },
+  { key: "banarse", label: "Bañarse/ducharse", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Independiente" }] },
+  { key: "desplazarse", label: "Desplazarse", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Independiente en silla de ruedas" }, { v: 10, l: "Con pequeña ayuda" }, { v: 15, l: "Independiente" }] },
+  { key: "escaleras", label: "Subir y bajar escaleras", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Necesita ayuda" }, { v: 10, l: "Independiente" }] },
+  { key: "vestirse", label: "Vestirse/desvestirse", options: [{ v: 0, l: "Dependiente" }, { v: 5, l: "Necesita ayuda" }, { v: 10, l: "Independiente" }] },
+  { key: "deposicion", label: "Deposición", options: [{ v: 0, l: "Incontinente" }, { v: 5, l: "Accidente excepcional" }, { v: 10, l: "Continente" }] },
+  { key: "miccion", label: "Micción", options: [{ v: 0, l: "Incontinente" }, { v: 5, l: "Accidente ocasional" }, { v: 10, l: "Continente" }] },
+];
+
+export function emptyBarthel(): Record<string, number | null> {
+  return Object.fromEntries(BARTHEL_ITEMS.map(i => [i.key, null]));
+}
+
+export function calcBarthelTotal(items: Record<string, number | null>): number | null {
+  const vals = BARTHEL_ITEMS.map(i => items[i.key]).filter((v): v is number => v !== null && v !== undefined);
+  if (vals.length === 0) return null;
+  return vals.reduce((a, b) => a + b, 0);
+}
+
+function barthelInterpretation(score: number): string {
+  if (score <= 20) return "Dependencia total";
+  if (score <= 60) return "Dependencia severa";
+  if (score <= 90) return "Dependencia moderada";
+  if (score <= 99) return "Dependencia escasa";
+  return "Independiente";
+}
+
+export function BarthelSection({
+  items,
+  onChange,
+}: {
+  items: Record<string, number | null>;
+  onChange: (items: Record<string, number | null>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const total = calcBarthelTotal(items);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="rounded-lg border border-gray-200 bg-white">
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-gray-700">Índice de Barthel</span>
+          {total !== null && (
+            <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+              Barthel: {total}/100
+            </Badge>
+          )}
+        </div>
+        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-4 pb-4 space-y-3">
+        <p className="text-xs text-muted-foreground">Seleccione el nivel de independencia para cada actividad.</p>
+        {BARTHEL_ITEMS.map((item) => (
+          <div key={item.key} className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-100 last:border-0">
+            <span className="text-xs text-gray-700 font-medium flex-1 min-w-0">{item.label}</span>
+            <select
+              value={items[item.key] != null ? String(items[item.key]) : ""}
+              onChange={(e) => onChange({ ...items, [item.key]: e.target.value !== "" ? parseInt(e.target.value) : null })}
+              className={`${selectClass} w-56`}
+            >
+              <option value="">—</option>
+              {item.options.map((opt) => (
+                <option key={opt.v} value={String(opt.v)}>{opt.v} — {opt.l}</option>
+              ))}
+            </select>
+          </div>
+        ))}
+        {total !== null && (
+          <div className="border-t border-teal-200 pt-3 space-y-2">
+            <div className="flex justify-end">
+              <Badge className="bg-teal-600 text-white border-0 hover:bg-teal-600 text-sm px-3 py-1">
+                Barthel: {total}/100
+              </Badge>
+            </div>
+            <p className="text-xs text-center text-muted-foreground">
+              Interpretación: <span className="font-semibold text-gray-700">{barthelInterpretation(total)}</span>
+            </p>
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
