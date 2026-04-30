@@ -366,24 +366,33 @@ export default function PatientProfile() {
             return (
               <div className="space-y-4">
                 {clinical?.diagnosis && (
-                  <div className="bg-gradient-to-br from-teal-50 via-white to-blue-50 rounded-xl border border-teal-100 p-5">
-                    <p className="text-[11px] font-bold tracking-widest text-teal-700 uppercase mb-1">Diagnóstico actual</p>
-                    <p className="text-lg font-semibold text-foreground leading-snug">{clinical.diagnosis}</p>
-                    <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="bg-card rounded-xl border border-border p-6">
+                    <p className="field-label mb-1">Diagnóstico principal</p>
+                    <p className="text-base font-medium text-foreground leading-snug">{clinical.diagnosis}</p>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
                       {treatmentLabel && (
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-teal-600 text-white font-medium">
-                          {treatmentLabel}
-                        </span>
-                      )}
-                      {clinical.injury_date && (
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-white border border-teal-200 text-teal-700 font-medium">
-                          📅 Lesión: {fmtDate(clinical.injury_date)}
-                        </span>
+                        <div>
+                          <p className="field-label mb-0.5">Tipo de tratamiento</p>
+                          <p className="text-sm text-foreground">{treatmentLabel}</p>
+                        </div>
                       )}
                       {clinical.doctor_name && (
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-white border border-border text-muted-foreground">
-                          👨‍⚕️ {clinical.doctor_name}
-                        </span>
+                        <div>
+                          <p className="field-label mb-0.5">Médico derivante</p>
+                          <p className="text-sm text-foreground">{clinical.doctor_name}</p>
+                        </div>
+                      )}
+                      {patient.admission_date && (
+                        <div>
+                          <p className="field-label mb-0.5">Fecha de admisión</p>
+                          <p className="text-sm text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
+                        </div>
+                      )}
+                      {activeEpisode && (
+                        <div>
+                          <p className="field-label mb-0.5">Nº de episodio</p>
+                          <p className="text-sm text-primary font-medium">{activeEpisode.episode_number}</p>
+                        </div>
                       )}
                     </div>
                   </div>
