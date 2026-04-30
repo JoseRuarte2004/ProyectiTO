@@ -1,12 +1,12 @@
-import { Home, Users, Calendar, Dumbbell, LogOut } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { LayoutDashboard, Users, Calendar, Dumbbell, LogOut } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -18,61 +18,82 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { title: "Inicio", url: "/dashboard", icon: Home },
-  { title: "Mis Pacientes", url: "/patients", icon: Users },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Pacientes", url: "/patients", icon: Users },
   { title: "Turnos", url: "/appointments", icon: Calendar },
-  { title: "Biblioteca de Ejercicios", url: "/exercises", icon: Dumbbell },
+  { title: "Ejercicios", url: "/exercises", icon: Dumbbell },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
+  const { pathname } = useLocation();
   const { profile, signOut } = useAuth();
 
   const initials = profile?.full_name
     ?.split(" ")
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2) || "TO";
 
+  const isActive = (url: string) => {
+    if (url === "/dashboard") return pathname === "/dashboard" || pathname === "/";
+    return pathname.startsWith(url);
+  };
+
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
+      <SidebarHeader className="px-5 py-5 border-b border-sidebar-border">
         {!collapsed ? (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">R</span>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-serif font-bold text-base">m</span>
             </div>
-            <span className="font-bold text-lg text-foreground">RehabOT</span>
+            <div>
+              <p className="font-bold text-lg text-foreground leading-tight">RehabOT</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-label">Clínica · TO</p>
+            </div>
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-bold text-sm">R</span>
+          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center mx-auto">
+            <span className="text-primary-foreground font-serif font-bold text-base">m</span>
           </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent className="px-3 py-4">
         <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="field-label px-3 mb-2">Trabajo</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="hover:bg-sidebar-accent rounded-lg px-3 py-2.5 flex items-center gap-3 text-sidebar-foreground transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                    >
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={active}>
+                      <NavLink
+                        to={item.url}
+                        className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                          active
+                            ? "text-primary font-semibold bg-sidebar-accent"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                        }`}
+                      >
+                        <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
+                        {!collapsed && (
+                          <>
+                            <span>{item.title}</span>
+                            {active && (
+                              <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary" />
+                            )}
+                          </>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -81,7 +102,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-sidebar-border">
         {!collapsed && profile && (
           <div className="flex items-center gap-3 mb-3">
-            <Avatar className="h-9 w-9">
+            <Avatar className="h-9 w-9 border border-border">
               <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                 {initials}
               </AvatarFallback>
@@ -90,8 +111,8 @@ export function AppSidebar() {
               <p className="text-sm font-medium text-foreground truncate">
                 {profile.full_name}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {profile.specialty || "Terapeuta Ocupacional"}
+              <p className="text-[11px] text-muted-foreground truncate">
+                {profile.specialty || "T. Ocupacional"}
               </p>
             </div>
           </div>

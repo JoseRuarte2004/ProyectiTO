@@ -96,27 +96,35 @@ export default function Patients() {
         <p className="text-muted-foreground text-center py-12">No se encontraron pacientes.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((p) => (
-            <Link key={p.id} to={`/patients/${p.id}`}>
-              <Card className="border-border/50 hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        {p.last_name}, {p.first_name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">DNI: {p.dni}</p>
+          {filtered.map((p) => {
+            const initials = `${p.last_name?.[0] || ""}${p.first_name?.[0] || ""}`.toUpperCase();
+            return (
+              <Link key={p.id} to={`/patients/${p.id}`}>
+                <Card className="border-border hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-serif font-semibold text-primary">{initials}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-semibold text-foreground text-sm">
+                            {p.last_name}, {p.first_name}
+                          </p>
+                          <StatusBadge status={p.status} />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">DNI: {p.dni}</p>
+                        <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+                          <span>{p.insurance || "Sin O.S."}</span>
+                          <span>Adm. {format(new Date(p.admission_date), "dd/MM/yy")}</span>
+                        </div>
+                      </div>
                     </div>
-                    <StatusBadge status={p.status} />
-                  </div>
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p>Obra Social: {p.insurance || "—"}</p>
-                    <p>Admisión: {format(new Date(p.admission_date), "dd/MM/yyyy")}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       )}
 
