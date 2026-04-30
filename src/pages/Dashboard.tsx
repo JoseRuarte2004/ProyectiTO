@@ -196,14 +196,14 @@ export default function Dashboard() {
                     className={`flex items-center gap-6 py-4 ${isNow ? "border-l-[3px] border-l-primary pl-5 -ml-6 bg-primary/[0.02]" : ""} ${isCancelled ? "opacity-50" : ""}`}
                   >
                     <div className="w-16 shrink-0">
-                      <p className={`text-base font-bold tabular-nums ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
+                      <p className={`text-base font-bold tabular-nums font-mono ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
                       <p className="text-[11px] text-muted-foreground">{dur} min</p>
                     </div>
                     <div className="flex-1 min-w-0">
                       {patient ? (
                         <Link to={`/patients/${patient.id}`} className="hover:text-primary transition-colors">
-                          <p className="font-medium text-sm text-foreground">{patient.last_name}, {patient.first_name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="font-normal text-sm text-foreground">{patient.last_name}, {patient.first_name}</p>
+                          <p className="text-xs text-muted-foreground italic">
                             {age !== null ? `${age} años` : ""}{age !== null && typeName ? " · " : ""}{typeName}
                           </p>
                         </Link>
