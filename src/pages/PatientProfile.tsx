@@ -691,7 +691,9 @@ export default function PatientProfile() {
             })()}
           </div>
         </TabsContent>
-      </Tabs>
+          </Tabs>
+        </div>
+      </div>
 
       {/* New Episode Dialog */}
       <NewEpisodeDialog open={showNewEpisode} onClose={() => setShowNewEpisode(false)} patientId={id!} userId={user!.id} episodes={episodes} onSaved={async (newEpId: string) => {
