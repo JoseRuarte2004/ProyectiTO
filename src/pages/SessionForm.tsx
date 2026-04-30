@@ -1143,6 +1143,7 @@ export default function SessionForm() {
               </div>
               <QuickDashSection items={qd_items} onChange={setQdItems} />
               <FimSection items={fim_items} onChange={setFimItems} />
+              <BarthelSection items={barthel_items} onChange={setBarthelItems} />
               <div>
                 <FieldLabel>AVD — Actividades de la vida diaria</FieldLabel>
                 <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} className={textareaClass} />
