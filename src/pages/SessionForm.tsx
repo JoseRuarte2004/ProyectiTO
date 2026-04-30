@@ -499,6 +499,7 @@ export default function SessionForm() {
           setFuncHealth(fe.health_management || "");
           if (Array.isArray(fe.quickdash_items)) setQdItems(fe.quickdash_items as any);
           if (fe.fim_items && typeof fe.fim_items === "object") setFimItems(fe.fim_items as any);
+          if (fe.barthel_items && typeof fe.barthel_items === "object") setBarthelItems(fe.barthel_items as any);
         }
 
         const ae = analRes.data;
