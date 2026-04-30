@@ -133,9 +133,9 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header editorial */}
       <div>
-        <p className="field-label mb-2">{dateStr}</p>
-        <h1 className="text-3xl sm:text-4xl font-normal text-foreground">
-          Buenos días, <em className="font-serif font-semibold not-italic">{firstName}</em>
+        <p className="field-label mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
+        <h1 className="text-[2.5rem] font-normal text-foreground leading-tight">
+          <span className="font-accent">Buenos días,</span> <em className="font-accent font-semibold not-italic">{firstName}</em>
         </h1>
         <p className="text-muted-foreground mt-2 text-[15px]">
           Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
