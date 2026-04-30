@@ -1,96 +1,95 @@
-Perfecto. Ajusto el enfoque a lo que proponés: no vamos a editar evaluaciones funcionales/analíticas desde la pestaña Evaluaciones. La modificación de esas evaluaciones se hará únicamente entrando a editar la sesión correspondiente, porque ahí ya está el contexto clínico correcto.
 
-1. Editar ficha del paciente
-   - Agregar un botón “Editar ficha” en la pestaña Ficha.
-   - El formulario permitirá modificar los datos que se ven ahí y también los datos personales principales:
-     - Nombre
-     - Apellido
-     - DNI
-     - Fecha de nacimiento
-     - Teléfono
-     - Dirección
-     - Obra social / cobertura si está cargada
-     - Fecha de admisión si corresponde
-     - Diagnóstico
-     - Tipo de tratamiento
-     - Fechas clínicas: lesión, inicio de síntomas, cirugía/inmovilización si están en la ficha
-     - Médico, antecedentes, estudios, tratamiento actual, notas
-     - Datos ocupacionales visibles en ficha: lateralidad, trabajo, educación, red de apoyo, ocio, actividad física, sueño/descanso, notas
-   - Al guardar actualizará:
-     - `patients`
-     - `patient_clinical_records`
-     - `patient_occupational_profiles`
-   - Se mantendrá el filtro por episodio activo para los datos clínicos cuando aplique.
+# Rediseño visual: estilo profesional tipo "Maia"
 
-2. Editar sesiones desde el historial de sesiones
-   - Agregar un botón “Editar” en cada sesión del historial.
-   - Crear una ruta de edición, por ejemplo:
-     - `/patients/:patientId/sessions/:sessionId/edit`
-   - Reutilizar `SessionForm` para que funcione tanto para crear como para editar.
-   - Al abrir una sesión existente, el formulario se precargará con:
-     - Fecha
-     - Tipo de sesión: admisión, seguimiento o alta
-     - Nº de sesión
-     - Semana POP/PL
-     - Evolución / observaciones
-     - Cambios en síntomas
-     - Cambios clínicos
-     - AVD seguimiento
-     - Intervenciones
-     - Indicaciones enviadas
-     - Notas
+Analicé tu prototipo en detalle. No voy a cambiar datos ni campos, solo el estilo visual. Estos son los cambios clave que identifico:
 
-3. Editar la evaluación funcional únicamente desde la sesión
-   - Si la sesión es de admisión y tiene evaluación funcional asociada, se precargarán sus datos dentro del formulario de sesión:
-     - Lateralidad
-     - AVD
-     - AIVD
-     - Sueño/descanso
-     - Gestión de salud
-     - QuickDASH completo
-     - FIM completo
-   - Al guardar la sesión:
-     - Si ya existe una `functional_evaluations` con ese `session_id`, se actualizará.
-     - Si no existe y se completan datos funcionales, se creará asociada a esa sesión.
-   - La pestaña Evaluaciones seguirá siendo de visualización, no de edición directa.
+## 1. Tipografía y jerarquía de texto
 
-4. Editar la evaluación analítica únicamente desde la sesión
-   - Si la sesión tiene evaluación analítica asociada, se precargarán sus mediciones dentro de `SessionForm`:
-     - Dolor/EVA
-     - Edema
-     - Circometría
-     - Movilidad/goniometría PRE y POST
-     - Kapandji
-     - Dinamometría
-     - Fuerza Daniels por músculos
-     - DPPD
-     - Sensibilidad
-     - Pruebas específicas
-     - Cicatriz/Vancouver
-     - Estado trófico
-     - Postura
-     - Estado emocional
-   - Al guardar:
-     - Si ya existe una `analytical_evaluations` con ese `session_id`, se actualizará.
-     - Si no existe y se cargan mediciones, se creará asociada a esa sesión.
-   - Esto mantiene la lógica clínica ordenada: cada evaluación queda atada a su sesión real.
+El prototipo usa una combinación tipográfica más refinada:
+- **Headings grandes** con serif/itálica para el nombre del profesional ("Buenos días, *José*") - da calidez y profesionalismo
+- **Labels de datos** en MAYÚSCULAS, letra muy pequeña, color dorado/ocre apagado (tipo `#8B7355`) con tracking amplio
+- **Valores de datos** en negro/gris oscuro, peso normal, tamaño más grande que el label
+- La app actual usa Plus Jakarta Sans para todo, lo cual es correcto, pero falta la jerarquía label/valor del prototipo
 
-5. Mantener la pestaña Evaluaciones como lectura
-   - No agregar botones de edición en “Evaluaciones Funcionales” ni “Evaluaciones Analíticas”.
-   - Esa pestaña seguirá mostrando los datos cargados para consulta.
-   - Para modificar algo, el flujo será: ir a Sesiones > abrir la sesión correspondiente > Editar.
+**Cambios:**
+- Agregar una fuente serif (Playfair Display o similar) solo para acentos como el saludo del dashboard
+- Crear clases utilitarias para los "field labels" en mayúscula dorada
+- Ajustar el color de labels a un tono ocre/dorado (`~#9A8C72`)
 
-6. Seguridad y base de datos
-   - No se necesitan cambios de estructura en Supabase.
-   - Se usarán `update` sobre tablas existentes.
-   - Se mantendrá el alcance profesional actual:
-     - datos del paciente filtrados por el profesional autenticado
-     - sesiones no eliminadas con `is_deleted=false`
-     - evaluaciones asociadas por `session_id`
+## 2. Paleta de colores
 
-Archivos a modificar:
-- `src/pages/PatientProfile.tsx`
-- `src/pages/SessionForm.tsx`
-- `src/App.tsx`
+El prototipo tiene una paleta más cálida y sofisticada:
+- **Fondo general**: crema muy suave (`~#FAF8F5` en lugar del gris azulado actual)
+- **Cards**: blanco puro con bordes muy sutiles
+- **Sidebar**: fondo blanco, texto activo en teal/azul profundo, iconos finos
+- **Acentos**: dorado/ocre para labels, teal oscuro para acciones principales
+- **Badges de status**: bordes redondeados, fondo neutro, outline fino
 
-No voy a tocar la edición directa desde `AnalyticalEvalForm.tsx` salvo que haga falta ajustar la visualización. La edición clínica quedará centralizada en sesiones, como proponés.
+**Cambios en CSS variables:**
+- `--background` de gris azulado a crema suave
+- Agregar variable `--label` para el color ocre de los labels
+- Sidebar más limpia con separadores sutiles
+
+## 3. Sidebar
+
+El prototipo muestra:
+- Logo "Maia" con ícono circular + subtítulo "CLÍNICA · TO" en tracking amplio
+- Sección "TRABAJO" como group label en mayúsculas pequeñas
+- Ítems con tipografía limpia, el activo usa color teal + dot indicator
+- Footer con avatar del profesional + rol
+
+**Cambios en `AppSidebar.tsx`:**
+- Renombrar a "RehabOT" con subtítulo "CLÍNICA · TO" (o lo que prefieras)
+- Agregar group label "TRABAJO" arriba de los nav items
+- Active state con punto indicador (dot) en lugar de fondo completo
+
+## 4. Dashboard
+
+El prototipo muestra un diseño mucho más editorial:
+- Saludo grande con fecha arriba en mayúsculas tracking amplio
+- Resumen en texto natural ("Tenés **7 turnos** hoy · próximo a las **10:30**...")
+- Agenda del día como lista limpia (hora en bold monospace, nombre, edad, tipo)
+- Panel lateral "Pendientes" y "Esta semana" con contadores
+- Cita motivacional al final
+
+**Cambios en `Dashboard.tsx`:**
+- Reemplazar los 4 stat cards por el saludo editorial + resumen en texto
+- Agenda del día como componente principal (tabla limpia sin cards)
+- Panel lateral con pendientes y métricas semanales
+- Quitar los íconos grandes de las stat cards
+
+## 5. Perfil del paciente
+
+El prototipo muestra:
+- Layout de 2 columnas: sidebar izquierda con foto/datos + contenido principal a la derecha
+- Tabs: Sesiones | Ficha clínica | Evaluaciones | Documentos
+- **Sidebar del paciente**: avatar grande con iniciales, nombre en serif, edad + DNI, badge de episodio, datos en formato label/valor vertical
+- **Timeline de sesiones**: con línea vertical, íconos de tipo, badges de áreas trabajadas, score de dolor
+- **Ficha clínica**: secciones con headers (Episodio activo, Datos clínicos) y datos en grid 2 columnas con labels en mayúscula dorada
+
+**Cambios en `PatientProfile.tsx`:**
+- Reestructurar layout a 2 columnas (sidebar fija + contenido scrollable)
+- Mejorar la presentación de datos clínicos con el patrón label-mayúscula/valor
+- Timeline visual para sesiones
+- Tabs más limpios (underline style en lugar de pills)
+
+## 6. Componentes globales
+
+- **Tabs**: cambiar de pills/contenedor a underline style (línea bajo el tab activo)
+- **Buttons primarios**: teal sólido con bordes redondeados, hover más oscuro
+- **Cards**: sombra mínima o ninguna, bordes muy sutiles, padding generoso
+- **Badges**: más refinados, bordes redondeados pill, tipografía pequeña
+
+## Archivos a modificar
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/index.css` | Nueva paleta, variables de color, clase de labels, fuente serif |
+| `tailwind.config.ts` | Font serif, color label |
+| `src/components/AppSidebar.tsx` | Rediseño visual completo |
+| `src/pages/Dashboard.tsx` | Layout editorial con agenda y paneles |
+| `src/pages/PatientProfile.tsx` | Layout 2 columnas, timeline, labels |
+| `src/pages/Patients.tsx` | Ajustes menores de estilo |
+| `index.html` | Agregar Google Font serif |
+
+No se agregan dependencias nuevas ni columnas de base de datos. Los datos y la lógica permanecen intactos.
