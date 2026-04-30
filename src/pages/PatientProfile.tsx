@@ -793,6 +793,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
               <div><Label>Fecha de nacimiento</Label><Input type="date" value={form.birth_date || ""} onChange={(e) => u("birth_date", e.target.value)} /></div>
               <div><Label>Teléfono</Label><Input value={form.phone || ""} onChange={(e) => u("phone", e.target.value)} /></div>
               <div><Label>Obra social</Label><Input value={form.insurance || ""} onChange={(e) => u("insurance", e.target.value)} /></div>
+              <div><Label>Nº de afiliado</Label><Input value={form.insurance_number || ""} onChange={(e) => u("insurance_number", e.target.value)} /></div>
               <div className="sm:col-span-2"><Label>Dirección</Label><Input value={form.address || ""} onChange={(e) => u("address", e.target.value)} /></div>
               <div><Label>Fecha de admisión</Label><Input type="date" value={form.admission_date || ""} onChange={(e) => u("admission_date", e.target.value)} /></div>
             </div>
