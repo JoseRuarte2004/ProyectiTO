@@ -1128,6 +1128,10 @@ export function NewPatientForm() {
               <ObrasSocialesAutocomplete value={insurance} onChange={setInsurance} placeholder="OSDE, Swiss Medical, PAMI..." className={inputClass} />
             </div>
             <div>
+              <FieldLabel>Nº de afiliado</FieldLabel>
+              <Input value={insuranceNumber} onChange={(e) => setInsuranceNumber(e.target.value)} placeholder="Número de afiliado" className={inputClass} />
+            </div>
+            <div>
               <FieldLabel required>Fecha de admisión</FieldLabel>
               <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} className={`${inputClass} ${fieldClass("admissionDate")}`} />
               <ErrMsg field="admissionDate" />
