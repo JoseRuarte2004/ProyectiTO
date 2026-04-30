@@ -791,9 +791,10 @@ export default function SessionForm() {
     // Functional eval for admission
     const qd_answered = qd_items.some((v) => v !== null);
     const fim_answered = Object.values(fim_items).some((v) => v !== null);
+    const barthel_answered = Object.values(barthel_items).some((v) => v !== null);
     const hasFunctionalData =
       session_type === "admission" &&
-      ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered);
+      ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered || barthel_answered);
 
     const functionalPayload = {
       patient_id: patientId!,
@@ -810,6 +811,8 @@ export default function SessionForm() {
       quickdash_score: qd_answered ? (calcQuickDashScore(qd_items) as any) : null,
       fim_items: fim_answered ? (fim_items as any) : null,
       fim_score: fim_answered ? calcFimTotal(fim_items) : null,
+      barthel_items: barthel_answered ? (barthel_items as any) : null,
+      barthel_score: barthel_answered ? calcBarthelTotal(barthel_items) : null,
     } as any;
 
     if (editingFuncEval) {
