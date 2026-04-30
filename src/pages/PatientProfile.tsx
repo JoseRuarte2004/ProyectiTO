@@ -681,6 +681,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       phone: patient?.phone || "",
       address: patient?.address || "",
       insurance: patient?.insurance || "",
+      insurance_number: patient?.insurance_number || "",
       admission_date: patient?.admission_date || "",
       diagnosis: clinical?.diagnosis || "",
       treatment_type: clinical?.treatment_type || "",
