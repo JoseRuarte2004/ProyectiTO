@@ -753,6 +753,7 @@ export function NewPatientForm() {
           phone: or(phone),
           address: or(address),
           insurance: or(insurance),
+          insurance_number: or(insuranceNumber),
           admission_date: admissionDate,
           professional_id: user!.id,
         })
