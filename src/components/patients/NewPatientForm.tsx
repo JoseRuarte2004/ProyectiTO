@@ -818,9 +818,11 @@ export function NewPatientForm() {
       // 4. Functional evaluation
       const qdAnswered = qdItems.some((v) => v !== null);
       const fimAnswered = Object.values(fimItems).some((v) => v !== null);
+      const barthelAnswered = Object.values(barthelItems).some((v) => v !== null);
       const qdScore = calcQuickDashScore(qdItems);
       const fimTotal = calcFimTotal(fimItems);
-      const hasFunc = !!(avd.trim() || aivd.trim() || qdAnswered || fimAnswered);
+      const barthelTotal = calcBarthelTotal(barthelItems);
+      const hasFunc = !!(avd.trim() || aivd.trim() || qdAnswered || fimAnswered || barthelAnswered);
       if (showFunctional && hasFunc) {
         await supabase.from("functional_evaluations").insert({
           patient_id: pid,
