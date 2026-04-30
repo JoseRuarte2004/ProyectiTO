@@ -236,7 +236,7 @@ export default function Dashboard() {
                   <Link key={i} to={`/patients/${item.id}`} className="flex items-start gap-2 group">
                     <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{item.name}</p>
+                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</p>
                       <p className="text-xs text-muted-foreground">{item.detail}</p>
                     </div>
                   </Link>
