@@ -339,6 +339,7 @@ export default function SessionForm() {
   const [func_health, setFuncHealth] = useState("");
   const [qd_items, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
   const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
+  const [barthel_items, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
   // Analytical evaluation (master toggle)
   const [show_measurements, setShowMeasurements] = useState(false);
