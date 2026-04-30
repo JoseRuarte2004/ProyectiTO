@@ -1278,6 +1278,7 @@ export function NewPatientForm() {
           <div className="space-y-5">
             <QuickDashSection items={qdItems} onChange={setQdItems} />
             <FimSection items={fimItems} onChange={setFimItems} />
+            <BarthelSection items={barthelItems} onChange={setBarthelItems} />
             <div>
               <FieldLabel required>AVD — Actividades de la vida diaria</FieldLabel>
               <Textarea value={avd} onChange={(e) => setAvd(e.target.value)} rows={3} placeholder="Dificultad para vestido, higiene personal..." className={`${textareaClass} ${fieldClass("avd")}`} />
