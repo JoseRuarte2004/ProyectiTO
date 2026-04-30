@@ -354,12 +354,12 @@ export default function PatientProfile() {
             };
 
             const InfoCard = ({ title, icon, accent, children }: { title: string; icon: string; accent: string; children: React.ReactNode }) => (
-              <div className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
-                <div className={`px-4 py-2.5 border-b border-border/40 flex items-center gap-2 ${accent}`}>
-                  <span className="text-base">{icon}</span>
-                  <h3 className="text-sm font-semibold">{title}</h3>
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+                  <span className="text-sm">{icon}</span>
+                  <h3 className="text-sm font-semibold text-foreground">{title}</h3>
                 </div>
-                <div className="p-4">{children}</div>
+                <div className="px-5 py-3">{children}</div>
               </div>
             );
 
