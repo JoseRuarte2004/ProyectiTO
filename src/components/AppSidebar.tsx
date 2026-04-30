@@ -64,7 +64,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="field-label px-3 mb-2">Trabajo</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="px-3 mb-2" style={{ fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>Trabajo</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
