@@ -346,9 +346,9 @@ export default function PatientProfile() {
             const InfoRow = ({ label, value }: { label: string; value: any }) => {
               if (value == null || value === "") return null;
               return (
-                <div className="flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-0">
-                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-                  <span className="text-sm text-foreground whitespace-pre-wrap">{value}</span>
+                <div className="py-2">
+                  <span className="field-label">{label}</span>
+                  <p className="text-sm text-foreground mt-0.5 whitespace-pre-wrap">{value}</p>
                 </div>
               );
             };
