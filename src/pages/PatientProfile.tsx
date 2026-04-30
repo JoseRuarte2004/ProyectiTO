@@ -180,76 +180,146 @@ export default function PatientProfile() {
 
   const planStatusMap: Record<string, string> = { active: "Activo", completed: "Completado", archived: "Archivado" };
 
+  const initials = `${patient.last_name?.[0] || ""}${patient.first_name?.[0] || ""}`.toUpperCase();
+  const activeEpisode = episodes.find((e: any) => e.id === activeEpisodeId);
+  const sessionCount = sessions.length;
+  const currentSessionLabel = sessionCount > 0 ? `Nº ${sessionCount}` : null;
+
   return (
-    <div className="space-y-6">
-      <Button variant="ghost" onClick={() => navigate("/patients")} className="mb-2">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Volver
-      </Button>
+    <div className="space-y-0">
+      {/* Breadcrumb */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
+            <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
+          </button>
+          <span className="text-border">›</span>
+          <span className="text-foreground font-medium">{patient.last_name}, {patient.first_name}</span>
+        </div>
+        {patient.clinical_record_number && (
+          <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
+        )}
+      </div>
 
-      {/* Header */}
-      <Card className="border-border/50">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{patient.last_name}, {patient.first_name}</h1>
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
-                <span>DNI: {patient.dni}</span>
-                {age !== null && <span>{age} años</span>}
-                {patient.insurance && <span>{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</span>}
-                <span>Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}</span>
-              </div>
-              {(patient.birth_date || patient.phone || patient.address) && (
-                <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
-                  {patient.birth_date && <span>Nac: {format(new Date(patient.birth_date + "T12:00:00"), "dd/MM/yyyy")}</span>}
-                  {patient.phone && <span>Tel: {patient.phone}</span>}
-                  {patient.address && <span>Dir: {patient.address}</span>}
-                </div>
-              )}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+        {/* Patient sidebar */}
+        <div className="space-y-6">
+          {/* Avatar & identity */}
+          <div className="text-center lg:text-left">
+            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-4">
+              <span className="text-2xl font-serif font-semibold text-primary">{initials}</span>
             </div>
-            <StatusBadge status={patient.status} />
+            <h1 className="text-xl leading-tight">
+              <span className="text-foreground">{patient.last_name},</span><br />
+              <em className="font-serif font-semibold text-foreground not-italic text-2xl">{patient.first_name}</em>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {age !== null && <>{age} años · </>}DNI {patient.dni}
+            </p>
+            {activeEpisode && (
+              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-border">
+                Episodio activo
+              </Badge>
+            )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Episode selector */}
-      {episodes.length > 1 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          {episodes.map((ep: any) => (
-            <button
-              key={ep.id}
-              onClick={() => setActiveEpisodeId(ep.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                ep.id === activeEpisodeId
-                  ? "bg-teal-600 text-white border-teal-600"
-                  : "bg-background text-foreground border-border hover:bg-muted"
-              }`}
+          {/* Patient details */}
+          <div className="space-y-4">
+            {clinical?.diagnosis && (
+              <div>
+                <p className="field-label mb-1">Diagnóstico</p>
+                <p className="text-sm font-medium text-foreground">{clinical.diagnosis}</p>
+              </div>
+            )}
+            {patient.insurance && (
+              <div>
+                <p className="field-label mb-1">Obra social</p>
+                <p className="text-sm text-foreground">{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</p>
+              </div>
+            )}
+            {clinical?.doctor_name && (
+              <div>
+                <p className="field-label mb-1">Médico derivante</p>
+                <p className="text-sm text-foreground">{clinical.doctor_name}</p>
+              </div>
+            )}
+            <div>
+              <p className="field-label mb-1">Admisión</p>
+              <p className="text-sm text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
+            </div>
+            {currentSessionLabel && (
+              <div>
+                <p className="field-label mb-1">Sesión actual</p>
+                <p className="text-sm text-foreground">{currentSessionLabel}</p>
+              </div>
+            )}
+            {patient.phone && (
+              <div>
+                <p className="field-label mb-1">Teléfono</p>
+                <p className="text-sm text-foreground">{patient.phone}</p>
+              </div>
+            )}
+            {occupational?.dominance && (
+              <div>
+                <p className="field-label mb-1">Lateralidad</p>
+                <p className="text-sm text-foreground">
+                  {({ right: "Diestra", left: "Zurda", ambidextrous: "Ambidiestra" } as Record<string, string>)[occupational.dominance] || occupational.dominance}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-2">
+            <Button 
+              onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              Episodio {ep.episode_number}{ep.diagnosis ? ` — ${ep.diagnosis}` : ""} · {format(new Date(ep.admission_date + "T12:00:00"), "dd/MM/yyyy")}
-            </button>
-          ))}
-          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
-            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
-          </Button>
-        </div>
-      )}
-      {episodes.length <= 1 && (
-        <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => setShowNewEpisode(true)}>
-            <Plus className="h-3 w-3 mr-1" />Nuevo episodio
-          </Button>
-        </div>
-      )}
+              <Plus className="h-4 w-4 mr-2" /> Nueva sesión
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => setShowNewAppt(true)}>
+              <Calendar className="h-4 w-4 mr-2" /> Nuevo turno
+            </Button>
+          </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="ficha" className="space-y-4">
-        <TabsList className="bg-muted">
-          <TabsTrigger value="ficha">Ficha</TabsTrigger>
-          <TabsTrigger value="sessions">Sesiones</TabsTrigger>
-          <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
-          <TabsTrigger value="plans">Planes</TabsTrigger>
-          <TabsTrigger value="appointments">Turnos</TabsTrigger>
-          <TabsTrigger value="archivos">Archivos</TabsTrigger>
-        </TabsList>
+          {/* Episode selector */}
+          {episodes.length > 1 && (
+            <div className="space-y-2">
+              <p className="field-label">Episodios</p>
+              {episodes.map((ep: any) => (
+                <button
+                  key={ep.id}
+                  onClick={() => setActiveEpisodeId(ep.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs border transition-colors ${
+                    ep.id === activeEpisodeId
+                      ? "bg-primary/10 text-primary border-primary/20 font-medium"
+                      : "bg-card text-foreground border-border hover:bg-muted"
+                  }`}
+                >
+                  Ep. {ep.episode_number}{ep.diagnosis ? ` — ${ep.diagnosis}` : ""}
+                </button>
+              ))}
+              <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setShowNewEpisode(true)}>
+                <Plus className="h-3 w-3 mr-1" /> Nuevo episodio
+              </Button>
+            </div>
+          )}
+          {episodes.length <= 1 && (
+            <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setShowNewEpisode(true)}>
+              <Plus className="h-3 w-3 mr-1" /> Nuevo episodio
+            </Button>
+          )}
+        </div>
+
+        {/* Main content */}
+        <div>
+          <Tabs defaultValue="sessions" className="space-y-4">
+            <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
+              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
+              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
+              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
+              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
+            </TabsList>
 
         {/* FICHA */}
         <TabsContent value="ficha" className="space-y-4">
