@@ -565,6 +565,7 @@ export function NewPatientForm() {
   const [aivd, setAivd] = useState("");
   const [qdItems, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
   const [fimItems, setFimItems] = useState<Record<string, number | null>>(emptyFim());
+  const [barthelItems, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
   // Card 5 — Analytical evaluation
   const [painScore, setPainScore] = useState<number>(0);
