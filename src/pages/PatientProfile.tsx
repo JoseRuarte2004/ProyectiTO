@@ -1544,7 +1544,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
 
               {/* Expanded clinical note */}
               {isOpen && (
-                <div className="border-t border-border/30 px-5 py-4 space-y-5 bg-gray-50/50 font-sans text-sm text-foreground">
+                <div className="border-t border-border/30 px-4 py-3 space-y-4 bg-gray-50/30 font-sans text-sm text-foreground">
                   {/* Header line */}
                   <p className="italic text-muted-foreground mb-3">
                     {s.session_number != null
