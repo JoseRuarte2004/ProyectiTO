@@ -319,10 +319,10 @@ export default function PatientProfile() {
         <div>
           <Tabs defaultValue="sessions" className="space-y-4">
             <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
-              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
-              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
-              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
-              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
+              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
+              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
+              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
+              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
             </TabsList>
 
         {/* FICHA */}
