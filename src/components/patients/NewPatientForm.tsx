@@ -836,6 +836,8 @@ export function NewPatientForm() {
           quickdash_score: qdScore as any,
           fim_items: fimAnswered ? (fimItems as any) : null,
           fim_score: fimTotal,
+          barthel_items: barthelAnswered ? (barthelItems as any) : null,
+          barthel_score: barthelTotal,
         } as any);
       }
 
