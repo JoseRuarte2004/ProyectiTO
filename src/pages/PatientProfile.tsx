@@ -1513,7 +1513,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
             <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
             <div className={`bg-white rounded-xl border border-border/50 border-l-[3px] ${typeBorderColor[s.session_type] || "border-l-muted-foreground/20"}`}>
               {/* Header */}
-              <div className="flex items-center justify-between gap-3 p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
