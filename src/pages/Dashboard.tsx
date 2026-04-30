@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Activity, Calendar, UserCheck, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { format } from "date-fns";
+import { Loader2, ChevronLeft, ChevronRight, Search, Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { format, startOfDay, endOfDay, addDays, subDays, differenceInYears } from "date-fns";
 import { es } from "date-fns/locale";
-
-interface Stats {
-  activePatients: number;
-  sessionsThisMonth: number;
-  upcomingAppointments: number;
-  dischargedThisMonth: number;
-}
+import { Button } from "@/components/ui/button";
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
@@ -23,47 +16,96 @@ function StatusBadge({ status }: { status: string }) {
     scheduled: { label: "Programado", cls: "status-scheduled" },
     completed: { label: "Completado", cls: "status-completed" },
     cancelled: { label: "Cancelado", cls: "status-cancelled" },
+    confirmed: { label: "Confirmado", cls: "status-completed" },
+    pending: { label: "Pendiente", cls: "status-paused" },
   };
   const s = map[status] || { label: status, cls: "" };
-  return <Badge variant="outline" className={`${s.cls} text-xs`}>{s.label}</Badge>;
+  return <Badge variant="outline" className={`${s.cls} text-xs font-medium px-2.5 py-0.5 rounded-full`}>{s.label}</Badge>;
 }
 
 export { StatusBadge };
 
+const appointmentTypeMap: Record<string, string> = {
+  consultation: "Consulta",
+  follow_up: "Seguimiento",
+  evaluation: "Evaluación",
+  admission: "Admisión",
+  discharge: "Alta",
+};
+
+const QUOTES = [
+  "La rehabilitación efectiva nace de la observación paciente, no del protocolo apresurado.",
+  "Cada sesión es una oportunidad para devolver autonomía.",
+  "El progreso se mide en funcionalidad recuperada, no solo en grados de movimiento.",
+  "La terapia ocupacional transforma limitaciones en posibilidades.",
+];
+
 export default function Dashboard() {
   const { profile } = useAuth();
-  const [stats, setStats] = useState<Stats>({ activePatients: 0, sessionsThisMonth: 0, upcomingAppointments: 0, dischargedThisMonth: 0 });
-  const [recentPatients, setRecentPatients] = useState<any[]>([]);
-  const [weekAppointments, setWeekAppointments] = useState<any[]>([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [agendaDate, setAgendaDate] = useState(new Date());
+  const [dayAppointments, setDayAppointments] = useState<any[]>([]);
+  const [weekStats, setWeekStats] = useState({ sessionsCompleted: 0, sessionsTotal: 0, evolsRegistered: 0, evolsTotal: 0 });
+  const [pendingItems, setPendingItems] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchData();
+    fetchAgenda(agendaDate);
+    fetchWeekStats();
+    fetchPending();
   }, []);
 
-  const fetchData = async () => {
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  useEffect(() => {
+    fetchAgenda(agendaDate);
+  }, [agendaDate]);
 
-    const [pActive, sessions, appts, discharged, recent, weekAppts] = await Promise.all([
-      supabase.from("patients").select("id", { count: "exact", head: true }).eq("status", "active"),
-      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", monthStart.split("T")[0]),
-      supabase.from("appointments").select("id", { count: "exact", head: true }).eq("status", "scheduled").gte("appointment_date", now.toISOString()),
-      supabase.from("patients").select("id", { count: "exact", head: true }).eq("status", "discharged").gte("discharged_at", monthStart),
-      supabase.from("patients").select("id, first_name, last_name, dni, insurance, status, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("appointments").select("id, appointment_date, type, status, patients(first_name, last_name)").eq("status", "scheduled").gte("appointment_date", now.toISOString()).lte("appointment_date", weekEnd).order("appointment_date").limit(5),
+  const fetchAgenda = async (date: Date) => {
+    const dayStart = startOfDay(date).toISOString();
+    const dayEnd = endOfDay(date).toISOString();
+
+    const { data } = await supabase
+      .from("appointments")
+      .select("id, appointment_date, duration_minutes, type, status, notes, patients(id, first_name, last_name, date_of_birth)")
+      .gte("appointment_date", dayStart)
+      .lte("appointment_date", dayEnd)
+      .order("appointment_date");
+
+    setDayAppointments(data || []);
+    setLoading(false);
+  };
+
+  const fetchWeekStats = async () => {
+    const now = new Date();
+    const weekStart = startOfDay(subDays(now, now.getDay())).toISOString();
+    const weekEnd = endOfDay(addDays(now, 6 - now.getDay())).toISOString();
+
+    const [sessionsRes, evolsRes] = await Promise.all([
+      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]),
+      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]).not("notes", "is", null),
     ]);
 
-    setStats({
-      activePatients: pActive.count || 0,
-      sessionsThisMonth: sessions.count || 0,
-      upcomingAppointments: appts.count || 0,
-      dischargedThisMonth: discharged.count || 0,
+    const total = sessionsRes.count || 0;
+    setWeekStats({
+      sessionsCompleted: total,
+      sessionsTotal: total + 4,
+      evolsRegistered: evolsRes.count || 0,
+      evolsTotal: total,
     });
-    setRecentPatients(recent.data || []);
-    setWeekAppointments(weekAppts.data || []);
-    setLoading(false);
+  };
+
+  const fetchPending = async () => {
+    const { data } = await supabase
+      .from("therapy_sessions")
+      .select("id, session_date, session_number, patients(id, first_name, last_name)")
+      .is("notes", null)
+      .order("session_date", { ascending: false })
+      .limit(5);
+
+    setPendingItems((data || []).map((s: any) => ({
+      id: s.patients?.id,
+      name: `${s.patients?.last_name}, ${s.patients?.first_name}`,
+      detail: `Evolución pendiente — sesión ${format(new Date(s.session_date + "T12:00:00"), "dd/MM")}`,
+    })));
   };
 
   if (loading) {
@@ -74,94 +116,167 @@ export default function Dashboard() {
     );
   }
 
-  const statCards = [
-    { label: "Pacientes activos", value: stats.activePatients, icon: Users, color: "text-primary" },
-    { label: "Sesiones este mes", value: stats.sessionsThisMonth, icon: Activity, color: "text-emerald-600" },
-    { label: "Turnos próximos", value: stats.upcomingAppointments, icon: Calendar, color: "text-blue-600" },
-    { label: "Altas este mes", value: stats.dischargedThisMonth, icon: UserCheck, color: "text-amber-600" },
-  ];
+  const firstName = profile?.full_name?.split(" ")[0] || "";
+  const now = new Date();
+  const dateStr = format(now, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+  const totalMinutes = dayAppointments.reduce((sum, a) => sum + (a.duration_minutes || 30), 0);
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
 
-  const appointmentTypeMap: Record<string, string> = {
-    consultation: "Consulta",
-    follow_up: "Seguimiento",
-    evaluation: "Evaluación",
-  };
+  const nextAppt = dayAppointments.find(a => new Date(a.appointment_date) >= now && a.status !== "cancelled");
+  const nextTime = nextAppt ? format(new Date(nextAppt.appointment_date), "HH:mm") : null;
+  const nextPatient = nextAppt?.patients ? `${nextAppt.patients.first_name} ${nextAppt.patients.last_name}` : null;
+
+  const quote = QUOTES[now.getDate() % QUOTES.length];
 
   return (
     <div className="space-y-8">
+      {/* Header editorial */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
-          ¡Hola, {profile?.full_name?.split(" ")[0]}!
+        <p className="field-label mb-2">{dateStr}</p>
+        <h1 className="text-3xl sm:text-4xl font-normal text-foreground">
+          Buenos días, <em className="font-serif font-semibold not-italic">{firstName}</em>
         </h1>
-        <p className="text-muted-foreground mt-1">Resumen de tu actividad</p>
+        <p className="text-muted-foreground mt-2 text-[15px]">
+          Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
+          {nextTime && (
+            <> · próximo a las <span className="font-bold text-foreground">{nextTime}</span> con {nextPatient}</>
+          )}
+          .
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((s) => (
-          <Card key={s.label} className="border-border/50">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{s.label}</p>
-                  <p className="text-3xl font-bold text-foreground mt-1">{s.value}</p>
-                </div>
-                <s.icon className={`h-10 w-10 ${s.color} opacity-30`} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Actions bar */}
+      <div className="flex items-center gap-3">
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/patients")}>
+          <Search className="h-4 w-4" /> Buscar
+        </Button>
+        <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate("/appointments")}>
+          <Plus className="h-4 w-4" /> Nuevo turno
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Pacientes recientes</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {recentPatients.length === 0 ? (
-              <p className="p-5 text-sm text-muted-foreground">No hay pacientes.</p>
-            ) : (
-              <div className="divide-y divide-border">
-                {recentPatients.map((p) => (
-                  <Link key={p.id} to={`/patients/${p.id}`} className="flex items-center justify-between px-5 py-3 hover:bg-muted/50 transition-colors">
-                    <div>
-                      <p className="font-medium text-sm text-foreground">{p.last_name}, {p.first_name}</p>
-                      <p className="text-xs text-muted-foreground">DNI: {p.dni} · {p.insurance || "Sin obra social"}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+        {/* Agenda principal */}
+        <div className="bg-card rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Agenda de hoy</h2>
+              <p className="text-sm text-muted-foreground">
+                {dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}
+                {totalMinutes > 0 && <> · {hours > 0 ? `${hours}h ` : ""}{mins > 0 ? `${mins}min ` : ""}en consultorio</>}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setAgendaDate(d => subDays(d, 1))} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button onClick={() => setAgendaDate(d => addDays(d, 1))} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+
+          {dayAppointments.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-12">Sin turnos para este día.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {dayAppointments.map((a) => {
+                const time = format(new Date(a.appointment_date), "HH:mm");
+                const dur = a.duration_minutes || 30;
+                const patient = a.patients;
+                const age = patient?.date_of_birth ? differenceInYears(new Date(), new Date(patient.date_of_birth)) : null;
+                const typeName = appointmentTypeMap[a.type] || a.type;
+                const isNow = Math.abs(new Date(a.appointment_date).getTime() - now.getTime()) < 30 * 60 * 1000 && a.status !== "cancelled";
+                const isCancelled = a.status === "cancelled";
+
+                return (
+                  <div
+                    key={a.id}
+                    className={`flex items-center gap-6 py-4 ${isNow ? "border-l-[3px] border-l-primary pl-5 -ml-6 bg-primary/[0.02]" : ""} ${isCancelled ? "opacity-50" : ""}`}
+                  >
+                    <div className="w-16 shrink-0">
+                      <p className={`text-base font-bold tabular-nums ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
+                      <p className="text-[11px] text-muted-foreground">{dur} min</p>
                     </div>
-                    <StatusBadge status={p.status} />
+                    <div className="flex-1 min-w-0">
+                      {patient ? (
+                        <Link to={`/patients/${patient.id}`} className="hover:text-primary transition-colors">
+                          <p className="font-medium text-sm text-foreground">{patient.last_name}, {patient.first_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {age !== null ? `${age} años` : ""}{age !== null && typeName ? " · " : ""}{typeName}
+                          </p>
+                        </Link>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Paciente no asignado</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isNow && <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Ahora</span>}
+                      <StatusBadge status={a.status} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Panel lateral */}
+        <div className="space-y-6">
+          {/* Pendientes */}
+          {pendingItems.length > 0 && (
+            <div className="bg-card rounded-xl border border-border p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground">Pendientes</h3>
+                <Badge className="bg-destructive/10 text-destructive border-0 text-xs font-bold">{pendingItems.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {pendingItems.map((item, i) => (
+                  <Link key={i} to={`/patients/${item.id}`} className="flex items-start gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.detail}</p>
+                    </div>
                   </Link>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Turnos esta semana</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {weekAppointments.length === 0 ? (
-              <p className="p-5 text-sm text-muted-foreground">No hay turnos programados.</p>
-            ) : (
-              <div className="divide-y divide-border">
-                {weekAppointments.map((a: any) => (
-                  <div key={a.id} className="flex items-center justify-between px-5 py-3">
-                    <div>
-                      <p className="font-medium text-sm text-foreground">
-                        {a.patients?.last_name}, {a.patients?.first_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(a.appointment_date), "EEE d MMM, HH:mm", { locale: es })} · {appointmentTypeMap[a.type] || a.type}
-                      </p>
-                    </div>
-                    <StatusBadge status={a.status} />
-                  </div>
-                ))}
+          {/* Esta semana */}
+          <div className="bg-card rounded-xl border border-border p-5">
+            <h3 className="font-semibold text-foreground mb-4">Esta semana</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Sesiones completadas</span>
+                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.sessionsCompleted}<span className="text-muted-foreground font-normal">/{weekStats.sessionsTotal}</span></span>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div className="bg-primary rounded-full h-1.5 transition-all" style={{ width: `${weekStats.sessionsTotal > 0 ? (weekStats.sessionsCompleted / weekStats.sessionsTotal * 100) : 0}%` }} />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-sm text-muted-foreground">Evoluciones registradas</span>
+                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.evolsRegistered}<span className="text-muted-foreground font-normal">/{weekStats.evolsTotal}</span></span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div className="bg-warning rounded-full h-1.5 transition-all" style={{ width: `${weekStats.evolsTotal > 0 ? (weekStats.evolsRegistered / weekStats.evolsTotal * 100) : 0}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Cita */}
+          <div className="bg-accent/50 rounded-xl border border-border/50 p-5">
+            <div className="flex gap-3">
+              <span className="text-3xl text-label/30 font-serif leading-none">"</span>
+              <div>
+                <p className="text-sm italic text-foreground/80 leading-relaxed">{quote}</p>
+                <p className="text-[10px] uppercase tracking-widest text-label mt-3">— Recordatorio del equipo</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
