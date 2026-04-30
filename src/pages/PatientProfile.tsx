@@ -195,7 +195,7 @@ export default function PatientProfile() {
               <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
                 <span>DNI: {patient.dni}</span>
                 {age !== null && <span>{age} años</span>}
-                {patient.insurance && <span>{patient.insurance}</span>}
+                {patient.insurance && <span>{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</span>}
                 <span>Admisión: {format(new Date(patient.admission_date), "dd/MM/yyyy")}</span>
               </div>
               {(patient.birth_date || patient.phone || patient.address) && (
