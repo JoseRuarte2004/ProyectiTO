@@ -1386,7 +1386,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   };
 
   const SectionHeading = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-2">{children}</p>
+    <p className="field-label mb-2">{children}</p>
   );
 
   const Line = ({ children }: { children: React.ReactNode }) => (
