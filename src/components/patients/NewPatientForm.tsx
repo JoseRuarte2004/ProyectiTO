@@ -528,6 +528,7 @@ export function NewPatientForm() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [insurance, setInsurance] = useState("");
+  const [insuranceNumber, setInsuranceNumber] = useState("");
   const [admissionDate, setAdmissionDate] = useState(new Date().toISOString().split("T")[0]);
 
   // Card 2 — Clinical data
