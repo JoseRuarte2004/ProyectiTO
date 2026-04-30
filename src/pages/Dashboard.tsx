@@ -133,9 +133,9 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header editorial */}
       <div>
-        <p className="field-label mb-2">{dateStr}</p>
-        <h1 className="text-3xl sm:text-4xl font-normal text-foreground">
-          Buenos días, <em className="font-serif font-semibold not-italic">{firstName}</em>
+        <p className="field-label mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
+        <h1 className="text-[2.5rem] font-normal text-foreground leading-tight">
+          <span className="font-accent">Buenos días,</span> <em className="font-accent font-semibold not-italic">{firstName}</em>
         </h1>
         <p className="text-muted-foreground mt-2 text-[15px]">
           Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
@@ -196,14 +196,14 @@ export default function Dashboard() {
                     className={`flex items-center gap-6 py-4 ${isNow ? "border-l-[3px] border-l-primary pl-5 -ml-6 bg-primary/[0.02]" : ""} ${isCancelled ? "opacity-50" : ""}`}
                   >
                     <div className="w-16 shrink-0">
-                      <p className={`text-base font-bold tabular-nums ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
+                      <p className={`text-base font-bold tabular-nums font-mono ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
                       <p className="text-[11px] text-muted-foreground">{dur} min</p>
                     </div>
                     <div className="flex-1 min-w-0">
                       {patient ? (
                         <Link to={`/patients/${patient.id}`} className="hover:text-primary transition-colors">
-                          <p className="font-medium text-sm text-foreground">{patient.last_name}, {patient.first_name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="font-normal text-sm text-foreground">{patient.last_name}, {patient.first_name}</p>
+                          <p className="text-xs text-muted-foreground italic">
                             {age !== null ? `${age} años` : ""}{age !== null && typeName ? " · " : ""}{typeName}
                           </p>
                         </Link>
@@ -236,7 +236,7 @@ export default function Dashboard() {
                   <Link key={i} to={`/patients/${item.id}`} className="flex items-start gap-2 group">
                     <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{item.name}</p>
+                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</p>
                       <p className="text-xs text-muted-foreground">{item.detail}</p>
                     </div>
                   </Link>

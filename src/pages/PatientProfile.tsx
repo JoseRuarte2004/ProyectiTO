@@ -207,25 +207,28 @@ export default function PatientProfile() {
         <div className="space-y-6">
           {/* Avatar & identity */}
           <div className="text-center lg:text-left">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-4">
-              <span className="text-2xl font-serif font-semibold text-primary">{initials}</span>
+            <div className="flex items-start justify-between">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
+                <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono hidden lg:block">HC #{id?.slice(-5).toUpperCase()}</span>
             </div>
             <h1 className="text-xl leading-tight">
-              <span className="text-foreground">{patient.last_name},</span><br />
-              <em className="font-serif font-semibold text-foreground not-italic text-2xl">{patient.first_name}</em>
+              <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
+              <em className="font-accent font-normal text-foreground/80 text-lg not-italic">{patient.first_name}</em>
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {age !== null && <>{age} años · </>}DNI {patient.dni}
+            <p className="text-xs text-muted-foreground mt-1">
+              {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
             </p>
             {activeEpisode && (
-              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-border">
+              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-primary text-primary bg-transparent">
                 Episodio activo
               </Badge>
             )}
           </div>
 
           {/* Patient details */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {clinical?.diagnosis && (
               <div>
                 <p className="field-label mb-1">Diagnóstico</p>
@@ -316,10 +319,10 @@ export default function PatientProfile() {
         <div>
           <Tabs defaultValue="sessions" className="space-y-4">
             <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
-              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
-              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
-              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
-              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
+              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
+              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
+              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
+              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
             </TabsList>
 
         {/* FICHA */}
@@ -1370,7 +1373,8 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   const [deleteSession, setDeleteSession] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-  const typeColor: Record<string, string> = { admission: "bg-purple-100 text-purple-700", follow_up: "bg-teal-50 text-teal-700", discharge: "bg-green-100 text-green-700" };
+  const typeColor: Record<string, string> = { admission: "border-primary text-primary bg-transparent", follow_up: "border-muted-foreground/40 text-muted-foreground bg-transparent", discharge: "border-emerald-500 text-emerald-600 bg-transparent" };
+  const typeBorderColor: Record<string, string> = { admission: "border-l-primary", follow_up: "border-l-muted-foreground/30", discharge: "border-l-emerald-500" };
 
   const ordinal = (n: number) => {
     if (n === 1) return "1ra";
@@ -1382,7 +1386,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   };
 
   const SectionHeading = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase mb-2">{children}</p>
+    <p className="field-label mb-2">{children}</p>
   );
 
   const Line = ({ children }: { children: React.ReactNode }) => (
@@ -1507,13 +1511,13 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
         return (
           <div key={s.id} className="relative pl-12 pb-8">
             <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
-            <div className="bg-white rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+            <div className={`bg-white rounded-xl border border-border/50 border-l-[3px] ${typeBorderColor[s.session_type] || "border-l-muted-foreground/20"}`}>
               {/* Header */}
-              <div className="flex items-center justify-between gap-3 p-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[s.session_type] || "bg-muted text-muted-foreground"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
+                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-muted-foreground/30 text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
                     {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
                     {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                   </div>
@@ -1540,7 +1544,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
 
               {/* Expanded clinical note */}
               {isOpen && (
-                <div className="border-t border-border/30 px-5 py-4 space-y-5 bg-gray-50/50 font-sans text-sm text-foreground">
+                <div className="border-t border-border/30 px-4 py-3 space-y-4 bg-gray-50/30 font-sans text-sm text-foreground">
                   {/* Header line */}
                   <p className="italic text-muted-foreground mb-3">
                     {s.session_number != null

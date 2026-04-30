@@ -64,7 +64,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="field-label px-3 mb-2">Trabajo</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="px-3 mb-2" style={{ fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>Trabajo</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
@@ -76,8 +76,8 @@ export function AppSidebar() {
                         to={item.url}
                         className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                           active
-                            ? "text-primary font-semibold bg-sidebar-accent"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                            ? "text-primary font-semibold"
+                            : "text-sidebar-foreground font-normal hover:bg-sidebar-accent/50"
                         }`}
                       >
                         <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
