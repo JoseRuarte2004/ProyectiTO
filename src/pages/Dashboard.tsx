@@ -127,17 +127,17 @@ export default function Dashboard() {
   const quote = QUOTES[now.getDate() % QUOTES.length];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
       <div>
-        <p className="field-label mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
-        <h1 className="text-[2.5rem] font-normal text-foreground leading-tight">
-          Buenos días, <span className="font-bold">{firstName}</span>
+        <p className="field-label mb-3" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
+        <h1 className="font-serif text-[2.25rem] font-normal text-foreground leading-tight tracking-tight">
+          Buenos días, <span className="font-semibold">{firstName}</span>
         </h1>
-        <p className="text-muted-foreground mt-2 text-[15px]">
-          Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
+        <p className="text-muted-foreground mt-3 text-[15px] leading-relaxed">
+          Tenés <span className="font-semibold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
           {nextTime && (
-            <> · próximo a las <span className="font-bold text-foreground">{nextTime}</span> con {nextPatient}</>
+            <> · próximo a las <span className="font-semibold text-foreground">{nextTime}</span> con {nextPatient}</>
           )}
           .
         </p>
