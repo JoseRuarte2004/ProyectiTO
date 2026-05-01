@@ -268,11 +268,12 @@ export default function PatientProfile() {
           <div className="space-y-2">
             <Button 
               onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="sm"
+              className="w-full"
             >
               <Plus className="h-4 w-4 mr-2" /> Nueva sesión
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => setShowNewAppt(true)}>
+            <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setShowNewAppt(true)}>
               <Calendar className="h-4 w-4 mr-2" /> Nuevo turno
             </Button>
           </div>
