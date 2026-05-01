@@ -187,7 +187,7 @@ export default function PatientProfile() {
   const currentSessionLabel = sessionCount > 0 ? `Nº ${sessionCount}` : null;
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
+    <div className="flex flex-col -m-4 md:-m-6 lg:-m-8" style={{ height: "calc(100vh - 56px)" }}>
       {/* Two-panel layout */}
       <div className="flex flex-1 min-h-0">
         {/* Left panel — patient sidebar */}
