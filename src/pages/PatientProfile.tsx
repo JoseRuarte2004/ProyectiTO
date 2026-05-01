@@ -229,35 +229,35 @@ export default function PatientProfile() {
             {patient.insurance && (
               <div>
                 <p className="field-label mb-1">Obra social</p>
-                <p className="text-sm text-foreground">{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</p>
+                <p className="text-[13px] text-foreground">{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</p>
               </div>
             )}
             {clinical?.doctor_name && (
               <div>
                 <p className="field-label mb-1">Médico derivante</p>
-                <p className="text-sm text-foreground">{clinical.doctor_name}</p>
+                <p className="text-[13px] text-foreground">{clinical.doctor_name}</p>
               </div>
             )}
             <div>
               <p className="field-label mb-1">Admisión</p>
-              <p className="text-sm text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
+              <p className="text-[13px] text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
             </div>
             {currentSessionLabel && (
               <div>
                 <p className="field-label mb-1">Sesión actual</p>
-                <p className="text-sm text-foreground">{currentSessionLabel}</p>
+                <p className="text-[13px] text-foreground">{currentSessionLabel}</p>
               </div>
             )}
             {patient.phone && (
               <div>
                 <p className="field-label mb-1">Teléfono</p>
-                <p className="text-sm text-foreground">{patient.phone}</p>
+                <p className="text-[13px] text-foreground">{patient.phone}</p>
               </div>
             )}
             {occupational?.dominance && (
               <div>
                 <p className="field-label mb-1">Lateralidad</p>
-                <p className="text-sm text-foreground">
+                <p className="text-[13px] text-foreground">
                   {({ right: "Diestra", left: "Zurda", ambidextrous: "Ambidiestra" } as Record<string, string>)[occupational.dominance] || occupational.dominance}
                 </p>
               </div>
