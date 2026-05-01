@@ -190,7 +190,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={a.id}
-                    className={`flex items-center gap-6 py-4 ${isNow ? "border-l-2 border-l-primary pl-5 -ml-6" : ""} ${isCancelled ? "opacity-50" : ""}`}
+                    className={`flex items-center gap-6 py-5 ${isNow ? "border-l-2 border-l-primary pl-5 -ml-7" : ""} ${isCancelled ? "opacity-50" : ""}`}
                   >
                     <div className="w-16 shrink-0">
                       <p className={`text-base font-bold tabular-nums font-mono ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
