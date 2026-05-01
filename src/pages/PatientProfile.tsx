@@ -923,7 +923,7 @@ function MeasurementsBlock({ e }: { e: any }) {
   const nn = (v: any) => v != null && v !== "";
 
   const SubSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
+    <div className="border-l-2 border-primary/30 pl-3 py-1 space-y-1">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
       <div className="space-y-1 text-sm text-foreground">{children}</div>
     </div>
@@ -1158,7 +1158,7 @@ function MeasurementsBlock({ e }: { e: any }) {
           {dppdNode}
           {hasKendall && (() => {
             const nerves: { label: string; raw: any; cls: string }[] = [
-              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-teal-50 border-teal-200 text-teal-800" },
+              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-primary/5 border-primary/20 text-primary" },
               { label: "N. Cubital", raw: e.muscle_strength_cubital, cls: "bg-blue-50 border-blue-200 text-blue-800" },
               { label: "N. Radial", raw: e.muscle_strength_radial, cls: "bg-amber-50 border-amber-200 text-amber-800" },
             ];
@@ -1259,7 +1259,7 @@ function MeasurementsBlock({ e }: { e: any }) {
           {scarRendered.fields.length === 0 && nn(e.scar) && <p className="text-sm whitespace-pre-wrap">{e.scar}</p>}
           {scarRendered.vss}
           {nn(e.vancouver_score) && (
-            <span className="inline-block text-xs px-2 py-0.5 rounded-full font-bold bg-teal-100 text-teal-800 border border-teal-200">
+            <span className="inline-block text-xs px-2 py-0.5 rounded-full font-bold bg-primary/10 text-primary border border-primary/20">
               VSS: {e.vancouver_score}/15
             </span>
           )}
@@ -1723,7 +1723,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
                 {e.quickdash_score != null && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-teal-100 text-teal-800">QuickDASH: {e.quickdash_score}/100</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-primary/10 text-primary">QuickDASH: {e.quickdash_score}/100</span>
                 )}
                 {e.fim_score != null && (
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">FIM: {e.fim_score}/126</span>
@@ -1762,7 +1762,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
               <div className="space-y-5 text-sm">
                 {/* General */}
                 {detail.dominance && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lateralidad</p>
                     <p>{dominanceMap[detail.dominance] || detail.dominance}</p>
                   </div>
@@ -1770,12 +1770,12 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Desempeño + scores */}
                 {hasOccup && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Desempeño Ocupacional</p>
                     {(detail.quickdash_score != null || detail.fim_score != null) && (
                       <div className="flex flex-wrap gap-2 mb-3">
                         {detail.quickdash_score != null && (
-                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {detail.quickdash_score}/100</span>
+                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">QuickDASH: {detail.quickdash_score}/100</span>
                         )}
                         {detail.fim_score != null && (
                           <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {detail.fim_score}/126</span>
@@ -1796,7 +1796,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                             if (value === null || value === undefined) return null;
                             return (
                               <div key={idx} className="rounded-md border border-gray-100 bg-gray-50/60 px-3 py-2">
-                                <p className="text-xs text-gray-700"><span className="font-semibold text-teal-700">{idx + 1}.</span> {item.q}</p>
+                                <p className="text-xs text-gray-700"><span className="font-semibold text-primary">{idx + 1}.</span> {item.q}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">{value}. {item.scale[value - 1] || ""}</p>
                               </div>
                             );
@@ -1810,7 +1810,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {[{ label: "Motor", items: FIM_MOTOR }, { label: "Cognitivo", items: FIM_COGNITIVE }].map((group) => (
                             <div key={group.label} className="space-y-1">
-                              <p className="text-xs font-semibold text-teal-700 uppercase">{group.label}</p>
+                              <p className="text-xs font-semibold text-primary uppercase">{group.label}</p>
                               {group.items.map((item) => {
                                 const value = fimItems[item.key];
                                 if (value === null || value === undefined) return null;
@@ -1831,7 +1831,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Health */}
                 {hasHealth && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Hábitos de Salud</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="Actividad física" value={detail.physical_activity} />
@@ -1843,7 +1843,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Notes */}
                 {detail.notes && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Notas</p>
                     <p className="whitespace-pre-wrap text-sm">{detail.notes}</p>
                   </div>
