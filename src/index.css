@@ -2,56 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @layer base {
   :root {
-    --background: 34 33% 97%;
-    --foreground: 25 15% 15%;
+    --background: 40 20% 98%;
+    --foreground: 220 15% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 15% 15%;
+    --card-foreground: 220 15% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 15% 15%;
+    --popover-foreground: 220 15% 18%;
 
-    --primary: 187 55% 38%;
+    --primary: 192 35% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 15% 93%;
-    --secondary-foreground: 25 15% 30%;
+    --secondary: 40 12% 94%;
+    --secondary-foreground: 220 10% 35%;
 
-    --muted: 30 12% 94%;
-    --muted-foreground: 33 22% 53%;
+    --muted: 40 10% 95%;
+    --muted-foreground: 220 8% 52%;
 
-    --accent: 30 15% 93%;
-    --accent-foreground: 25 15% 30%;
+    --accent: 40 12% 94%;
+    --accent-foreground: 220 10% 35%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 33 18% 88%;
-    --input: 33 18% 88%;
-    --ring: 187 55% 38%;
+    --border: 30 10% 90%;
+    --input: 30 10% 90%;
+    --ring: 192 35% 30%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    --label: 33 22% 53%;
+    --label: 220 8% 52%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 25 15% 40%;
-    --sidebar-primary: 187 55% 38%;
+    --sidebar-foreground: 220 10% 42%;
+    --sidebar-primary: 192 35% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 20% 95%;
-    --sidebar-accent-foreground: 187 55% 30%;
-    --sidebar-border: 33 18% 92%;
-    --sidebar-ring: 187 55% 38%;
+    --sidebar-accent: 40 15% 96%;
+    --sidebar-accent-foreground: 192 35% 25%;
+    --sidebar-border: 30 10% 92%;
+    --sidebar-ring: 192 35% 30%;
 
-    --success: 152 60% 40%;
+    --success: 152 50% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 85% 50%;
     --warning-foreground: 0 0% 100%;
-    --info: 210 80% 55%;
+    --info: 210 70% 50%;
     --info-foreground: 0 0% 100%;
   }
 }
@@ -62,18 +62,21 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* Field label style — small uppercase tracking-wide warm muted */
+  /* Field label — refined uppercase micro label */
   .field-label {
-    font-size: 0.65rem;
+    font-size: 0.625rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: hsl(var(--muted-foreground));
   }
 
@@ -81,23 +84,24 @@
     font-family: 'Playfair Display', Georgia, serif;
   }
 
+  /* font-accent now maps to Inter medium for cleaner look */
   .font-accent {
-    font-family: 'Lora', Georgia, serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
   }
 
-  /* Dashboard card — clean, no shadow */
+  /* Dashboard card */
   .dashboard-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
-  /* Cards: no shadow */
+  /* Cards: no shadow globally */
   .card, [class*="bg-card"] {
     box-shadow: none;
   }
 
-  /* Remove all heavy shadows globally */
   .shadow-sm { box-shadow: none !important; }
   .shadow-md { box-shadow: none !important; }
   .shadow { box-shadow: none !important; }
@@ -107,30 +111,30 @@
   input:not([type="checkbox"]):not([type="radio"]),
   textarea,
   select {
-    border-radius: 6px !important;
+    border-radius: 8px !important;
   }
   input:focus, textarea:focus, select:focus {
-    --tw-ring-color: hsl(187 55% 38% / 0.4) !important;
+    --tw-ring-color: hsl(192 35% 30% / 0.3) !important;
   }
 
-  /* Status badges — outlined only, transparent bg */
+  /* Status badges */
   .status-active {
-    @apply bg-transparent text-emerald-700 border-emerald-400;
+    @apply bg-transparent text-emerald-700 border-emerald-300;
   }
   .status-paused {
-    @apply bg-transparent text-amber-700 border-amber-400;
+    @apply bg-transparent text-amber-700 border-amber-300;
   }
   .status-discharged {
-    @apply bg-transparent text-gray-600 border-gray-400;
+    @apply bg-transparent text-gray-500 border-gray-300;
   }
   .status-scheduled {
-    @apply bg-transparent text-blue-700 border-blue-400;
+    @apply bg-transparent text-blue-700 border-blue-300;
   }
   .status-completed {
-    @apply bg-transparent text-emerald-700 border-emerald-400;
+    @apply bg-transparent text-emerald-700 border-emerald-300;
   }
   .status-cancelled {
-    @apply bg-transparent text-red-600 border-red-400;
+    @apply bg-transparent text-red-600 border-red-300;
   }
 
   /* Patient profile two-panel layout */
@@ -138,13 +142,13 @@
     background: #FFFFFF;
   }
   .patient-content {
-    background: #F5F3EF;
+    background: hsl(40 20% 97%);
   }
   .patient-content .rounded-lg.border.bg-card,
   .patient-content .dashboard-card,
   .patient-content [class*="bg-card"] {
     background: #FFFFFF;
-    border: 1px solid #E8E3DB;
-    border-radius: 10px;
+    border: 1px solid hsl(30 10% 88%);
+    border-radius: 12px;
   }
 }
