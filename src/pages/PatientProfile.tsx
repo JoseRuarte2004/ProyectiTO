@@ -191,8 +191,8 @@ export default function PatientProfile() {
       {/* Two-panel layout */}
       <div className="flex flex-1 min-h-0">
         {/* Left panel — patient sidebar */}
-        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-6 hidden lg:block">
-          <div className="space-y-6">
+        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-7 hidden lg:block">
+          <div className="space-y-7">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
