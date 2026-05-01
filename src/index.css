@@ -132,4 +132,19 @@
   .status-cancelled {
     @apply bg-transparent text-red-600 border-red-400;
   }
+
+  /* Patient profile two-panel layout */
+  .patient-sidebar {
+    background: #FFFFFF;
+  }
+  .patient-content {
+    background: #F5F3EF;
+  }
+  .patient-content .rounded-lg.border.bg-card,
+  .patient-content .dashboard-card,
+  .patient-content [class*="bg-card"] {
+    background: #FFFFFF;
+    border: 1px solid #E8E3DB;
+    border-radius: 10px;
+  }
 }

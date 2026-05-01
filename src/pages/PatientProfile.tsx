@@ -187,31 +187,21 @@ export default function PatientProfile() {
   const currentSessionLabel = sessionCount > 0 ? `Nº ${sessionCount}` : null;
 
   return (
-    <div className="space-y-0">
-      {/* Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
-            <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
-          </button>
-          <span className="text-border">›</span>
-          <span className="text-foreground font-medium">{patient.last_name}, {patient.first_name}</span>
-        </div>
-        {patient.clinical_record_number && (
-          <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-        {/* Patient sidebar */}
-        <div className="space-y-6">
-          {/* Avatar & identity */}
+    <div className="flex flex-col -m-4 md:-m-6 lg:-m-8 overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
+      {/* Two-panel layout */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left panel — patient sidebar */}
+        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-6 hidden lg:block">
+          <div className="space-y-6">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
+                <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
+              </button>
+            </div>
           <div className="text-center lg:text-left">
-            <div className="flex items-start justify-between">
-              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
-                <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono hidden lg:block">HC #{id?.slice(-5).toUpperCase()}</span>
+            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
+              <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
             </div>
             <h1 className="text-xl leading-tight">
               <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
@@ -313,10 +303,16 @@ export default function PatientProfile() {
               <Plus className="h-3 w-3 mr-1" /> Nuevo episodio
             </Button>
           )}
+          </div>
         </div>
 
-        {/* Main content */}
-        <div>
+        {/* Right panel — main content */}
+        <div className="patient-content flex-1 overflow-y-auto p-6 min-w-0">
+          {patient.clinical_record_number && (
+            <div className="flex justify-end mb-4">
+              <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
+            </div>
+          )}
           <Tabs defaultValue="sessions" className="space-y-4">
             <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
               <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
@@ -643,40 +639,21 @@ export default function PatientProfile() {
         </div>
       </div>
 
-      {/* New Episode Dialog */}
+      {/* Dialogs rendered outside the panels */}
       <NewEpisodeDialog open={showNewEpisode} onClose={() => setShowNewEpisode(false)} patientId={id!} userId={user!.id} episodes={episodes} onSaved={async (newEpId: string) => {
         setActiveEpisodeId(newEpId);
         await fetchPatientBase();
         await fetchEpisodeData(newEpId);
       }} />
-
-
-      {/* New Functional Eval Dialog */}
       <EditFichaDialog open={showEditFicha} onClose={() => setShowEditFicha(false)} patient={patient} clinical={clinical} occupational={occupational} activeEpisodeId={activeEpisodeId} onSaved={fetchAll} />
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Analytical Eval Dialog */}
       <NewAnalEvalDialogFull open={showNewAnalEval} onClose={() => setShowNewAnalEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Appointment Dialog */}
       <NewPatientApptDialog open={showNewAppt} onClose={() => setShowNewAppt(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Plan Dialog */}
       <NewPlanDialog open={showNewPlan} onClose={() => setShowNewPlan(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* Plan Detail Dialog */}
       <PlanDetailDialog plan={showPlanDetail} onClose={() => setShowPlanDetail(null)} />
-
-      {/* Edit Plan Dialog */}
       <EditPlanDialog plan={editPlan} onClose={() => setEditPlan(null)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* Delete Plan Confirm */}
       <DeletePlanConfirm plan={deletePlan} onClose={() => setDeletePlan(null)} onSaved={fetchAll} />
-
-      {/* Upload File Dialog */}
       <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} episodeId={activeEpisodeId} />
-
-      {/* Delete File Confirm */}
       <DeleteFileConfirm file={deleteFile} onClose={() => setDeleteFile(null)} onDeleted={(fileId) => {
         setClinicalFiles(prev => prev.filter(f => f.id !== fileId));
         setSignedUrls(prev => { const n = { ...prev }; delete n[fileId]; return n; });
