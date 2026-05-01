@@ -33,6 +33,12 @@ const appointmentTypeMap: Record<string, string> = {
   discharge: "Alta",
 };
 
+const sessionTypeMap: Record<string, string> = {
+  admission: "Admisión",
+  follow_up: "Seguimiento",
+  discharge: "Alta",
+};
+
 const QUOTES = [
   "La rehabilitación efectiva nace de la observación paciente, no del protocolo apresurado.",
   "Cada sesión es una oportunidad para devolver autonomía.",
@@ -46,9 +52,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [agendaDate, setAgendaDate] = useState(new Date());
   const [dayAppointments, setDayAppointments] = useState<any[]>([]);
+  const [activePatients, setActivePatients] = useState<any[]>([]);
+  const [activePatientsCount, setActivePatientsCount] = useState(0);
+  const [recentSessions, setRecentSessions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAgenda(agendaDate);
+    fetchActivePatients();
+    fetchRecentSessions();
   }, []);
 
   useEffect(() => {
@@ -70,6 +81,29 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const fetchActivePatients = async () => {
+    const { data, count } = await supabase
+      .from("patients")
+      .select("id, first_name, last_name, admission_date", { count: "exact" })
+      .eq("status", "active")
+      .eq("is_deleted", false)
+      .order("admission_date", { ascending: false })
+      .limit(5);
+
+    setActivePatients(data || []);
+    setActivePatientsCount(count || 0);
+  };
+
+  const fetchRecentSessions = async () => {
+    const { data } = await supabase
+      .from("therapy_sessions")
+      .select("id, session_date, session_type, session_number, patient_id, patients(first_name, last_name)")
+      .eq("is_deleted", false)
+      .order("session_date", { ascending: false })
+      .limit(5);
+
+    setRecentSessions(data || []);
+  };
 
   if (loading) {
     return (
@@ -94,11 +128,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header editorial */}
+      {/* Header */}
       <div>
         <p className="field-label mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
         <h1 className="text-[2.5rem] font-normal text-foreground leading-tight">
-          <span className="font-accent">Buenos días,</span> <em className="font-accent font-semibold not-italic">{firstName}</em>
+          Buenos días, <span className="font-bold">{firstName}</span>
         </h1>
         <p className="text-muted-foreground mt-2 text-[15px]">
           Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
@@ -121,7 +155,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
         {/* Agenda principal */}
-        <div className="bg-card rounded-xl border border-border p-6">
+        <div className="dashboard-card p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Agenda de hoy</h2>
@@ -156,7 +190,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={a.id}
-                    className={`flex items-center gap-6 py-4 ${isNow ? "border-l-[3px] border-l-primary pl-5 -ml-6 bg-primary/[0.02]" : ""} ${isCancelled ? "opacity-50" : ""}`}
+                    className={`flex items-center gap-6 py-4 ${isNow ? "border-l-2 border-l-primary pl-5 -ml-6" : ""} ${isCancelled ? "opacity-50" : ""}`}
                   >
                     <div className="w-16 shrink-0">
                       <p className={`text-base font-bold tabular-nums font-mono ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
@@ -187,13 +221,70 @@ export default function Dashboard() {
 
         {/* Panel lateral */}
         <div className="space-y-6">
+          {/* Pacientes activos */}
+          <div className="dashboard-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-foreground">Pacientes activos</h3>
+              <span className="text-sm text-muted-foreground tabular-nums">{activePatientsCount}</span>
+            </div>
+            {activePatients.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin pacientes activos.</p>
+            ) : (
+              <div className="space-y-3">
+                {activePatients.map((p) => (
+                  <Link key={p.id} to={`/patients/${p.id}`} className="flex items-center justify-between group">
+                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                      {p.last_name}, {p.first_name}
+                    </p>
+                    {p.admission_date && (
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {format(new Date(p.admission_date + "T12:00:00"), "dd/MM/yy")}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <Link to="/patients" className="block mt-4 text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
+              Ver todos →
+            </Link>
+          </div>
+
+          {/* Últimas sesiones */}
+          <div className="dashboard-card p-5">
+            <h3 className="font-semibold text-foreground mb-4">Últimas sesiones</h3>
+            {recentSessions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin sesiones registradas.</p>
+            ) : (
+              <div className="space-y-3">
+                {recentSessions.map((s) => {
+                  const patient = s.patients;
+                  const typeName = sessionTypeMap[s.session_type] || s.session_type;
+                  return (
+                    <Link key={s.id} to={`/patients/${s.patient_id}`} className="flex items-center justify-between group">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                          {patient?.last_name}, {patient?.first_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground italic">{typeName}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                        {format(new Date(s.session_date + "T12:00:00"), "dd/MM/yy")}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Cita */}
-          <div className="bg-accent/50 rounded-xl border border-border/50 p-5">
+          <div className="dashboard-card p-5 bg-accent/30">
             <div className="flex gap-3">
-              <span className="text-3xl text-label/30 font-serif leading-none">"</span>
+              <span className="text-3xl text-muted-foreground/30 font-serif leading-none">"</span>
               <div>
                 <p className="text-sm italic text-foreground/80 leading-relaxed">{quote}</p>
-                <p className="text-[10px] uppercase tracking-widest text-label mt-3">— Recordatorio del equipo</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-3">— Recordatorio del equipo</p>
               </div>
             </div>
           </div>
