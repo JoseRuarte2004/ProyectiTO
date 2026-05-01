@@ -39,20 +39,17 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md shadow-lg border-border/50">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-4">
-            <span className="text-primary-foreground font-bold text-xl">R</span>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">RehabOT</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+      <Card className="w-full max-w-md border-border/60">
+        <CardHeader className="text-center pb-4 pt-10">
+          <h1 className="font-serif text-3xl font-semibold text-foreground tracking-tight">RehabOT</h1>
+          <p className="text-muted-foreground text-sm mt-2">
             Sistema de gestión para rehabilitación
           </p>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+        <CardContent className="px-8 pb-10">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email" className="text-[13px]">Correo electrónico</Label>
               <Input
                 id="email"
                 type="email"
@@ -60,10 +57,11 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="text-[13px]">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
@@ -71,9 +69,10 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button type="submit" className="w-full h-12 text-[15px]" disabled={submitting}>
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

@@ -127,17 +127,17 @@ export default function Dashboard() {
   const quote = QUOTES[now.getDate() % QUOTES.length];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
       <div>
-        <p className="field-label mb-2" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
-        <h1 className="text-[2.5rem] font-normal text-foreground leading-tight">
-          Buenos días, <span className="font-bold">{firstName}</span>
+        <p className="field-label mb-3" style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>{dateStr}</p>
+        <h1 className="font-serif text-[2.25rem] font-normal text-foreground leading-tight tracking-tight">
+          Buenos días, <span className="font-semibold">{firstName}</span>
         </h1>
-        <p className="text-muted-foreground mt-2 text-[15px]">
-          Tenés <span className="font-bold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
+        <p className="text-muted-foreground mt-3 text-[15px] leading-relaxed">
+          Tenés <span className="font-semibold text-foreground">{dayAppointments.length} turno{dayAppointments.length !== 1 ? "s" : ""}</span> hoy
           {nextTime && (
-            <> · próximo a las <span className="font-bold text-foreground">{nextTime}</span> con {nextPatient}</>
+            <> · próximo a las <span className="font-semibold text-foreground">{nextTime}</span> con {nextPatient}</>
           )}
           .
         </p>
@@ -153,9 +153,9 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
         {/* Agenda principal */}
-        <div className="dashboard-card p-6">
+        <div className="dashboard-card p-7">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Agenda de hoy</h2>
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={a.id}
-                    className={`flex items-center gap-6 py-4 ${isNow ? "border-l-2 border-l-primary pl-5 -ml-6" : ""} ${isCancelled ? "opacity-50" : ""}`}
+                    className={`flex items-center gap-6 py-5 ${isNow ? "border-l-2 border-l-primary pl-5 -ml-7" : ""} ${isCancelled ? "opacity-50" : ""}`}
                   >
                     <div className="w-16 shrink-0">
                       <p className={`text-base font-bold tabular-nums font-mono ${isCancelled ? "line-through text-muted-foreground" : "text-foreground"}`}>{time}</p>
@@ -220,9 +220,9 @@ export default function Dashboard() {
         </div>
 
         {/* Panel lateral */}
-        <div className="space-y-6">
+        <div className="space-y-7">
           {/* Pacientes activos */}
-          <div className="dashboard-card p-5">
+          <div className="dashboard-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-foreground">Pacientes activos</h3>
               <span className="text-sm text-muted-foreground tabular-nums">{activePatientsCount}</span>
@@ -251,7 +251,7 @@ export default function Dashboard() {
           </div>
 
           {/* Últimas sesiones */}
-          <div className="dashboard-card p-5">
+          <div className="dashboard-card p-6">
             <h3 className="font-semibold text-foreground mb-4">Últimas sesiones</h3>
             {recentSessions.length === 0 ? (
               <p className="text-sm text-muted-foreground">Sin sesiones registradas.</p>

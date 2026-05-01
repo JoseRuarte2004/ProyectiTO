@@ -191,21 +191,21 @@ export default function PatientProfile() {
       {/* Two-panel layout */}
       <div className="flex flex-1 min-h-0">
         {/* Left panel — patient sidebar */}
-        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-6 hidden lg:block">
-          <div className="space-y-6">
+        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-7 hidden lg:block">
+          <div className="space-y-7">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
                 <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
               </button>
             </div>
-          <div className="text-center lg:text-left">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
-              <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
+          <div>
+            <div className="w-[88px] h-[88px] rounded-full bg-primary/8 border-2 border-primary/15 flex items-center justify-center mb-4">
+              <span className="text-2xl font-medium text-primary">{initials}</span>
             </div>
             <h1 className="text-xl leading-tight">
-              <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
-              <em className="font-accent font-normal text-foreground/80 text-lg not-italic">{patient.first_name}</em>
+              <span className="font-serif font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
+              <span className="text-foreground/70 text-lg font-normal">{patient.first_name}</span>
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
               {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
@@ -218,7 +218,7 @@ export default function PatientProfile() {
           </div>
 
           {/* Patient details */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             {clinical?.diagnosis && (
               <div>
                 <p className="field-label mb-1">Diagnóstico</p>
@@ -307,7 +307,7 @@ export default function PatientProfile() {
         </div>
 
         {/* Right panel — main content */}
-        <div className="patient-content flex-1 overflow-y-auto p-6 min-w-0">
+        <div className="patient-content flex-1 overflow-y-auto p-7 min-w-0">
           {patient.clinical_record_number && (
             <div className="flex justify-end mb-4">
               <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>

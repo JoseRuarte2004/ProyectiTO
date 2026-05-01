@@ -44,29 +44,26 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-5 py-5 border-b border-sidebar-border">
+      <SidebarHeader className="px-5 py-6 border-b border-sidebar-border">
         {!collapsed ? (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-serif font-bold text-base">m</span>
-            </div>
-            <div>
-              <p className="font-bold text-lg text-foreground leading-tight">RehabOT</p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-label">Clínica · TO</p>
-            </div>
+          <div>
+            <p className="font-serif text-xl font-semibold text-foreground tracking-tight">RehabOT</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground mt-0.5">Clínica · Terapia Ocupacional</p>
           </div>
         ) : (
-          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-serif font-bold text-base">m</span>
-          </div>
+          <p className="font-serif text-lg font-semibold text-foreground text-center">R</p>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-3 py-5">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="px-3 mb-2" style={{ fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>Trabajo</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="px-3 mb-3 text-[10px] tracking-[0.14em] uppercase text-muted-foreground font-medium">
+              Trabajo
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {navItems.map((item) => {
                 const active = isActive(item.url);
                 return (
@@ -74,13 +71,13 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild isActive={active}>
                       <NavLink
                         to={item.url}
-                        className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                        className={`relative flex items-center gap-3 rounded-lg px-3 py-3 text-[13px] transition-colors ${
                           active
-                            ? "border-l-2 border-l-primary text-foreground font-semibold bg-transparent"
-                            : "text-sidebar-foreground font-normal hover:bg-sidebar-accent/50 border-l-2 border-l-transparent"
+                            ? "border-l-[3px] border-l-primary text-foreground font-semibold bg-transparent"
+                            : "text-sidebar-foreground font-normal hover:bg-sidebar-accent/60 border-l-[3px] border-l-transparent"
                         }`}
                       >
-                        <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
+                        <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2 : 1.5} />
                         {!collapsed && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
@@ -92,11 +89,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+      <SidebarFooter className="p-5 border-t border-sidebar-border">
         {!collapsed && profile && (
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-9 w-9 border border-border">
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              <AvatarFallback className="bg-primary/8 text-primary text-xs font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -114,7 +111,7 @@ export function AppSidebar() {
           variant="ghost"
           size={collapsed ? "icon" : "default"}
           onClick={signOut}
-          className="w-full justify-start text-muted-foreground hover:text-destructive"
+          className="w-full justify-start text-muted-foreground hover:text-destructive text-[13px]"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span className="ml-2">Cerrar sesión</span>}
