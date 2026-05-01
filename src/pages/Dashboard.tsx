@@ -224,48 +224,6 @@ export default function Dashboard() {
 
         {/* Panel lateral */}
         <div className="space-y-6">
-          {/* Pendientes */}
-          {pendingItems.length > 0 && (
-            <div className="bg-card rounded-xl border border-border p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">Pendientes</h3>
-                <Badge className="bg-destructive/10 text-destructive border-0 text-xs font-bold">{pendingItems.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {pendingItems.map((item, i) => (
-                  <Link key={i} to={`/patients/${item.id}`} className="flex items-start gap-2 group">
-                    <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.detail}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Esta semana */}
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-semibold text-foreground mb-4">Esta semana</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Sesiones completadas</span>
-                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.sessionsCompleted}<span className="text-muted-foreground font-normal">/{weekStats.sessionsTotal}</span></span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-1.5">
-                <div className="bg-primary rounded-full h-1.5 transition-all" style={{ width: `${weekStats.sessionsTotal > 0 ? (weekStats.sessionsCompleted / weekStats.sessionsTotal * 100) : 0}%` }} />
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-sm text-muted-foreground">Evoluciones registradas</span>
-                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.evolsRegistered}<span className="text-muted-foreground font-normal">/{weekStats.evolsTotal}</span></span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-1.5">
-                <div className="bg-warning rounded-full h-1.5 transition-all" style={{ width: `${weekStats.evolsTotal > 0 ? (weekStats.evolsRegistered / weekStats.evolsTotal * 100) : 0}%` }} />
-              </div>
-            </div>
-          </div>
-
           {/* Cita */}
           <div className="bg-accent/50 rounded-xl border border-border/50 p-5">
             <div className="flex gap-3">
