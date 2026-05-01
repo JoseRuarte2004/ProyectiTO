@@ -705,6 +705,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       diagnosis: clinical?.diagnosis || "",
       treatment_type: clinical?.treatment_type || "",
       injury_date: clinical?.injury_date || "",
+      surgery_date: clinical?.surgery_date || "",
       symptom_start_date: clinical?.symptom_start_date || "",
       injury_mechanism: clinical?.injury_mechanism || "",
       current_treatment: clinical?.current_treatment || "",
