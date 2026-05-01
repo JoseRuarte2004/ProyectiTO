@@ -379,6 +379,7 @@ export default function PatientProfile() {
                   <Field label="Médico derivante" value={clinical?.doctor_name} />
                   <Field label="Fecha de admisión" value={patient.admission_date ? format(new Date(patient.admission_date), "d MMM yyyy", { locale: es }) : null} />
                   <Field label="Nº de episodio" value={activeEpisode?.episode_number} />
+                  <Field label="Nº de afiliado" value={patient.insurance_number} />
                   <Field label="Nacionalidad" value={(patient as any).nationality} />
                   <Field label="Teléfono" value={patient.phone} />
                   <Field label="Domicilio" value={(patient as any).address} />
