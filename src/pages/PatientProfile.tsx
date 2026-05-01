@@ -223,7 +223,7 @@ export default function PatientProfile() {
             {clinical?.diagnosis && (
               <div>
                 <p className="field-label mb-1">Diagnóstico</p>
-                <p className="text-sm font-medium text-foreground">{clinical.diagnosis}</p>
+                <p className="text-[13px] text-foreground">{clinical.diagnosis}</p>
               </div>
             )}
             {patient.insurance && (
