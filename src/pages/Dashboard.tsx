@@ -220,9 +220,9 @@ export default function Dashboard() {
         </div>
 
         {/* Panel lateral */}
-        <div className="space-y-6">
+        <div className="space-y-7">
           {/* Pacientes activos */}
-          <div className="dashboard-card p-5">
+          <div className="dashboard-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-foreground">Pacientes activos</h3>
               <span className="text-sm text-muted-foreground tabular-nums">{activePatientsCount}</span>
