@@ -46,13 +46,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [agendaDate, setAgendaDate] = useState(new Date());
   const [dayAppointments, setDayAppointments] = useState<any[]>([]);
-  const [weekStats, setWeekStats] = useState({ sessionsCompleted: 0, sessionsTotal: 0, evolsRegistered: 0, evolsTotal: 0 });
-  const [pendingItems, setPendingItems] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAgenda(agendaDate);
-    fetchWeekStats();
-    fetchPending();
   }, []);
 
   useEffect(() => {
