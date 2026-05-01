@@ -1542,7 +1542,6 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
                 </div>
               )}
             </div>
-          </div>
         );
       })}
     </div>
