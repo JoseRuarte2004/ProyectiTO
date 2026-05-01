@@ -442,8 +442,8 @@ export default function PatientProfile() {
           </div>
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4">
-                <Activity className="h-8 w-8 text-teal-400" />
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Activity className="h-8 w-8 text-primary/50" />
               </div>
               <p className="font-medium text-foreground">Sin visitas registradas</p>
               <p className="text-sm text-muted-foreground mt-1">Registrá la primera visita con el botón de arriba</p>
