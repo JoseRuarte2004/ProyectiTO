@@ -753,6 +753,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       diagnosis: emptyToNull(form.diagnosis),
       treatment_type: emptyToNull(form.treatment_type),
       injury_date: emptyToNull(form.injury_date),
+      surgery_date: emptyToNull(form.surgery_date),
       symptom_start_date: emptyToNull(form.symptom_start_date),
       injury_mechanism: emptyToNull(form.injury_mechanism),
       current_treatment: emptyToNull(form.current_treatment),
