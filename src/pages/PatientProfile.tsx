@@ -1418,46 +1418,43 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
 
   return (
     <>
-    <div className="relative">
-      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
+    <div className="space-y-3">
       {sessions.map((s) => {
         const isOpen = expanded === s.id;
         const linkedEval = analEvals.find(e => matchesSessionEval(s, e));
         const linkedFuncEval = funcEvals.find(e => matchesSessionEval(s, e));
 
         return (
-          <div key={s.id} className="relative pl-12 pb-8">
-            <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
-            <div className={`bg-white rounded-xl border border-border/50 border-l-[3px] ${typeBorderColor[s.session_type] || "border-l-muted-foreground/20"}`}>
-              {/* Header */}
-              <div className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-muted-foreground/30 text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
-                    {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
-                    {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
-                  </div>
-                  {(linkedEval || linkedFuncEval) && (
-                    <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
-                      📊 Con mediciones
-                    </span>
-                  )}
+          <div key={s.id} className="bg-card rounded-[10px] border border-border overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3 px-5 py-3.5 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground text-[13px]">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {s.session_type && <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-border text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
+                  {s.session_number != null && <span className="text-[11px] text-muted-foreground">Sesión Nº {s.session_number}</span>}
+                  {s.week_at_session != null && <span className="text-[11px] text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                 </div>
-                <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  {s.session_type !== "admission" && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </div>
+                {(linkedEval || linkedFuncEval) && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-primary font-medium mt-1.5">
+                    <BarChart3 className="h-3 w-3" /> Con mediciones
+                  </span>
+                )}
               </div>
+              <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                {s.session_type !== "admission" && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
 
               {/* Expanded clinical note */}
               {isOpen && (
