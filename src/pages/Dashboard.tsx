@@ -46,13 +46,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [agendaDate, setAgendaDate] = useState(new Date());
   const [dayAppointments, setDayAppointments] = useState<any[]>([]);
-  const [weekStats, setWeekStats] = useState({ sessionsCompleted: 0, sessionsTotal: 0, evolsRegistered: 0, evolsTotal: 0 });
-  const [pendingItems, setPendingItems] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAgenda(agendaDate);
-    fetchWeekStats();
-    fetchPending();
   }, []);
 
   useEffect(() => {
@@ -74,39 +70,6 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const fetchWeekStats = async () => {
-    const now = new Date();
-    const weekStart = startOfDay(subDays(now, now.getDay())).toISOString();
-    const weekEnd = endOfDay(addDays(now, 6 - now.getDay())).toISOString();
-
-    const [sessionsRes, evolsRes] = await Promise.all([
-      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]),
-      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]).not("notes", "is", null),
-    ]);
-
-    const total = sessionsRes.count || 0;
-    setWeekStats({
-      sessionsCompleted: total,
-      sessionsTotal: total + 4,
-      evolsRegistered: evolsRes.count || 0,
-      evolsTotal: total,
-    });
-  };
-
-  const fetchPending = async () => {
-    const { data } = await supabase
-      .from("therapy_sessions")
-      .select("id, session_date, session_number, patients(id, first_name, last_name)")
-      .is("notes", null)
-      .order("session_date", { ascending: false })
-      .limit(5);
-
-    setPendingItems((data || []).map((s: any) => ({
-      id: s.patients?.id,
-      name: `${s.patients?.last_name}, ${s.patients?.first_name}`,
-      detail: `Evolución pendiente — sesión ${format(new Date(s.session_date + "T12:00:00"), "dd/MM")}`,
-    })));
-  };
 
   if (loading) {
     return (
@@ -224,48 +187,6 @@ export default function Dashboard() {
 
         {/* Panel lateral */}
         <div className="space-y-6">
-          {/* Pendientes */}
-          {pendingItems.length > 0 && (
-            <div className="bg-card rounded-xl border border-border p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">Pendientes</h3>
-                <Badge className="bg-destructive/10 text-destructive border-0 text-xs font-bold">{pendingItems.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {pendingItems.map((item, i) => (
-                  <Link key={i} to={`/patients/${item.id}`} className="flex items-start gap-2 group">
-                    <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.detail}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Esta semana */}
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-semibold text-foreground mb-4">Esta semana</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Sesiones completadas</span>
-                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.sessionsCompleted}<span className="text-muted-foreground font-normal">/{weekStats.sessionsTotal}</span></span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-1.5">
-                <div className="bg-primary rounded-full h-1.5 transition-all" style={{ width: `${weekStats.sessionsTotal > 0 ? (weekStats.sessionsCompleted / weekStats.sessionsTotal * 100) : 0}%` }} />
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-sm text-muted-foreground">Evoluciones registradas</span>
-                <span className="text-sm font-bold text-primary tabular-nums">{weekStats.evolsRegistered}<span className="text-muted-foreground font-normal">/{weekStats.evolsTotal}</span></span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-1.5">
-                <div className="bg-warning rounded-full h-1.5 transition-all" style={{ width: `${weekStats.evolsTotal > 0 ? (weekStats.evolsRegistered / weekStats.evolsTotal * 100) : 0}%` }} />
-              </div>
-            </div>
-          </div>
-
           {/* Cita */}
           <div className="bg-accent/50 rounded-xl border border-border/50 p-5">
             <div className="flex gap-3">
