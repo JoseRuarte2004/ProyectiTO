@@ -703,6 +703,7 @@ export type Database = {
           patient_id: string
           pharmacological_treatment: string | null
           studies: string | null
+          surgery_date: string | null
           symptom_start_date: string | null
           treatment_type: string | null
           updated_at: string
@@ -729,6 +730,7 @@ export type Database = {
           patient_id: string
           pharmacological_treatment?: string | null
           studies?: string | null
+          surgery_date?: string | null
           symptom_start_date?: string | null
           treatment_type?: string | null
           updated_at?: string
@@ -755,6 +757,7 @@ export type Database = {
           patient_id?: string
           pharmacological_treatment?: string | null
           studies?: string | null
+          surgery_date?: string | null
           symptom_start_date?: string | null
           treatment_type?: string | null
           updated_at?: string
