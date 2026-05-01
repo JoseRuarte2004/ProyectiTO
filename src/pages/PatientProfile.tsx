@@ -827,6 +827,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
               <div><Label>Tipo de tratamiento</Label><Select value={form.treatment_type || ""} onValueChange={(v) => u("treatment_type", v)}><SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger><SelectContent><SelectItem value="conservative">Conservador</SelectItem><SelectItem value="surgery">Quirúrgico</SelectItem><SelectItem value="mixed">Mixto</SelectItem></SelectContent></Select></div>
               <div><Label>Médico</Label><Input value={form.doctor_name || ""} onChange={(e) => u("doctor_name", e.target.value)} /></div>
               <div><Label>Fecha lesión</Label><Input type="date" value={form.injury_date || ""} onChange={(e) => u("injury_date", e.target.value)} /></div>
+              <div><Label>Fecha cirugía</Label><Input type="date" value={form.surgery_date || ""} onChange={(e) => u("surgery_date", e.target.value)} /></div>
               <div><Label>Inicio síntomas</Label><Input type="date" value={form.symptom_start_date || ""} onChange={(e) => u("symptom_start_date", e.target.value)} /></div>
               <div><Label>Tipo inmovilización</Label><Input value={form.immobilization_type || ""} onChange={(e) => u("immobilization_type", e.target.value)} /></div>
               <div><Label>Próximo OyT</Label><Input type="date" value={form.next_oyt_appointment || ""} onChange={(e) => u("next_oyt_appointment", e.target.value)} /></div>
