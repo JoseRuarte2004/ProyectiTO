@@ -1,99 +1,56 @@
 
-# Rediseño visual — Clínica editorial
+# Rediseño visual del perfil del paciente
 
-Objetivo: transformar la estética de "plantilla IA" a una app médica premium con identidad propia, más respiración entre elementos y jerarquía visual clara.
+Todo lo que no te gusta: avatar genérico, timeline con puntos/líneas, colores y fondos, tipografía sin jerarquía. La distribución de información se mantiene igual (dos paneles, tabs).
 
 ---
 
-## 1. Paleta y tokens de diseño (`index.css`, `tailwind.config.ts`)
+## 1. Avatar — Eliminar el círculo grande con iniciales
 
-**Paleta refinada** — mantener la base cálida pero con mayor sofisticación:
-- Background: `#FAF9F7` (crema más sutil)
-- Card: `#FFFFFF`
-- Primario: cambiar de teal genérico a un verde-azulado más oscuro y sobrio: `hsl(192, 35%, 30%)` — más institucional, menos "startup"
-- Texto principal: `hsl(220, 15%, 18%)` — casi negro azulado en vez de marrón
-- Muted: ajustar para mejor contraste
-- Bordes: más sutiles, `hsl(30, 10%, 90%)`
+Reemplazar el avatar circular de 88px con iniciales por un bloque más sutil:
+- Sin círculo. Solo las iniciales en texto pequeño (14px) dentro de un cuadrado redondeado (40px) con fondo `hsl(var(--muted))` muy sutil
+- O directamente eliminarlo y empezar con el nombre del paciente, con el apellido en Playfair Display 24px semibold y el nombre debajo en Inter 16px regular — jerarquía clara sin necesidad de avatar
 
-**Tipografía editorial**:
-- Reemplazar Plus Jakarta Sans por **Inter** para body (más profesional, mejor legibilidad a tamaños chicos)
-- Mantener Playfair Display para títulos principales (buen contraste editorial)
-- Quitar Lora — redundante con Playfair. Usar Inter medium para donde se usaba `.font-accent`
+## 2. Panel izquierdo — Tipografía y colores
 
-**Nuevos tokens CSS**:
-- `--spacing-section: 2.5rem` (40px entre secciones, actualmente ~24px)
-- `--spacing-card-padding: 1.5rem` (24px dentro de cards)
-- Sutil `border-radius: 12px` en cards (en vez de 10px)
-- Inputs con `border-radius: 8px`
+- Apellido: Playfair Display, 22px, font-semibold, tracking-tight, color foreground
+- Nombre: Inter, 16px, font-normal, color foreground/60
+- Edad + DNI: Inter 12px, muted-foreground, separados con " · "
+- Badge "Episodio activo": más discreto — sin borde visible, solo un punto verde (6px) + texto "Episodio activo" en 11px semibold verde
+- Campos (DIAGNÓSTICO, ADMISIÓN, etc.): `.field-label` sin cambios, pero el valor debajo con 13px en vez de 14px, font-normal, color foreground (no foreground con peso bold)
+- Botones: "Nueva sesión" como botón primario más compacto (h-10), "Nuevo turno" como ghost con icono — menos protagonismo
 
-## 2. Sidebar de navegación (`AppSidebar.tsx`)
+## 3. Fondo y colores
 
-- Fondo: blanco puro, borde derecho sutil
-- Logo: tipografía más limpia, sin el circulito con letra — usar solo texto "RehabOT" con un separador fino y "Clínica · TO" debajo
-- Items de navegación: más padding vertical (py-3), iconos más finos (strokeWidth 1.5), indicador activo como barra izquierda sólida de 3px
-- Footer: avatar y nombre con más espacio, estilo más limpio
+- Panel izquierdo: `#FFFFFF` puro (se mantiene)
+- Panel derecho: cambiar de `#F5F3EF` a `hsl(var(--background))` — el mismo crema sutil del fondo general. Sin contraste forzado que se ve artificial
+- Cards de sesión en el panel derecho: `#FFFFFF`, borde `hsl(var(--border))` 1px, border-radius 10px
+- Eliminar todos los colores `teal-XXX` hardcodeados (teal-200, teal-500, teal-50, teal-100, teal-800) y usar los tokens del design system: `primary`, `primary/10`, `primary/20`
 
-## 3. Dashboard (`Dashboard.tsx`)
+## 4. Timeline de sesiones — Eliminar completamente
 
-- Saludo: tipografía Playfair Display a 2.25rem, peso normal, nombre en bold — más editorial
-- Subtítulo de turnos: más separado del título (mt-3)
-- Cards de agenda: padding 28px, más espacio entre items del listado (py-5 en vez de py-4)
-- Panel lateral: gap de 28px entre cards
-- Quote card: bordes más sutiles, padding generoso, tipografía itálica más grande
-- Botones de acción: más separados del header
+Reemplazar la timeline con puntos y línea vertical por una lista simple de cards:
+- Eliminar la línea vertical `bg-teal-200`
+- Eliminar los puntos circulares (`bg-teal-500 ring-4`)
+- Eliminar el `pl-12` y `pb-8` del padding de timeline
+- Cada sesión es simplemente una card blanca con:
+  - Fecha en 13px font-medium
+  - Badge de tipo (Admisión/Seguimiento/Alta) como pill sutil
+  - Número de sesión en texto muted
+  - Badge "Con mediciones" si aplica
+  - Botones editar/eliminar a la derecha
+  - Separadas por `gap-3` en un `space-y-3`
+- Eliminar el `border-l-[3px]` de color por tipo — eso también se ve "plantilla"
+- El card expandido: fondo blanco (no `bg-gray-50/30`), borde top sutil
 
-## 4. Lista de pacientes (`Patients.tsx`)
+## 5. Tab bar
 
-- Título: Playfair Display, tamaño mayor
-- Cards de paciente: padding 24px (en vez de 20px), gap entre cards 20px
-- Avatar: ligeramente más grande (44px), con borde más sutil
-- Nombre del paciente: un poco más grande, usar font-medium en vez de font-semibold
-- Más espacio entre la barra de búsqueda/filtros y la grilla
+- Mantener el estilo underline actual pero ajustar: texto 13px, tracking ligeramente más amplio, color muted-foreground para inactivo, foreground para activo con borde-bottom de 2px primary
+- Agregar un poco más de padding vertical (py-3)
 
-## 5. Perfil del paciente (`PatientProfile.tsx`)
+## Archivos a editar
 
-- **Panel izquierdo**: padding 28px, gap entre secciones 28px. Avatar de 88px. Nombre con Playfair Display. Campos con más espacio vertical (space-y-4 en vez de space-y-3)
-- **Panel derecho**: padding 28px. Tab content con más espacio arriba (mt-6)
-- **Cards de sesión**: padding 24px, border-radius 12px, gap entre cards 16px
-- **Ficha clínica**: grid de campos con gap-y-5 en vez de gap-y-4
-
-## 6. Login (`Login.tsx`)
-
-- Card más amplia (max-w-sm -> max-w-md queda bien), más padding interno
-- Logo: solo texto "RehabOT" con Playfair Display, sin el cuadradito con letra
-- Inputs con más height (h-12 en vez de h-10)
-- Botón de login con más height y border-radius suave
-
-## 7. Componentes globales
-
-**Botones** (`button.tsx`):
-- Border-radius: 8px
-- Tamaño default: h-11 (en vez de h-10), px-5
-- Primary: el nuevo color más oscuro
-- Outline: borde más sutil
-
-**Cards** (`card.tsx` y CSS global):
-- Border-radius: 12px
-- Padding default más generoso
-- Borde 1px solid con color más sutil
-
-**Inputs** (`input.tsx` y CSS):
-- Height: 44px
-- Border-radius: 8px
-- Padding interno más generoso
-
-## Resumen de archivos a editar
-
-| Archivo | Cambio |
-|---------|--------|
-| `src/index.css` | Paleta, tipografía, espaciado, clases utilitarias |
-| `tailwind.config.ts` | Fuentes, colores |
-| `src/components/AppSidebar.tsx` | Layout sidebar editorial |
-| `src/components/ui/button.tsx` | Tamaños y radii |
-| `src/components/ui/card.tsx` | Border-radius |
-| `src/pages/Login.tsx` | Diseño editorial |
-| `src/pages/Dashboard.tsx` | Espaciado y tipografía |
-| `src/pages/Patients.tsx` | Espaciado cards y tipografía |
-| `src/pages/PatientProfile.tsx` | Espaciado paneles |
-
-No se modifica ninguna funcionalidad ni lógica de datos.
+| Archivo | Cambios |
+|---------|---------|
+| `src/pages/PatientProfile.tsx` | Avatar, panel izquierdo, SessionTimeline (quitar timeline, hacer cards simples), colores hardcodeados, tab styling, botón "Registrar visita" |
+| `src/index.css` | Ajustar `.patient-content` background, limpiar reglas de patient-content cards |

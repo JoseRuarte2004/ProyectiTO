@@ -200,20 +200,21 @@ export default function PatientProfile() {
               </button>
             </div>
           <div>
-            <div className="w-[88px] h-[88px] rounded-full bg-primary/8 border-2 border-primary/15 flex items-center justify-center mb-4">
-              <span className="text-2xl font-medium text-primary">{initials}</span>
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-4">
+              <span className="text-sm font-semibold text-muted-foreground">{initials}</span>
             </div>
-            <h1 className="text-xl leading-tight">
-              <span className="font-serif font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
-              <span className="text-foreground/70 text-lg font-normal">{patient.first_name}</span>
+            <h1 className="leading-tight">
+              <span className="font-serif text-[22px] font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
+              <span className="text-base text-foreground/60 font-normal">{patient.first_name}</span>
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1.5">
               {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
             </p>
             {activeEpisode && (
-              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-primary text-primary bg-transparent">
-                Episodio activo
-              </Badge>
+              <div className="flex items-center gap-1.5 mt-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-[11px] font-semibold text-emerald-700">Episodio activo</span>
+              </div>
             )}
           </div>
 
@@ -222,41 +223,41 @@ export default function PatientProfile() {
             {clinical?.diagnosis && (
               <div>
                 <p className="field-label mb-1">Diagnóstico</p>
-                <p className="text-sm font-medium text-foreground">{clinical.diagnosis}</p>
+                <p className="text-[13px] text-foreground">{clinical.diagnosis}</p>
               </div>
             )}
             {patient.insurance && (
               <div>
                 <p className="field-label mb-1">Obra social</p>
-                <p className="text-sm text-foreground">{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</p>
+                <p className="text-[13px] text-foreground">{patient.insurance}{patient.insurance_number ? ` · Nº ${patient.insurance_number}` : ''}</p>
               </div>
             )}
             {clinical?.doctor_name && (
               <div>
                 <p className="field-label mb-1">Médico derivante</p>
-                <p className="text-sm text-foreground">{clinical.doctor_name}</p>
+                <p className="text-[13px] text-foreground">{clinical.doctor_name}</p>
               </div>
             )}
             <div>
               <p className="field-label mb-1">Admisión</p>
-              <p className="text-sm text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
+              <p className="text-[13px] text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
             </div>
             {currentSessionLabel && (
               <div>
                 <p className="field-label mb-1">Sesión actual</p>
-                <p className="text-sm text-foreground">{currentSessionLabel}</p>
+                <p className="text-[13px] text-foreground">{currentSessionLabel}</p>
               </div>
             )}
             {patient.phone && (
               <div>
                 <p className="field-label mb-1">Teléfono</p>
-                <p className="text-sm text-foreground">{patient.phone}</p>
+                <p className="text-[13px] text-foreground">{patient.phone}</p>
               </div>
             )}
             {occupational?.dominance && (
               <div>
                 <p className="field-label mb-1">Lateralidad</p>
-                <p className="text-sm text-foreground">
+                <p className="text-[13px] text-foreground">
                   {({ right: "Diestra", left: "Zurda", ambidextrous: "Ambidiestra" } as Record<string, string>)[occupational.dominance] || occupational.dominance}
                 </p>
               </div>
@@ -267,11 +268,12 @@ export default function PatientProfile() {
           <div className="space-y-2">
             <Button 
               onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="sm"
+              className="w-full"
             >
               <Plus className="h-4 w-4 mr-2" /> Nueva sesión
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => setShowNewAppt(true)}>
+            <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setShowNewAppt(true)}>
               <Calendar className="h-4 w-4 mr-2" /> Nuevo turno
             </Button>
           </div>
@@ -315,10 +317,10 @@ export default function PatientProfile() {
           )}
           <Tabs defaultValue="sessions" className="space-y-4">
             <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
-              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
-              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Ficha clínica</TabsTrigger>
-              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Evaluaciones</TabsTrigger>
-              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Documentos</TabsTrigger>
+              <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-3 text-[13px] font-medium tracking-wide">Sesiones</TabsTrigger>
+              <TabsTrigger value="ficha" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-3 text-[13px] font-medium tracking-wide">Ficha clínica</TabsTrigger>
+              <TabsTrigger value="evaluations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-3 text-[13px] font-medium tracking-wide">Evaluaciones</TabsTrigger>
+              <TabsTrigger value="archivos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-3 text-[13px] font-medium tracking-wide">Documentos</TabsTrigger>
             </TabsList>
 
         {/* FICHA */}
@@ -436,12 +438,12 @@ export default function PatientProfile() {
               <h2 className="font-semibold text-foreground">Historial de visitas</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{sessions.length} {sessions.length === 1 ? "visita registrada" : "visitas registradas"}</p>
             </div>
-            <Button onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
+            <Button onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} size="sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
           </div>
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4">
-                <Activity className="h-8 w-8 text-teal-400" />
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Activity className="h-8 w-8 text-primary/50" />
               </div>
               <p className="font-medium text-foreground">Sin visitas registradas</p>
               <p className="text-sm text-muted-foreground mt-1">Registrá la primera visita con el botón de arriba</p>
@@ -921,7 +923,7 @@ function MeasurementsBlock({ e }: { e: any }) {
   const nn = (v: any) => v != null && v !== "";
 
   const SubSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
+    <div className="border-l-2 border-primary/30 pl-3 py-1 space-y-1">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
       <div className="space-y-1 text-sm text-foreground">{children}</div>
     </div>
@@ -1156,7 +1158,7 @@ function MeasurementsBlock({ e }: { e: any }) {
           {dppdNode}
           {hasKendall && (() => {
             const nerves: { label: string; raw: any; cls: string }[] = [
-              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-teal-50 border-teal-200 text-teal-800" },
+              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-primary/5 border-primary/20 text-primary" },
               { label: "N. Cubital", raw: e.muscle_strength_cubital, cls: "bg-blue-50 border-blue-200 text-blue-800" },
               { label: "N. Radial", raw: e.muscle_strength_radial, cls: "bg-amber-50 border-amber-200 text-amber-800" },
             ];
@@ -1257,7 +1259,7 @@ function MeasurementsBlock({ e }: { e: any }) {
           {scarRendered.fields.length === 0 && nn(e.scar) && <p className="text-sm whitespace-pre-wrap">{e.scar}</p>}
           {scarRendered.vss}
           {nn(e.vancouver_score) && (
-            <span className="inline-block text-xs px-2 py-0.5 rounded-full font-bold bg-teal-100 text-teal-800 border border-teal-200">
+            <span className="inline-block text-xs px-2 py-0.5 rounded-full font-bold bg-primary/10 text-primary border border-primary/20">
               VSS: {e.vancouver_score}/15
             </span>
           )}
@@ -1288,8 +1290,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   const [deleteSession, setDeleteSession] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-  const typeColor: Record<string, string> = { admission: "border-primary text-primary bg-transparent", follow_up: "border-muted-foreground/40 text-muted-foreground bg-transparent", discharge: "border-emerald-500 text-emerald-600 bg-transparent" };
-  const typeBorderColor: Record<string, string> = { admission: "border-l-primary", follow_up: "border-l-muted-foreground/30", discharge: "border-l-emerald-500" };
+  const typeColor: Record<string, string> = { admission: "border-primary/40 text-primary bg-transparent", follow_up: "border-border text-muted-foreground bg-transparent", discharge: "border-emerald-400 text-emerald-600 bg-transparent" };
 
   const ordinal = (n: number) => {
     if (n === 1) return "1ra";
@@ -1332,21 +1333,21 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
     if (!hasScores && !hasFields) return null;
 
     return (
-      <div className="bg-white rounded-lg border border-border/40 p-3 space-y-3">
+      <div className="bg-card rounded-lg border border-border p-3 space-y-3">
         {hasScores && (
           <div className="flex flex-wrap gap-2">
             {e.quickdash_score != null && (
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {e.quickdash_score}/100</span>
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">QuickDASH: {e.quickdash_score}/100</span>
             )}
             {e.fim_score != null && (
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {e.fim_score}/126</span>
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-info/10 text-info border border-info/20">FIM: {e.fim_score}/126</span>
             )}
           </div>
         )}
         {hasFields && (
-          <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
-            {nn(e.avd) && <Line><span className="font-medium text-gray-700">AVD:</span> {e.avd}</Line>}
-            {nn(e.aivd) && <Line><span className="font-medium text-gray-700">AIVD:</span> {e.aivd}</Line>}
+          <div className="border-l-2 border-primary/30 pl-3 py-1 space-y-1">
+            {nn(e.avd) && <Line><span className="font-medium text-foreground/70">AVD:</span> {e.avd}</Line>}
+            {nn(e.aivd) && <Line><span className="font-medium text-foreground/70">AIVD:</span> {e.aivd}</Line>}
           </div>
         )}
       </div>
@@ -1416,50 +1417,47 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
 
   return (
     <>
-    <div className="relative">
-      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-teal-200" />
+    <div className="space-y-3">
       {sessions.map((s) => {
         const isOpen = expanded === s.id;
         const linkedEval = analEvals.find(e => matchesSessionEval(s, e));
         const linkedFuncEval = funcEvals.find(e => matchesSessionEval(s, e));
 
         return (
-          <div key={s.id} className="relative pl-12 pb-8">
-            <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-white border-2 border-teal-500" />
-            <div className={`bg-white rounded-xl border border-border/50 border-l-[3px] ${typeBorderColor[s.session_type] || "border-l-muted-foreground/20"}`}>
-              {/* Header */}
-              <div className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground text-sm">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {s.session_type && <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-muted-foreground/30 text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
-                    {s.session_number != null && <span className="text-xs text-muted-foreground">Sesión Nº {s.session_number}</span>}
-                    {s.week_at_session != null && <span className="text-xs text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
-                  </div>
-                  {(linkedEval || linkedFuncEval) && (
-                    <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 mt-1.5">
-                      📊 Con mediciones
-                    </span>
-                  )}
+          <div key={s.id} className="bg-card rounded-[10px] border border-border overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3 px-5 py-3.5 cursor-pointer" onClick={() => setExpanded(isOpen ? null : s.id)}>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground text-[13px]">{format(new Date(s.session_date), "dd/MM/yyyy")}</p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {s.session_type && <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${typeColor[s.session_type] || "border-border text-muted-foreground bg-transparent"}`}>{typeLabel[s.session_type] || s.session_type}</span>}
+                  {s.session_number != null && <span className="text-[11px] text-muted-foreground">Sesión Nº {s.session_number}</span>}
+                  {s.week_at_session != null && <span className="text-[11px] text-muted-foreground">· Semana {s.week_at_session} POP/PL</span>}
                 </div>
-                <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  {s.session_type !== "admission" && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </div>
+                {(linkedEval || linkedFuncEval) && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-primary font-medium mt-1.5">
+                    <BarChart3 className="h-3 w-3" /> Con mediciones
+                  </span>
+                )}
               </div>
+              <div className="flex items-center gap-1" onClick={(ev) => ev.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${patientId}/sessions/${s.id}/edit`)} aria-label="Editar sesión">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                {s.session_type !== "admission" && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteSession(s)} aria-label="Eliminar sesión">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
 
               {/* Expanded clinical note */}
               {isOpen && (
-                <div className="border-t border-border/30 px-4 py-3 space-y-4 bg-gray-50/30 font-sans text-sm text-foreground">
+                <div className="border-t border-border px-5 py-4 space-y-4 text-sm text-foreground">
                   {/* Header line */}
                   <p className="italic text-muted-foreground mb-3">
                     {s.session_number != null
@@ -1543,7 +1541,6 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
                 </div>
               )}
             </div>
-          </div>
         );
       })}
     </div>
@@ -1726,7 +1723,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium text-sm">{format(new Date(e.evaluation_date), "dd/MM/yyyy")}</p>
                 {e.quickdash_score != null && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-teal-100 text-teal-800">QuickDASH: {e.quickdash_score}/100</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-primary/10 text-primary">QuickDASH: {e.quickdash_score}/100</span>
                 )}
                 {e.fim_score != null && (
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">FIM: {e.fim_score}/126</span>
@@ -1765,7 +1762,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
               <div className="space-y-5 text-sm">
                 {/* General */}
                 {detail.dominance && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Lateralidad</p>
                     <p>{dominanceMap[detail.dominance] || detail.dominance}</p>
                   </div>
@@ -1773,12 +1770,12 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Desempeño + scores */}
                 {hasOccup && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Desempeño Ocupacional</p>
                     {(detail.quickdash_score != null || detail.fim_score != null) && (
                       <div className="flex flex-wrap gap-2 mb-3">
                         {detail.quickdash_score != null && (
-                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {detail.quickdash_score}/100</span>
+                          <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">QuickDASH: {detail.quickdash_score}/100</span>
                         )}
                         {detail.fim_score != null && (
                           <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {detail.fim_score}/126</span>
@@ -1799,7 +1796,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                             if (value === null || value === undefined) return null;
                             return (
                               <div key={idx} className="rounded-md border border-gray-100 bg-gray-50/60 px-3 py-2">
-                                <p className="text-xs text-gray-700"><span className="font-semibold text-teal-700">{idx + 1}.</span> {item.q}</p>
+                                <p className="text-xs text-gray-700"><span className="font-semibold text-primary">{idx + 1}.</span> {item.q}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">{value}. {item.scale[value - 1] || ""}</p>
                               </div>
                             );
@@ -1813,7 +1810,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {[{ label: "Motor", items: FIM_MOTOR }, { label: "Cognitivo", items: FIM_COGNITIVE }].map((group) => (
                             <div key={group.label} className="space-y-1">
-                              <p className="text-xs font-semibold text-teal-700 uppercase">{group.label}</p>
+                              <p className="text-xs font-semibold text-primary uppercase">{group.label}</p>
                               {group.items.map((item) => {
                                 const value = fimItems[item.key];
                                 if (value === null || value === undefined) return null;
@@ -1834,7 +1831,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Health */}
                 {hasHealth && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Hábitos de Salud</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="Actividad física" value={detail.physical_activity} />
@@ -1846,7 +1843,7 @@ function FuncEvalList({ evaluations }: { evaluations: any[] }) {
 
                 {/* Notes */}
                 {detail.notes && (
-                  <div className="border-l-2 border-teal-300 pl-3 py-1">
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Notas</p>
                     <p className="whitespace-pre-wrap text-sm">{detail.notes}</p>
                   </div>

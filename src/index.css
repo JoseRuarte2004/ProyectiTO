@@ -142,13 +142,6 @@
     background: #FFFFFF;
   }
   .patient-content {
-    background: hsl(40 20% 97%);
-  }
-  .patient-content .rounded-lg.border.bg-card,
-  .patient-content .dashboard-card,
-  .patient-content [class*="bg-card"] {
-    background: #FFFFFF;
-    border: 1px solid hsl(30 10% 88%);
-    border-radius: 12px;
+    background: hsl(var(--background));
   }
 }
