@@ -251,7 +251,7 @@ export default function Dashboard() {
           </div>
 
           {/* Últimas sesiones */}
-          <div className="dashboard-card p-5">
+          <div className="dashboard-card p-6">
             <h3 className="font-semibold text-foreground mb-4">Últimas sesiones</h3>
             {recentSessions.length === 0 ? (
               <p className="text-sm text-muted-foreground">Sin sesiones registradas.</p>
