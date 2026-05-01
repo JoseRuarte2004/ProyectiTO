@@ -307,7 +307,7 @@ export default function PatientProfile() {
         </div>
 
         {/* Right panel — main content */}
-        <div className="patient-content flex-1 overflow-y-auto p-6 min-w-0">
+        <div className="patient-content flex-1 overflow-y-auto p-7 min-w-0">
           {patient.clinical_record_number && (
             <div className="flex justify-end mb-4">
               <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
