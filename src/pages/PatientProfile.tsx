@@ -187,24 +187,18 @@ export default function PatientProfile() {
   const currentSessionLabel = sessionCount > 0 ? `Nº ${sessionCount}` : null;
 
   return (
-    <div className="space-y-0">
-      {/* Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
-            <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
-          </button>
-          <span className="text-border">›</span>
-          <span className="text-foreground font-medium">{patient.last_name}, {patient.first_name}</span>
-        </div>
-        {patient.clinical_record_number && (
-          <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-        {/* Patient sidebar */}
-        <div className="space-y-6">
+    <div className="flex flex-col" style={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
+      {/* Two-panel layout */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left panel — patient sidebar */}
+        <div className="patient-sidebar w-[280px] shrink-0 overflow-y-auto border-r border-border p-6 hidden lg:block">
+          <div className="space-y-6">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <button onClick={() => navigate("/patients")} className="hover:text-primary transition-colors flex items-center gap-1">
+                <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
+              </button>
+            </div>
           {/* Avatar & identity */}
           <div className="text-center lg:text-left">
             <div className="flex items-start justify-between">
