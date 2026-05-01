@@ -326,7 +326,7 @@ export default function PatientProfile() {
             </TabsList>
 
         {/* FICHA */}
-        <TabsContent value="ficha" className="space-y-4">
+        <TabsContent value="ficha" className="space-y-5">
           <div className="flex justify-end">
             <Button variant="outline" size="sm" onClick={() => setShowEditFicha(true)}>
               <Edit className="h-4 w-4 mr-1" /> Editar ficha
@@ -340,160 +340,93 @@ export default function PatientProfile() {
               ? ({ right: "Diestro/a", left: "Zurdo/a", ambidextrous: "Ambidiestro/a" } as Record<string, string>)[occupational.dominance] || occupational.dominance
               : null;
             const fmtDate = (d: string | null | undefined) =>
-              d ? format(new Date(d + "T12:00:00"), "dd/MM/yyyy") : null;
+              d ? format(new Date(d + "T12:00:00"), "d MMM yyyy", { locale: es }) : null;
             const periodStr = (w: number | null | undefined, d: number | null | undefined) => {
               if (w == null && d == null) return null;
-              return [w != null ? `${w} sem` : "", d != null ? `${d} d` : ""].filter(Boolean).join(" · ");
+              return [w != null ? `${w} sem` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" · ");
             };
 
-            const InfoRow = ({ label, value }: { label: string; value: any }) => {
+            const Field = ({ label, value, full }: { label: string; value: any; full?: boolean }) => {
               if (value == null || value === "") return null;
               return (
-                <div className="py-2">
-                  <span className="field-label">{label}</span>
-                  <p className="text-sm text-foreground mt-0.5 whitespace-pre-wrap">{value}</p>
+                <div className={full ? "col-span-2" : ""}>
+                  <p className="field-label mb-0.5">{label}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
                 </div>
               );
             };
 
-            const InfoCard = ({ title, icon, accent, children }: { title: string; icon: string; accent: string; children: React.ReactNode }) => (
-              <div className="bg-card rounded-xl border border-border overflow-hidden">
-                <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-                  <span className="text-sm">{icon}</span>
+            const Section = ({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) => (
+              <div className="bg-card rounded-[10px] border border-border overflow-hidden">
+                <div className="px-5 py-3 border-b border-border flex items-center gap-2.5">
+                  <span className="text-muted-foreground">{icon}</span>
                   <h3 className="text-sm font-semibold text-foreground">{title}</h3>
                 </div>
-                <div className="px-5 py-3">{children}</div>
+                <div className="px-5 py-4 grid grid-cols-2 gap-x-8 gap-y-4">
+                  {children}
+                </div>
               </div>
             );
 
             return (
-              <div className="space-y-4">
-                {clinical?.diagnosis && (
-                  <div className="bg-card rounded-xl border border-border p-6">
-                    <p className="field-label mb-1">Diagnóstico principal</p>
-                    <p className="text-base font-medium text-foreground leading-snug">{clinical.diagnosis}</p>
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      {treatmentLabel && (
-                        <div>
-                          <p className="field-label mb-0.5">Tipo de tratamiento</p>
-                          <p className="text-sm text-foreground">{treatmentLabel}</p>
-                        </div>
-                      )}
-                      {clinical.doctor_name && (
-                        <div>
-                          <p className="field-label mb-0.5">Médico derivante</p>
-                          <p className="text-sm text-foreground">{clinical.doctor_name}</p>
-                        </div>
-                      )}
-                      {patient.admission_date && (
-                        <div>
-                          <p className="field-label mb-0.5">Fecha de admisión</p>
-                          <p className="text-sm text-foreground">{format(new Date(patient.admission_date), "d MMM yyyy", { locale: es })}</p>
-                        </div>
-                      )}
-                      {activeEpisode && (
-                        <div>
-                          <p className="field-label mb-0.5">Nº de episodio</p>
-                          <p className="text-sm text-primary font-medium">{activeEpisode.episode_number}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              <div className="space-y-5">
+                {/* Episodio activo */}
+                <Section title="Episodio activo" icon={<ClipboardList className="h-4 w-4" />}>
+                  {clinical?.diagnosis && (
+                    <Field label="Diagnóstico principal" value={clinical.diagnosis} full />
+                  )}
+                  <Field label="Tipo de tratamiento" value={treatmentLabel} />
+                  <Field label="Médico derivante" value={clinical?.doctor_name} />
+                  <Field label="Fecha de admisión" value={patient.admission_date ? format(new Date(patient.admission_date), "d MMM yyyy", { locale: es }) : null} />
+                  <Field label="Nº de episodio" value={activeEpisode?.episode_number} />
+                  <Field label="Nacionalidad" value={(patient as any).nationality} />
+                  <Field label="Teléfono" value={patient.phone} />
+                  <Field label="Domicilio" value={(patient as any).address} />
+                </Section>
+
+                {/* Datos clínicos */}
+                {clinical && (clinical.injury_date || clinical.surgery_date || clinical.symptom_start_date || clinical.injury_mechanism || clinical.treatment_type || clinical.immobilization_type || clinical.studies || clinical.weeks_post_injury || clinical.weeks_post_surgery || clinical.immobilization_weeks) && (
+                  <Section title="Datos clínicos" icon={<Stethoscope className="h-4 w-4" />}>
+                    <Field label="Fecha de lesión" value={fmtDate(clinical.injury_date)} />
+                    <Field label="Fecha de cirugía" value={fmtDate(clinical.surgery_date)} />
+                    <Field label="Mecanismo de lesión" value={clinical.injury_mechanism} full />
+                    <Field label="Tipo de tratamiento" value={treatmentLabel} />
+                    <Field label="Semanas post-lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury)} />
+                    <Field label="Semanas post-operatorio" value={periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery)} />
+                    <Field label="Semanas de inmovilización" value={periodStr(clinical.immobilization_weeks, clinical.immobilization_days)} />
+                    <Field label="Tipo de inmovilización" value={clinical.immobilization_type} />
+                    <Field label="Estudios" value={clinical.studies} full />
+                    <Field label="Inicio síntomas" value={fmtDate(clinical.symptom_start_date)} />
+                    <Field label="Próximo OyT" value={fmtDate(clinical.next_oyt_appointment)} />
+                    <Field label="Tratamiento actual" value={clinical.current_treatment} full />
+                    <Field label="Tratamiento farmacológico" value={clinical.pharmacological_treatment} full />
+                    <Field label="Antecedentes personales" value={clinical.medical_history} full />
+                    <Field label="Notas" value={clinical.notes} full />
+                  </Section>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {clinical ? (
-                    <div className="space-y-4">
-                      {(clinical.injury_date || clinical.symptom_start_date || periodStr(clinical.weeks_post_injury, clinical.days_post_injury) || periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery) || periodStr(clinical.immobilization_weeks, clinical.immobilization_days) || clinical.immobilization_type || clinical.next_oyt_appointment) && (
-                        <InfoCard title="Cronología" icon="🗓️" accent="bg-blue-50 text-blue-800">
-                          <div className="grid grid-cols-2 gap-x-4">
-                            <InfoRow label="Fecha de lesión" value={fmtDate(clinical.injury_date)} />
-                            <InfoRow label="Inicio síntomas" value={fmtDate(clinical.symptom_start_date)} />
-                            <InfoRow label="Post lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury)} />
-                            <InfoRow label="Post cirugía" value={periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery)} />
-                            <InfoRow label="Inmovilización" value={periodStr(clinical.immobilization_weeks, clinical.immobilization_days)} />
-                            <InfoRow label="Tipo inmovilización" value={clinical.immobilization_type} />
-                            <InfoRow label="Próximo OyT" value={fmtDate(clinical.next_oyt_appointment)} />
-                          </div>
-                        </InfoCard>
-                      )}
+                {/* Perfil ocupacional */}
+                {occupational && (
+                  <Section title="Perfil ocupacional" icon={<User className="h-4 w-4" />}>
+                    <Field label="Lateralidad" value={dominanceLabel} />
+                    <Field label="Trabajo" value={occupational.job} />
+                    <Field label="Educación" value={occupational.education} />
+                    <Field label="Red de apoyo" value={occupational.support_network} />
+                    <Field label="Ocio" value={occupational.leisure} />
+                    <Field label="Actividad física" value={occupational.physical_activity} />
+                    <Field label="Sueño y descanso" value={occupational.sleep_rest} />
+                    {occupational.dash_score != null && (
+                      <Field label="Puntaje DASH" value={`${occupational.dash_score} / 100`} />
+                    )}
+                    <Field label="Notas" value={occupational.notes} full />
+                  </Section>
+                )}
 
-                      {(clinical.injury_mechanism || clinical.current_treatment || clinical.pharmacological_treatment) && (
-                        <InfoCard title="Mecanismo y tratamiento" icon="🩺" accent="bg-teal-50 text-teal-800">
-                          <InfoRow label="Mecanismo de lesión" value={clinical.injury_mechanism} />
-                          <InfoRow label="Tratamiento actual" value={clinical.current_treatment} />
-                          <InfoRow label="Tratamiento farmacológico" value={clinical.pharmacological_treatment} />
-                        </InfoCard>
-                      )}
-
-                      {(clinical.medical_history || clinical.studies || clinical.notes) && (
-                        <InfoCard title="Antecedentes y estudios" icon="📋" accent="bg-amber-50 text-amber-800">
-                          <InfoRow label="Antecedentes personales" value={clinical.medical_history} />
-                          <InfoRow label="Estudios" value={clinical.studies} />
-                          <InfoRow label="Notas" value={clinical.notes} />
-                        </InfoCard>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-card rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground text-sm">
-                      Sin datos clínicos registrados.
-                    </div>
-                  )}
-
-                  {occupational ? (
-                    <div className="space-y-4">
-                      <InfoCard title="Identidad ocupacional" icon="👤" accent="bg-purple-50 text-purple-800">
-                        {dominanceLabel && (
-                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/30">
-                            <span className="text-xs text-muted-foreground">Lateralidad:</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-semibold">
-                              {dominanceLabel}
-                            </span>
-                          </div>
-                        )}
-                        <InfoRow label="Trabajo" value={occupational.job} />
-                        <InfoRow label="Educación" value={occupational.education} />
-                        <InfoRow label="Red de apoyo" value={occupational.support_network} />
-                      </InfoCard>
-
-                      {(occupational.leisure || occupational.physical_activity || occupational.sleep_rest) && (
-                        <InfoCard title="Estilo de vida" icon="🌿" accent="bg-emerald-50 text-emerald-800">
-                          <InfoRow label="Ocio" value={occupational.leisure} />
-                          <InfoRow label="Actividad física" value={occupational.physical_activity} />
-                          <InfoRow label="Sueño y descanso" value={occupational.sleep_rest} />
-                        </InfoCard>
-                      )}
-
-                      {occupational.dash_score != null && (
-                        <InfoCard title="Puntaje DASH" icon="📊" accent="bg-rose-50 text-rose-800">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-rose-700">{occupational.dash_score}</span>
-                            <span className="text-sm text-muted-foreground">/100</span>
-                          </div>
-                          <div className="mt-2 h-2 w-full bg-rose-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-rose-500 transition-all"
-                              style={{ width: `${Math.min(100, Math.max(0, occupational.dash_score))}%` }}
-                            />
-                          </div>
-                          <p className="text-[11px] text-muted-foreground mt-2">
-                            A menor puntaje, mejor función del miembro superior.
-                          </p>
-                        </InfoCard>
-                      )}
-
-                      {occupational.notes && (
-                        <InfoCard title="Notas" icon="📝" accent="bg-muted text-foreground">
-                          <p className="text-sm whitespace-pre-wrap">{occupational.notes}</p>
-                        </InfoCard>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-card rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground text-sm">
-                      Sin perfil ocupacional registrado.
-                    </div>
-                  )}
-                </div>
+                {!clinical && !occupational && (
+                  <div className="bg-card rounded-[10px] border border-dashed border-border p-8 text-center text-muted-foreground text-sm">
+                    Sin datos clínicos ni perfil ocupacional registrado.
+                  </div>
+                )}
               </div>
             );
           })()}
