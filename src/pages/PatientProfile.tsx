@@ -199,13 +199,13 @@ export default function PatientProfile() {
                 <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
               </button>
             </div>
-          <div className="text-center lg:text-left">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
-              <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
+          <div>
+            <div className="w-[88px] h-[88px] rounded-full bg-primary/8 border-2 border-primary/15 flex items-center justify-center mb-4">
+              <span className="text-2xl font-medium text-primary">{initials}</span>
             </div>
             <h1 className="text-xl leading-tight">
-              <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
-              <em className="font-accent font-normal text-foreground/80 text-lg not-italic">{patient.first_name}</em>
+              <span className="font-serif font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
+              <span className="text-foreground/70 text-lg font-normal">{patient.first_name}</span>
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
               {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
