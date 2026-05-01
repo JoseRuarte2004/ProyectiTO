@@ -1290,8 +1290,7 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   const [deleteSession, setDeleteSession] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
   const typeLabel: Record<string, string> = { admission: "Admisión", follow_up: "Seguimiento", discharge: "Alta" };
-  const typeColor: Record<string, string> = { admission: "border-primary text-primary bg-transparent", follow_up: "border-muted-foreground/40 text-muted-foreground bg-transparent", discharge: "border-emerald-500 text-emerald-600 bg-transparent" };
-  const typeBorderColor: Record<string, string> = { admission: "border-l-primary", follow_up: "border-l-muted-foreground/30", discharge: "border-l-emerald-500" };
+  const typeColor: Record<string, string> = { admission: "border-primary/40 text-primary bg-transparent", follow_up: "border-border text-muted-foreground bg-transparent", discharge: "border-emerald-400 text-emerald-600 bg-transparent" };
 
   const ordinal = (n: number) => {
     if (n === 1) return "1ra";
