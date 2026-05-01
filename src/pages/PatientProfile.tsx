@@ -199,13 +199,9 @@ export default function PatientProfile() {
                 <ArrowLeft className="h-3.5 w-3.5" /> Pacientes
               </button>
             </div>
-          {/* Avatar & identity */}
           <div className="text-center lg:text-left">
-            <div className="flex items-start justify-between">
-              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
-                <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono hidden lg:block">HC #{id?.slice(-5).toUpperCase()}</span>
+            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto lg:mx-0 mb-3">
+              <span className="text-2xl font-accent font-semibold text-primary">{initials}</span>
             </div>
             <h1 className="text-xl leading-tight">
               <span className="font-accent font-bold text-foreground block">{patient.last_name}</span>
