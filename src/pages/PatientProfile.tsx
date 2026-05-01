@@ -307,10 +307,16 @@ export default function PatientProfile() {
               <Plus className="h-3 w-3 mr-1" /> Nuevo episodio
             </Button>
           )}
+          </div>
         </div>
 
-        {/* Main content */}
-        <div>
+        {/* Right panel — main content */}
+        <div className="patient-content flex-1 overflow-y-auto p-6 min-w-0">
+          {patient.clinical_record_number && (
+            <div className="flex justify-end mb-4">
+              <span className="text-xs text-muted-foreground font-mono">HC #{patient.clinical_record_number}</span>
+            </div>
+          )}
           <Tabs defaultValue="sessions" className="space-y-4">
             <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
               <TabsTrigger value="sessions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground px-4 py-2.5 text-sm font-medium">Sesiones</TabsTrigger>
