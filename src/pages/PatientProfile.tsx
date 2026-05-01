@@ -346,12 +346,13 @@ export default function PatientProfile() {
               return [w != null ? `${w} sem` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" · ");
             };
 
-            const Field = ({ label, value, full }: { label: string; value: any; full?: boolean }) => {
-              if (value == null || value === "") return null;
+            const Field = ({ label, value, full, showEmpty = false }: { label: string; value: any; full?: boolean; showEmpty?: boolean }) => {
+              const isEmpty = value == null || value === "";
+              if (isEmpty && !showEmpty) return null;
               return (
                 <div className={full ? "col-span-2" : ""}>
                   <p className="field-label mb-0.5">{label}</p>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
+                  <p className={`text-sm whitespace-pre-wrap ${isEmpty ? "text-muted-foreground" : "text-foreground"}`}>{isEmpty ? "Sin registrar" : value}</p>
                 </div>
               );
             };
@@ -386,10 +387,10 @@ export default function PatientProfile() {
                 </Section>
 
                 {/* Datos clínicos */}
-                {clinical && (clinical.injury_date || clinical.surgery_date || clinical.symptom_start_date || clinical.injury_mechanism || clinical.treatment_type || clinical.immobilization_type || clinical.studies || clinical.weeks_post_injury || clinical.weeks_post_surgery || clinical.immobilization_weeks) && (
+                {clinical && (clinical.injury_date || clinical.surgery_date || clinical.symptom_start_date || clinical.injury_mechanism || clinical.treatment_type || clinical.immobilization_type || clinical.studies || clinical.weeks_post_injury || clinical.weeks_post_surgery || clinical.immobilization_weeks || clinical.diagnosis) && (
                   <Section title="Datos clínicos" icon={<Stethoscope className="h-4 w-4" />}>
                     <Field label="Fecha de lesión" value={fmtDate(clinical.injury_date)} />
-                    <Field label="Fecha de cirugía" value={fmtDate(clinical.surgery_date)} />
+                    <Field label="Fecha de cirugía" value={fmtDate(clinical.surgery_date)} showEmpty />
                     <Field label="Mecanismo de lesión" value={clinical.injury_mechanism} full />
                     <Field label="Tipo de tratamiento" value={treatmentLabel} />
                     <Field label="Semanas post-lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury)} />
