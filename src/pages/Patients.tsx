@@ -55,9 +55,9 @@ export default function Patients() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-foreground">Mis Pacientes</h1>
+        <h1 className="font-serif text-2xl font-semibold text-foreground tracking-tight">Mis Pacientes</h1>
         <Button onClick={() => navigate("/patients/new")}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Paciente
