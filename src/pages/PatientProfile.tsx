@@ -643,40 +643,21 @@ export default function PatientProfile() {
         </div>
       </div>
 
-      {/* New Episode Dialog */}
+      {/* Dialogs rendered outside the panels */}
       <NewEpisodeDialog open={showNewEpisode} onClose={() => setShowNewEpisode(false)} patientId={id!} userId={user!.id} episodes={episodes} onSaved={async (newEpId: string) => {
         setActiveEpisodeId(newEpId);
         await fetchPatientBase();
         await fetchEpisodeData(newEpId);
       }} />
-
-
-      {/* New Functional Eval Dialog */}
       <EditFichaDialog open={showEditFicha} onClose={() => setShowEditFicha(false)} patient={patient} clinical={clinical} occupational={occupational} activeEpisodeId={activeEpisodeId} onSaved={fetchAll} />
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Analytical Eval Dialog */}
       <NewAnalEvalDialogFull open={showNewAnalEval} onClose={() => setShowNewAnalEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Appointment Dialog */}
       <NewPatientApptDialog open={showNewAppt} onClose={() => setShowNewAppt(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* New Plan Dialog */}
       <NewPlanDialog open={showNewPlan} onClose={() => setShowNewPlan(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* Plan Detail Dialog */}
       <PlanDetailDialog plan={showPlanDetail} onClose={() => setShowPlanDetail(null)} />
-
-      {/* Edit Plan Dialog */}
       <EditPlanDialog plan={editPlan} onClose={() => setEditPlan(null)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-
-      {/* Delete Plan Confirm */}
       <DeletePlanConfirm plan={deletePlan} onClose={() => setDeletePlan(null)} onSaved={fetchAll} />
-
-      {/* Upload File Dialog */}
       <UploadFileDialog open={showUploadFile} onClose={() => setShowUploadFile(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} episodeId={activeEpisodeId} />
-
-      {/* Delete File Confirm */}
       <DeleteFileConfirm file={deleteFile} onClose={() => setDeleteFile(null)} onDeleted={(fileId) => {
         setClinicalFiles(prev => prev.filter(f => f.id !== fileId));
         setSignedUrls(prev => { const n = { ...prev }; delete n[fileId]; return n; });
