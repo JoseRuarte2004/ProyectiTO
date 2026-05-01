@@ -76,19 +76,12 @@ export function AppSidebar() {
                         to={item.url}
                         className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                           active
-                            ? "text-primary font-semibold"
-                            : "text-sidebar-foreground font-normal hover:bg-sidebar-accent/50"
+                            ? "border-l-2 border-l-primary text-foreground font-semibold bg-transparent"
+                            : "text-sidebar-foreground font-normal hover:bg-sidebar-accent/50 border-l-2 border-l-transparent"
                         }`}
                       >
                         <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
-                        {!collapsed && (
-                          <>
-                            <span>{item.title}</span>
-                            {active && (
-                              <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary" />
-                            )}
-                          </>
-                        )}
+                        {!collapsed && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
