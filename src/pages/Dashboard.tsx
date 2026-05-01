@@ -153,9 +153,9 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
         {/* Agenda principal */}
-        <div className="dashboard-card p-6">
+        <div className="dashboard-card p-7">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Agenda de hoy</h2>
