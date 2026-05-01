@@ -787,6 +787,7 @@ export function NewPatientForm() {
         diagnosis: or(diagnosis),
         doctor_name: or(doctorName),
         injury_date: or(injuryDate),
+        surgery_date: or(surgeryDate),
         injury_mechanism: or(injuryMechanism),
         treatment_type: or(treatmentType),
         weeks_post_injury: orNum(weeksPostInjury),
