@@ -379,6 +379,7 @@ export default function PatientProfile() {
                   <Field label="Médico derivante" value={clinical?.doctor_name} />
                   <Field label="Fecha de admisión" value={patient.admission_date ? format(new Date(patient.admission_date), "d MMM yyyy", { locale: es }) : null} />
                   <Field label="Nº de episodio" value={activeEpisode?.episode_number} />
+                  <Field label="Nº de afiliado" value={patient.insurance_number} />
                   <Field label="Nacionalidad" value={(patient as any).nationality} />
                   <Field label="Teléfono" value={patient.phone} />
                   <Field label="Domicilio" value={(patient as any).address} />
@@ -704,6 +705,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       diagnosis: clinical?.diagnosis || "",
       treatment_type: clinical?.treatment_type || "",
       injury_date: clinical?.injury_date || "",
+      surgery_date: clinical?.surgery_date || "",
       symptom_start_date: clinical?.symptom_start_date || "",
       injury_mechanism: clinical?.injury_mechanism || "",
       current_treatment: clinical?.current_treatment || "",
@@ -751,6 +753,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
       diagnosis: emptyToNull(form.diagnosis),
       treatment_type: emptyToNull(form.treatment_type),
       injury_date: emptyToNull(form.injury_date),
+      surgery_date: emptyToNull(form.surgery_date),
       symptom_start_date: emptyToNull(form.symptom_start_date),
       injury_mechanism: emptyToNull(form.injury_mechanism),
       current_treatment: emptyToNull(form.current_treatment),
@@ -824,6 +827,7 @@ function EditFichaDialog({ open, onClose, patient, clinical, occupational, activ
               <div><Label>Tipo de tratamiento</Label><Select value={form.treatment_type || ""} onValueChange={(v) => u("treatment_type", v)}><SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger><SelectContent><SelectItem value="conservative">Conservador</SelectItem><SelectItem value="surgery">Quirúrgico</SelectItem><SelectItem value="mixed">Mixto</SelectItem></SelectContent></Select></div>
               <div><Label>Médico</Label><Input value={form.doctor_name || ""} onChange={(e) => u("doctor_name", e.target.value)} /></div>
               <div><Label>Fecha lesión</Label><Input type="date" value={form.injury_date || ""} onChange={(e) => u("injury_date", e.target.value)} /></div>
+              <div><Label>Fecha cirugía</Label><Input type="date" value={form.surgery_date || ""} onChange={(e) => u("surgery_date", e.target.value)} /></div>
               <div><Label>Inicio síntomas</Label><Input type="date" value={form.symptom_start_date || ""} onChange={(e) => u("symptom_start_date", e.target.value)} /></div>
               <div><Label>Tipo inmovilización</Label><Input value={form.immobilization_type || ""} onChange={(e) => u("immobilization_type", e.target.value)} /></div>
               <div><Label>Próximo OyT</Label><Input type="date" value={form.next_oyt_appointment || ""} onChange={(e) => u("next_oyt_appointment", e.target.value)} /></div>

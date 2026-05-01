@@ -1,0 +1,1 @@
+ALTER TABLE public.patient_clinical_records ADD COLUMN IF NOT EXISTS surgery_date date;
