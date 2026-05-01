@@ -1334,21 +1334,21 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
     if (!hasScores && !hasFields) return null;
 
     return (
-      <div className="bg-white rounded-lg border border-border/40 p-3 space-y-3">
+      <div className="bg-card rounded-lg border border-border p-3 space-y-3">
         {hasScores && (
           <div className="flex flex-wrap gap-2">
             {e.quickdash_score != null && (
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-100 text-teal-800 border border-teal-200">QuickDASH: {e.quickdash_score}/100</span>
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">QuickDASH: {e.quickdash_score}/100</span>
             )}
             {e.fim_score != null && (
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">FIM: {e.fim_score}/126</span>
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-info/10 text-info border border-info/20">FIM: {e.fim_score}/126</span>
             )}
           </div>
         )}
         {hasFields && (
-          <div className="border-l-2 border-teal-300 pl-3 py-1 space-y-1">
-            {nn(e.avd) && <Line><span className="font-medium text-gray-700">AVD:</span> {e.avd}</Line>}
-            {nn(e.aivd) && <Line><span className="font-medium text-gray-700">AIVD:</span> {e.aivd}</Line>}
+          <div className="border-l-2 border-primary/30 pl-3 py-1 space-y-1">
+            {nn(e.avd) && <Line><span className="font-medium text-foreground/70">AVD:</span> {e.avd}</Line>}
+            {nn(e.aivd) && <Line><span className="font-medium text-foreground/70">AIVD:</span> {e.aivd}</Line>}
           </div>
         )}
       </div>
