@@ -200,20 +200,21 @@ export default function PatientProfile() {
               </button>
             </div>
           <div>
-            <div className="w-[88px] h-[88px] rounded-full bg-primary/8 border-2 border-primary/15 flex items-center justify-center mb-4">
-              <span className="text-2xl font-medium text-primary">{initials}</span>
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-4">
+              <span className="text-sm font-semibold text-muted-foreground">{initials}</span>
             </div>
-            <h1 className="text-xl leading-tight">
-              <span className="font-serif font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
-              <span className="text-foreground/70 text-lg font-normal">{patient.first_name}</span>
+            <h1 className="leading-tight">
+              <span className="font-serif text-[22px] font-semibold text-foreground block tracking-tight">{patient.last_name}</span>
+              <span className="text-base text-foreground/60 font-normal">{patient.first_name}</span>
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1.5">
               {age !== null && <>{age} años</>}{age !== null && patient.dni ? " · " : ""}{patient.dni && <>DNI {patient.dni}</>}
             </p>
             {activeEpisode && (
-              <Badge variant="outline" className="mt-2 rounded-full text-xs font-medium border-primary text-primary bg-transparent">
-                Episodio activo
-              </Badge>
+              <div className="flex items-center gap-1.5 mt-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-[11px] font-semibold text-emerald-700">Episodio activo</span>
+              </div>
             )}
           </div>
 
