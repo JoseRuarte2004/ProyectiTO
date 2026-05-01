@@ -95,15 +95,15 @@ export default function Patients() {
       ) : filtered.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">No se encontraron pacientes.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((p) => {
             const initials = `${p.last_name?.[0] || ""}${p.first_name?.[0] || ""}`.toUpperCase();
             return (
               <Link key={p.id} to={`/patients/${p.id}`}>
-                <Card className="border-border hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Card className="border-border hover:border-primary/30 transition-all cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
                         <span className="text-sm font-serif font-semibold text-primary">{initials}</span>
                       </div>
                       <div className="flex-1 min-w-0">
