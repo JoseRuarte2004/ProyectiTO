@@ -70,39 +70,6 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const fetchWeekStats = async () => {
-    const now = new Date();
-    const weekStart = startOfDay(subDays(now, now.getDay())).toISOString();
-    const weekEnd = endOfDay(addDays(now, 6 - now.getDay())).toISOString();
-
-    const [sessionsRes, evolsRes] = await Promise.all([
-      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]),
-      supabase.from("therapy_sessions").select("id", { count: "exact", head: true }).gte("session_date", weekStart.split("T")[0]).lte("session_date", weekEnd.split("T")[0]).not("notes", "is", null),
-    ]);
-
-    const total = sessionsRes.count || 0;
-    setWeekStats({
-      sessionsCompleted: total,
-      sessionsTotal: total + 4,
-      evolsRegistered: evolsRes.count || 0,
-      evolsTotal: total,
-    });
-  };
-
-  const fetchPending = async () => {
-    const { data } = await supabase
-      .from("therapy_sessions")
-      .select("id, session_date, session_number, patients(id, first_name, last_name)")
-      .is("notes", null)
-      .order("session_date", { ascending: false })
-      .limit(5);
-
-    setPendingItems((data || []).map((s: any) => ({
-      id: s.patients?.id,
-      name: `${s.patients?.last_name}, ${s.patients?.first_name}`,
-      detail: `Evolución pendiente — sesión ${format(new Date(s.session_date + "T12:00:00"), "dd/MM")}`,
-    })));
-  };
 
   if (loading) {
     return (
