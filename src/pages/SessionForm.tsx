@@ -795,7 +795,7 @@ export default function SessionForm() {
     const fim_answered = Object.values(fim_items).some((v) => v !== null);
     const barthel_answered = Object.values(barthel_items).some((v) => v !== null);
     const hasFunctionalData =
-      session_type === "admission" &&
+      showFunctional &&
       ([func_dominance, func_avd, func_aivd, func_sleep, func_health].some((v) => v) || qd_answered || fim_answered || barthel_answered);
 
     const functionalPayload = {
