@@ -202,17 +202,17 @@ function SectionCard({
 }) {
   const isOff = toggle && !toggle.checked;
   return (
-    <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-teal-600" />
-          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+    <Card className="rounded-xl border-border bg-card mb-6 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-serif text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
         <div className="flex items-center gap-3">
           {action}
           {toggle && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{toggle.label || (toggle.checked ? "Incluido" : "Incluir")}</span>
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{toggle.label || (toggle.checked ? "Incluido" : "Incluir")}</span>
               <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
             </div>
           )}
@@ -239,14 +239,14 @@ function SubSection({
   badge?: React.ReactNode;
 }) {
   return (
-    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-gray-100" : ""}`}>
+    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+          <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
           {badge}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
           <Switch checked={checked} onCheckedChange={onChange} />
         </div>
       </div>
@@ -257,16 +257,14 @@ function SubSection({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">
+    <Label className="field-label mb-1.5 block">
       {children}
     </Label>
   );
 }
 
-const inputClass =
-  "border-gray-200 rounded-lg min-h-[44px] focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
-const textareaClass =
-  "border-gray-200 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
+const inputClass = "rounded-lg min-h-[44px]";
+const textareaClass = "rounded-lg";
 
 function DanielsTable({
   muscles,
@@ -285,7 +283,7 @@ function DanielsTable({
           <div key={k} className="flex items-center gap-2">
             <span className="text-xs flex-1 min-w-0 truncate">{m}</span>
             <Select value={values[k] || ""} onValueChange={(v) => onChange(k, v)}>
-              <SelectTrigger className="h-8 w-16 text-xs border-gray-200 rounded-lg">
+              <SelectTrigger className="h-8 w-16 text-xs border-border rounded-lg">
                 <SelectValue placeholder="—" />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -629,13 +627,13 @@ export default function SessionForm() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-screen bg-[#F9FAFB]">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      <div className="flex items-center justify-center h-screen bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   if (!patient)
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-center text-muted-foreground py-12">Paciente no encontrado.</p>
       </div>
     );
@@ -1011,8 +1009,8 @@ export default function SessionForm() {
           variant={value === k ? "default" : "outline"}
           className={
             value === k
-              ? "bg-teal-600 hover:bg-teal-700 text-white h-8 text-xs rounded-full"
-              : "h-8 text-xs rounded-full border-gray-200"
+              ? "bg-primary hover:bg-primary/85  h-8 text-xs rounded-full"
+              : "h-8 text-xs rounded-full border-border"
           }
           onClick={() => onChange(k)}
         >
@@ -1026,20 +1024,20 @@ export default function SessionForm() {
   const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Sticky top bar */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 h-14 flex items-center px-4">
+      <header className="sticky top-0 z-50 bg-card border-b border-border h-14 flex items-center px-4">
         <div className="max-w-2xl w-full mx-auto flex items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(`/patients/${patientId}`)}
-            className="text-gray-600 hover:text-gray-900 -ml-2"
+            className="text-muted-foreground hover:text-foreground -ml-2"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 text-center min-w-0">
-            <h1 className="text-sm font-semibold text-gray-800 truncate">{sessionTitle}</h1>
+            <h1 className="text-sm font-semibold text-foreground truncate">{sessionTitle}</h1>
             {clinical?.diagnosis && (
               <p className="text-xs text-muted-foreground truncate">{clinical.diagnosis}</p>
             )}
@@ -1048,7 +1046,7 @@ export default function SessionForm() {
             onClick={handleSave}
             disabled={saving || !session_date}
             size="sm"
-            className="bg-teal-600 hover:bg-teal-700 text-white"
+            className="bg-primary hover:bg-primary/85 "
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
             {isEditMode ? "Actualizar" : "Guardar"}
@@ -1271,7 +1269,7 @@ export default function SessionForm() {
                 <Badge
                   className={`text-sm font-semibold w-10 justify-center ${
                     pain_score === 0
-                      ? "bg-gray-100 text-gray-700 hover:bg-gray-100"
+                      ? "bg-muted text-foreground hover:bg-muted"
                       : pain_score <= 3
                       ? "bg-green-100 text-green-700 hover:bg-green-100"
                       : pain_score <= 6
@@ -1317,7 +1315,7 @@ export default function SessionForm() {
               </Select>
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-600 mb-2">Circometría</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Circometría</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <FieldLabel>Muñeca MSD (cm)</FieldLabel>
@@ -1342,7 +1340,7 @@ export default function SessionForm() {
           {/* Movilidad */}
           <SubSection title="Movilidad" checked={showMobility} onChange={setShowMobility}>
             <div>
-              <p className="text-xs font-semibold text-gray-600 mb-2">Goniometría PRE</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Goniometría PRE</p>
               <GonioPartSelector value={gonio_part} onChange={setGonioPart} />
               <GonioGrid
                 partKey={gonio_part}
@@ -1426,23 +1424,23 @@ export default function SessionForm() {
               <FieldLabel>DPPD (cm) — distancia pulpejo-pliegue distal</FieldLabel>
               <div className="grid grid-cols-5 gap-2">
                 <div>
-                  <Label className="text-[10px] text-gray-500 uppercase">Pulgar</Label>
+                  <Label className="text-[10px] text-muted-foreground uppercase">Pulgar</Label>
                   <Input type="number" step="0.1" value={dppd_pulgar} onChange={(e) => setDppdPulgar(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-gray-500 uppercase">Índice</Label>
+                  <Label className="text-[10px] text-muted-foreground uppercase">Índice</Label>
                   <Input type="number" step="0.1" value={dppd_indice} onChange={(e) => setDppdIndice(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-gray-500 uppercase">Medio</Label>
+                  <Label className="text-[10px] text-muted-foreground uppercase">Medio</Label>
                   <Input type="number" step="0.1" value={dppd_medio} onChange={(e) => setDppdMedio(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-gray-500 uppercase">Anular</Label>
+                  <Label className="text-[10px] text-muted-foreground uppercase">Anular</Label>
                   <Input type="number" step="0.1" value={dppd_anular} onChange={(e) => setDppdAnular(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-gray-500 uppercase">Meñique</Label>
+                  <Label className="text-[10px] text-muted-foreground uppercase">Meñique</Label>
                   <Input type="number" step="0.1" value={dppd_menique} onChange={(e) => setDppdMenique(e.target.value)} className={inputClass} />
                 </div>
               </div>
@@ -1492,7 +1490,7 @@ export default function SessionForm() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-teal-600 hover:text-teal-700"
+                  className="text-primary hover:text-primary"
                   onClick={() => {
                     const id = danielsNextId.current++;
                     setDanielsRows((prev) => [...prev, { id, muscle: "", grade: "" }]);
@@ -1507,7 +1505,7 @@ export default function SessionForm() {
           {/* Sensibilidad */}
           <SubSection title="Sensibilidad" checked={showSensitivity} onChange={setShowSensitivity}>
             <div>
-              <p className="text-xs font-semibold text-gray-600 mb-2">Epicrítica (funcional)</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Epicrítica (funcional)</p>
               <div className="space-y-3">
                 <div>
                   <FieldLabel>Tacto ligero</FieldLabel>
@@ -1528,7 +1526,7 @@ export default function SessionForm() {
               </div>
             </div>
             <div className="pt-3">
-              <p className="text-xs font-semibold text-gray-600 mb-2">Protopática (protectora)</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Protopática (protectora)</p>
               <div className="space-y-3">
                 <div>
                   <FieldLabel>Toco-pincho</FieldLabel>
@@ -1544,7 +1542,7 @@ export default function SessionForm() {
             {/* Tabla Kendall */}
             <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-gray-700 mt-2 border border-gray-200 rounded-lg">
+                <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-foreground mt-2 border border-border rounded-lg">
                   <span className="font-semibold">Tabla Kendall (por nervio)</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${show_daniels ? "rotate-180" : ""}`} />
                 </Button>
@@ -1585,7 +1583,7 @@ export default function SessionForm() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className={`h-9 text-xs gap-1.5 rounded-full border-gray-200 ${
+                    className={`h-9 text-xs gap-1.5 rounded-full border-border ${
                       val === "positive"
                         ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
                         : val === "negative"
@@ -1616,7 +1614,7 @@ export default function SessionForm() {
             }
           >
             <div>
-              <p className="text-xs font-semibold text-gray-600 mb-2">Planilla</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Planilla</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <FieldLabel>Localización</FieldLabel>
@@ -1689,7 +1687,7 @@ export default function SessionForm() {
 
             <div className="pt-3">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-gray-600">Escala Vancouver VSS</p>
+                <p className="text-xs font-semibold text-muted-foreground">Escala Vancouver VSS</p>
                 <Badge variant="secondary">Total: {vssTotalLive}/15</Badge>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1773,12 +1771,12 @@ export default function SessionForm() {
       </main>
 
       {/* Sticky bottom bar */}
-      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 p-4">
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border p-4">
         <div className="max-w-2xl mx-auto flex justify-end">
           <Button
             onClick={handleSave}
             disabled={saving || !session_date}
-            className="bg-teal-600 hover:bg-teal-700 text-white"
+            className="bg-primary hover:bg-primary/85 "
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             {isEditMode ? "Actualizar sesión" : "Guardar sesión"}

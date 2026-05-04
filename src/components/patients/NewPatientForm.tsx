@@ -49,17 +49,17 @@ function SectionCard({
 }) {
   const isOff = toggle && !toggle.checked;
   return (
-    <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-teal-600" />
-          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+    <Card className="rounded-xl border-border bg-card mb-6 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-serif text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
         <div className="flex items-center gap-3">
           {action}
           {toggle && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
               <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
             </div>
           )}
@@ -85,11 +85,11 @@ function SubSection({
   withDivider?: boolean;
 }) {
   return (
-    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-gray-100" : ""}`}>
+    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+        <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
           <Switch checked={checked} onCheckedChange={onChange} />
         </div>
       </div>
@@ -101,16 +101,16 @@ function SubSection({
 // ── Reusable label with optional required asterisk ──
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">
-      {children}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <Label className="field-label mb-1.5 block">
+      {children}{required && <span className="text-destructive ml-0.5">*</span>}
     </Label>
   );
 }
 
-const inputClass = "border-gray-200 rounded-lg min-h-[44px] focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
-const textareaClass = "border-gray-200 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
-const subDivider = "pt-5 mt-5 border-t border-gray-100";
-const subLabel = "text-sm font-semibold text-gray-600 mb-3";
+const inputClass = "rounded-lg min-h-[44px]";
+const textareaClass = "rounded-lg";
+const subDivider = "pt-5 mt-5 border-t border-border";
+const subLabel = "text-[13px] font-semibold text-foreground/70 mb-3 tracking-tight";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
@@ -1059,8 +1059,8 @@ export function NewPatientForm() {
           onClick={() => onChange(k)}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             value === k
-              ? "bg-teal-600 text-white border border-teal-600"
-              : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
+              ? "bg-primary text-primary-foreground border border-primary"
+              : "border border-border text-muted-foreground bg-white hover:bg-muted/40"
           }`}
         >
           {GONIO_PARTS[k].label}
@@ -1072,17 +1072,17 @@ export function NewPatientForm() {
   const patientDisplay = `${firstName} ${lastName}`.trim() || "Nueva admisión";
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Sticky top bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 h-14">
+      <div className="sticky top-0 z-50 bg-card border-b border-border h-14">
         <div className="max-w-2xl mx-auto h-full px-6 flex items-center justify-between gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-gray-700 hover:bg-gray-100">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="flex-1 text-center text-sm font-semibold text-gray-800 truncate">
+          <h1 className="flex-1 text-center text-sm font-semibold text-foreground truncate">
             {patientDisplay}
           </h1>
-          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/85  rounded-lg">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
@@ -1303,7 +1303,7 @@ export function NewPatientForm() {
               (vssFlexibilidad ? parseInt(vssFlexibilidad) : 0) +
               (vssAltura ? parseInt(vssAltura) : 0);
             return total > 0 ? (
-              <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+              <Badge className="bg-primary/5 text-primary border border-primary/30 hover:bg-primary/5">
                 VSS: {total}/15
               </Badge>
             ) : null;
@@ -1361,7 +1361,7 @@ export function NewPatientForm() {
                       min={0} max={10} step={1}
                       value={[painScore]}
                       onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
-                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-teal-600 [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
+                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-primary [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
                     />
                   </div>
                   <span className={`text-sm font-bold rounded-md min-w-[2.5rem] text-center px-2 py-1 ${
@@ -1588,7 +1588,7 @@ export function NewPatientForm() {
                     ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
                     : val === "negative"
                       ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
-                      : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50";
+                      : "border-border text-muted-foreground bg-white hover:bg-muted/40";
                   return (
                     <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
                       {t.label}
@@ -1776,12 +1776,12 @@ export function NewPatientForm() {
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 px-6">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border py-4 px-6">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-gray-600 hover:bg-gray-100">
+          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-muted-foreground hover:bg-muted">
             Descartar
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-6">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/85  rounded-lg px-6">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
