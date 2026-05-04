@@ -1443,7 +1443,7 @@ export function NewPatientForm() {
             </SubSection>
 
             {/* Fuerza */}
-            <SubSection title="Fuerza" checked={showFuerza} onChange={setShowFuerza}>
+            <SubSection title="Fuerza muscular" checked={showFuerza} onChange={setShowFuerza}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dinamómetro MSD (kgf)</Label>

@@ -1144,7 +1144,7 @@ function MeasurementsBlock({ e }: { e: any }) {
       )}
 
       {hasStrength && (
-        <SubSection label="Fuerza">
+        <SubSection label="Fuerza muscular">
           {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
             <p className="text-sm">
               <span className="font-medium text-gray-700">Dinamómetro:</span>{" "}
