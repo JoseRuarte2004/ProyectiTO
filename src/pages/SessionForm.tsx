@@ -1399,7 +1399,7 @@ export default function SessionForm() {
           </SubSection>
 
           {/* Fuerza */}
-          <SubSection title="Fuerza" checked={showStrength} onChange={setShowStrength}>
+          <SubSection title="Fuerza muscular" checked={showStrength} onChange={setShowStrength}>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel>Dinamómetro MSD (kg)</FieldLabel>
