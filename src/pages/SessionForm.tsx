@@ -242,7 +242,7 @@ function SubSection({
     <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
+          <h3 className="field-label">{title}</h3>
           {badge}
         </div>
         <div className="flex items-center gap-2">
