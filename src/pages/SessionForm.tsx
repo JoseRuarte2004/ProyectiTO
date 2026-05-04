@@ -493,6 +493,7 @@ export default function SessionForm() {
 
         const fe = funcRes.data;
         if (fe) {
+          setShowFunctional(true);
           setFuncDominance(fe.dominance || "");
           setFuncAvd(fe.avd || "");
           setFuncAivd(fe.aivd || "");
