@@ -339,6 +339,9 @@ export default function SessionForm() {
   const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
   const [barthel_items, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
+  // Functional eval toggle (default on for admission, off for follow_up/discharge)
+  const [showFunctional, setShowFunctional] = useState(typeParam === "admission");
+
   // Analytical evaluation (master toggle)
   const [show_measurements, setShowMeasurements] = useState(false);
 
