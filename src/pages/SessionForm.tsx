@@ -1496,7 +1496,7 @@ export default function SessionForm() {
                     setDanielsRows((prev) => [...prev, { id, muscle: "", grade: "" }]);
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-1" /> Agregar músculo
+                  <Plus className="h-4 w-4 mr-1" /> Agregar grupo muscular
                 </Button>
               </div>
             </div>
