@@ -343,6 +343,12 @@ export default function PatientProfile() {
               if (w == null && d == null) return null;
               return [w != null ? `${w} sem` : "", d != null ? `${d} días` : ""].filter(Boolean).join(" · ");
             };
+            const periodFromDate = (dateStr: string | null | undefined) => {
+              if (!dateStr) return null;
+              const diff = Math.floor((Date.now() - new Date(dateStr + "T12:00:00").getTime()) / 86400000);
+              if (diff < 0) return null;
+              return `${Math.floor(diff / 7)} sem · ${diff % 7} días`;
+            };
 
             const Field = ({ label, value, full, showEmpty = false }: { label: string; value: any; full?: boolean; showEmpty?: boolean }) => {
               const isEmpty = value == null || value === "";
