@@ -1009,7 +1009,7 @@ export default function SessionForm() {
           variant={value === k ? "default" : "outline"}
           className={
             value === k
-              ? "bg-primary hover:bg-teal-700 text-white h-8 text-xs rounded-full"
+              ? "bg-primary hover:bg-primary/85  h-8 text-xs rounded-full"
               : "h-8 text-xs rounded-full border-border"
           }
           onClick={() => onChange(k)}
@@ -1032,7 +1032,7 @@ export default function SessionForm() {
             variant="ghost"
             size="sm"
             onClick={() => navigate(`/patients/${patientId}`)}
-            className="text-muted-foreground hover:text-gray-900 -ml-2"
+            className="text-muted-foreground hover:text-foreground -ml-2"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -1046,7 +1046,7 @@ export default function SessionForm() {
             onClick={handleSave}
             disabled={saving || !session_date}
             size="sm"
-            className="bg-primary hover:bg-teal-700 text-white"
+            className="bg-primary hover:bg-primary/85 "
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
             {isEditMode ? "Actualizar" : "Guardar"}
@@ -1776,7 +1776,7 @@ export default function SessionForm() {
           <Button
             onClick={handleSave}
             disabled={saving || !session_date}
-            className="bg-primary hover:bg-teal-700 text-white"
+            className="bg-primary hover:bg-primary/85 "
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             {isEditMode ? "Actualizar sesión" : "Guardar sesión"}

@@ -1059,7 +1059,7 @@ export function NewPatientForm() {
           onClick={() => onChange(k)}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             value === k
-              ? "bg-primary text-white border border-teal-600"
+              ? "bg-primary  border border-primary"
               : "border border-border text-muted-foreground bg-white hover:bg-muted/40"
           }`}
         >
@@ -1082,7 +1082,7 @@ export function NewPatientForm() {
           <h1 className="flex-1 text-center text-sm font-semibold text-foreground truncate">
             {patientDisplay}
           </h1>
-          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-teal-700 text-white rounded-lg">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/85  rounded-lg">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
@@ -1361,7 +1361,7 @@ export function NewPatientForm() {
                       min={0} max={10} step={1}
                       value={[painScore]}
                       onValueChange={(v) => { setPainScore(v[0]); setEvaTouched(true); }}
-                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-teal-600 [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
+                      className={`relative [&_[data-orientation=horizontal]]:bg-transparent [&_[role=slider]]:border-primary [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-transparent ${fieldClass("painScore")}`}
                     />
                   </div>
                   <span className={`text-sm font-bold rounded-md min-w-[2.5rem] text-center px-2 py-1 ${
@@ -1781,7 +1781,7 @@ export function NewPatientForm() {
           <Button variant="ghost" onClick={() => navigate("/patients")} className="text-muted-foreground hover:bg-muted">
             Descartar
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-teal-700 text-white rounded-lg px-6">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/85  rounded-lg px-6">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
