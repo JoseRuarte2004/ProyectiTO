@@ -1319,7 +1319,7 @@ export default function SessionForm() {
               </Select>
             </div>
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Circometría</p>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Circometría</h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Muñeca MSD (cm)</Label>
@@ -1344,7 +1344,7 @@ export default function SessionForm() {
           {/* Movilidad */}
           <SubSection title="Movilidad" checked={showMobility} onChange={setShowMobility}>
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Goniometría PRE</p>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría PRE</h4>
               <GonioPartSelector value={gonio_part} onChange={setGonioPart} />
               <GonioGrid
                 partKey={gonio_part}
@@ -1428,23 +1428,23 @@ export default function SessionForm() {
               <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
               <div className="grid grid-cols-5 gap-2">
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase">Pulgar</Label>
+                  <Label className="text-xs">Pulgar</Label>
                   <Input type="number" step="0.1" value={dppd_pulgar} onChange={(e) => setDppdPulgar(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase">Índice</Label>
+                  <Label className="text-xs">Índice</Label>
                   <Input type="number" step="0.1" value={dppd_indice} onChange={(e) => setDppdIndice(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase">Medio</Label>
+                  <Label className="text-xs">Medio</Label>
                   <Input type="number" step="0.1" value={dppd_medio} onChange={(e) => setDppdMedio(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase">Anular</Label>
+                  <Label className="text-xs">Anular</Label>
                   <Input type="number" step="0.1" value={dppd_anular} onChange={(e) => setDppdAnular(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase">Meñique</Label>
+                  <Label className="text-xs">Meñique</Label>
                   <Input type="number" step="0.1" value={dppd_menique} onChange={(e) => setDppdMenique(e.target.value)} className={inputClass} />
                 </div>
               </div>
@@ -1509,7 +1509,7 @@ export default function SessionForm() {
           {/* Sensibilidad */}
           <SubSection title="Sensibilidad" checked={showSensitivity} onChange={setShowSensitivity}>
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Epicrítica (funcional)</p>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Epicrítica (funcional)</h4>
               <div className="space-y-3">
                 <div>
                   <Label>Tacto ligero</Label>
@@ -1530,7 +1530,7 @@ export default function SessionForm() {
               </div>
             </div>
             <div className="pt-3">
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Protopática (protectora)</p>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Protopática (protectora)</h4>
               <div className="space-y-3">
                 <div>
                   <Label>Toco-pincho</Label>
@@ -1618,7 +1618,7 @@ export default function SessionForm() {
             }
           >
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Planilla</p>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Planilla</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Localización</Label>
@@ -1691,7 +1691,7 @@ export default function SessionForm() {
 
             <div className="pt-3">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-muted-foreground">Escala Vancouver VSS</p>
+                <h4 className="text-xs font-medium text-muted-foreground">Escala Vancouver VSS</h4>
                 <Badge variant="secondary">Total: {vssTotalLive}/15</Badge>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
