@@ -1126,45 +1126,45 @@ export default function SessionForm() {
           )}
         </SectionCard>
 
-        {/* Functional eval (admission only) */}
-        {session_type === "admission" && (
-          <SectionCard icon={ClipboardList} title="Evaluación funcional">
-            <div className="space-y-5">
-              <div>
-                <FieldLabel>Lateralidad</FieldLabel>
-                <Select value={func_dominance} onValueChange={setFuncDominance}>
-                  <SelectTrigger className={inputClass}>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="right">Diestro/a</SelectItem>
-                    <SelectItem value="left">Zurdo/a</SelectItem>
-                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <QuickDashSection items={qd_items} onChange={setQdItems} />
-              <FimSection items={fim_items} onChange={setFimItems} />
-              <BarthelSection items={barthel_items} onChange={setBarthelItems} />
-              <div>
-                <FieldLabel>AVD — Actividades de la vida diaria</FieldLabel>
-                <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} className={textareaClass} />
-              </div>
-              <div>
-                <FieldLabel>AIVD — Actividades instrumentales</FieldLabel>
-                <Textarea rows={3} value={func_aivd} onChange={(e) => setFuncAivd(e.target.value)} className={textareaClass} />
-              </div>
-              <div>
-                <FieldLabel>Sueño y descanso</FieldLabel>
-                <Textarea rows={2} value={func_sleep} onChange={(e) => setFuncSleep(e.target.value)} className={textareaClass} />
-              </div>
-              <div>
-                <FieldLabel>Gestión de la salud</FieldLabel>
-                <Textarea rows={2} value={func_health} onChange={(e) => setFuncHealth(e.target.value)} className={textareaClass} />
-              </div>
+        {/* Functional eval */}
+        <SectionCard
+          icon={ClipboardList}
+          title="Evaluación funcional"
+          toggle={{ checked: showFunctional, onChange: setShowFunctional }}
+        >
+          <div className="space-y-5">
+            <div>
+              <Label>Lateralidad</Label>
+              <Select value={func_dominance} onValueChange={setFuncDominance}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="right">Diestro/a</SelectItem>
+                  <SelectItem value="left">Zurdo/a</SelectItem>
+                  <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </SectionCard>
-        )}
+            <QuickDashSection items={qd_items} onChange={setQdItems} />
+            <FimSection items={fim_items} onChange={setFimItems} />
+            <BarthelSection items={barthel_items} onChange={setBarthelItems} />
+            <div className="space-y-2">
+              <Label>AVD — Actividades de la vida diaria</Label>
+              <Textarea rows={3} value={func_avd} onChange={(e) => setFuncAvd(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>AIVD — Actividades instrumentales</Label>
+              <Textarea rows={3} value={func_aivd} onChange={(e) => setFuncAivd(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Sueño y descanso</Label>
+              <Textarea rows={2} value={func_sleep} onChange={(e) => setFuncSleep(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Gestión de la salud</Label>
+              <Textarea rows={2} value={func_health} onChange={(e) => setFuncHealth(e.target.value)} />
+            </div>
+          </div>
+        </SectionCard>
 
         {/* Card 2: Evolución */}
         <SectionCard icon={FileText} title="Evolución">
