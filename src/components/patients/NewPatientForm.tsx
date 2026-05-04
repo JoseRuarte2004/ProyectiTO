@@ -550,6 +550,26 @@ export function NewPatientForm() {
   const [medicalHistory, setMedicalHistory] = useState("");
   const [pharma, setPharma] = useState("");
 
+  // Auto-calcular semanas/días desde fechas (si los campos están vacíos)
+  useEffect(() => {
+    if (!injuryDate) return;
+    const diff = Math.floor((Date.now() - new Date(injuryDate + "T12:00:00").getTime()) / 86400000);
+    if (diff < 0) return;
+    if (!weeksPostInjury && !daysPostInjury) {
+      setWeeksPostInjury(String(Math.floor(diff / 7)));
+      setDaysPostInjury(String(diff % 7));
+    }
+  }, [injuryDate]);
+  useEffect(() => {
+    if (!surgeryDate) return;
+    const diff = Math.floor((Date.now() - new Date(surgeryDate + "T12:00:00").getTime()) / 86400000);
+    if (diff < 0) return;
+    if (!weeksPostSurgery && !daysPostSurgery) {
+      setWeeksPostSurgery(String(Math.floor(diff / 7)));
+      setDaysPostSurgery(String(diff % 7));
+    }
+  }, [surgeryDate]);
+
   // Card 3 — Occupational profile
   const [dominance, setDominance] = useState("");
   const [supportNetwork, setSupportNetwork] = useState("");

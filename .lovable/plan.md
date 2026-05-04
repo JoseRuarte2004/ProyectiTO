@@ -1,41 +1,37 @@
-## Objetivo
+## Problema
 
-Igualar el aspecto visual del formulario de **sesiones** al de **admisión** (que ya quedó pulido) y permitir incluir la **Evaluación funcional** en cualquier sesión, no solo en la de admisión.
+Al cargar un paciente y poner solo la **Fecha de cirugía**, el campo "Semanas post-operatorio" en la ficha clínica aparece vacío ("Sin registrar") porque actualmente las semanas/días se guardan **manualmente** en campos separados (`weeks_post_surgery`, `days_post_surgery`) y no se calculan a partir de `surgery_date`.
 
-## Cambios en `src/pages/SessionForm.tsx`
+Pasa lo mismo con Fecha de lesión → Semanas post-lesión.
 
-### 1. Evaluación funcional disponible en toda sesión
+## Solución
 
-Hoy el bloque `Evaluación funcional` está condicionado a `session_type === "admission"` (línea 1126). Se va a:
+Cuando exista `surgery_date` (o `injury_date`) calcular las semanas + días automáticamente al mostrar y al guardar, sin que el profesional tenga que cargarlas a mano.
 
-- Mostrarlo siempre, dentro de un `SectionCard` con `toggle` (igual que en admisión, línea 1278 de `NewPatientForm.tsx`).
-- Agregar un nuevo estado `showFunctional` (default: `true` cuando `session_type === "admission"`, `false` en seguimientos / alta — así no aparece de más en seguimientos pero queda a un click).
-- Cuando el toggle está apagado, **no** se guarda nada en `functional_evaluations` (la lógica de save en línea 790–820 ya chequea si hay datos; se sumará la condición `showFunctional`).
-- Al cargar una sesión existente que ya tiene `functional_evaluations`, se enciende `showFunctional` automáticamente.
+### Cambios
 
-Estado por defecto:
-- `admission` → `true`
-- `follow_up` / `discharge` → `false`, pero el usuario lo puede activar.
+1. **`src/pages/PatientProfile.tsx`** (vista de Datos clínicos)
+   - Agregar helper `weeksFromDate(dateStr)` que calcule semanas y días entre la fecha y hoy.
+   - Si hay `clinical.surgery_date` y los campos manuales están vacíos → mostrar el cálculo automático en "Semanas post-operatorio".
+   - Igual para `injury_date` → "Semanas post-lesión".
+   - Incluir `surgery_date`/`injury_date` en la condición que decide si mostrar la sección (ya está incluida).
 
-### 2. Igualar el estilo visual de la "Evaluación analítica" al de admisión
+2. **`src/components/patients/NewPatientForm.tsx`** (formulario nuevo paciente)
+   - Cuando el usuario selecciona `surgeryDate` y los inputs de semanas/días están vacíos, autocompletarlos a partir de la fecha (recálculo en `useEffect` o al `onChange`).
+   - Mismo comportamiento para `injuryDate`.
+   - El usuario puede sobrescribir manualmente si quiere.
 
-La diferencia clave entre los dos formularios es que en sesiones se usó `FieldLabel` (clase `field-label`: minúsculas → MAYÚSCULAS muy chicas) en muchos sub-campos de la analítica, mientras que en admisión se usa `<Label>` normal (texto más legible, no uppercase). Eso hace que la analítica de sesiones se vea más "apretada / técnica" que la de admisión.
+3. **`src/pages/PatientProfile.tsx`** edición de ficha clínica (mismo formulario)
+   - Mismo autocompletado al cambiar `surgery_date` / `injury_date` en el form de edición (líneas ~810).
 
-Acciones (solo dentro de la card "Evaluación analítica", líneas 1199–1748):
+### Detalles técnicos
 
-- Reemplazar `<FieldLabel>…</FieldLabel>` por `<Label>…</Label>` en los campos de Dolor, Edema, Movilidad, Fuerza muscular, Sensibilidad, Pruebas específicas, Cicatriz y Otros — replicando exactamente cómo están en `NewPatientForm.tsx` (líneas 1315–1730).
-- Mantener `FieldLabel` solo en las cards "Datos de la sesión", "Evaluación funcional" y "Evolución", donde sí queda bien (son campos de cabecera, igual que en admisión).
-- Para los mini-labels de DPPD ("Pulgar", "Índice", …) usar `Label className="text-xs"` como en admisión (líneas 1472–1476), no `text-[10px] uppercase`.
-- Para los subtítulos internos ("Circometría", "Goniometría PRE", "Epicrítica (funcional)") usar `<h4 className="text-xs font-medium text-muted-foreground">` (estilo admisión, línea 1401), no `<p className="text-xs font-semibold text-muted-foreground">`.
-- Quitar el `inputClass` (alto h-10) en los inputs internos donde admisión usa el alto por defecto, para que la densidad coincida.
-
-### 3. Sin cambios
-
-- Estructura de cards, headers, sticky bar y botón de guardar (ya coinciden).
-- Lógica de guardado/carga (solo se le suma la condición del toggle funcional).
-- `SubSection` ya idéntico entre ambos formularios.
-
-## Resultado esperado
-
-- La pantalla de sesión se ve indistinguible en estilo de la de admisión (mismas etiquetas, misma densidad, mismos subtítulos).
-- En cualquier sesión (seguimiento, alta) el usuario ve un nuevo bloque "Evaluación funcional" con switch "Incluir" para sumar QuickDASH / FIM / Barthel / AVD / AIVD / sueño / gestión de salud cuando lo necesite.
+- Helper:
+  ```ts
+  const weeksFromDate = (d: string) => {
+    const diff = Math.floor((Date.now() - new Date(d + "T12:00:00").getTime()) / 86400000);
+    return { weeks: Math.floor(diff / 7), days: diff % 7 };
+  };
+  ```
+- En la vista, si `weeks_post_surgery == null && surgery_date` → usar el cálculo; si el profesional cargó valores manuales, respetarlos.
+- No se requieren cambios en la base de datos.
