@@ -49,17 +49,17 @@ function SectionCard({
 }) {
   const isOff = toggle && !toggle.checked;
   return (
-    <Card className="rounded-xl shadow-sm border-gray-200 bg-white mb-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100 border-l-4 border-l-teal-500">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-teal-600" />
-          <h2 className="text-base font-semibold text-gray-800">{title}</h2>
+    <Card className="rounded-xl border-border bg-card mb-6 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-serif text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
         <div className="flex items-center gap-3">
           {action}
           {toggle && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{toggle.checked ? "Incluido" : "Incluir"}</span>
               <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
             </div>
           )}
@@ -85,11 +85,11 @@ function SubSection({
   withDivider?: boolean;
 }) {
   return (
-    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-gray-100" : ""}`}>
+    <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+        <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
           <Switch checked={checked} onCheckedChange={onChange} />
         </div>
       </div>
@@ -101,16 +101,16 @@ function SubSection({
 // ── Reusable label with optional required asterisk ──
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">
-      {children}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <Label className="field-label mb-1.5 block">
+      {children}{required && <span className="text-destructive ml-0.5">*</span>}
     </Label>
   );
 }
 
-const inputClass = "border-gray-200 rounded-lg min-h-[44px] focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
-const textareaClass = "border-gray-200 rounded-lg focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:border-transparent focus-visible:ring-offset-0";
-const subDivider = "pt-5 mt-5 border-t border-gray-100";
-const subLabel = "text-sm font-semibold text-gray-600 mb-3";
+const inputClass = "rounded-lg min-h-[44px]";
+const textareaClass = "rounded-lg";
+const subDivider = "pt-5 mt-5 border-t border-border";
+const subLabel = "text-[13px] font-semibold text-foreground/70 mb-3 tracking-tight";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
