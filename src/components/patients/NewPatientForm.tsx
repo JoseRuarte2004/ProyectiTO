@@ -1059,8 +1059,8 @@ export function NewPatientForm() {
           onClick={() => onChange(k)}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             value === k
-              ? "bg-teal-600 text-white border border-teal-600"
-              : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50"
+              ? "bg-primary text-white border border-teal-600"
+              : "border border-border text-muted-foreground bg-white hover:bg-muted/40"
           }`}
         >
           {GONIO_PARTS[k].label}
@@ -1074,15 +1074,15 @@ export function NewPatientForm() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] pb-24">
       {/* Sticky top bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 h-14">
+      <div className="sticky top-0 z-50 bg-white border-b border-border h-14">
         <div className="max-w-2xl mx-auto h-full px-6 flex items-center justify-between gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-gray-700 hover:bg-gray-100">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="flex-1 text-center text-sm font-semibold text-gray-800 truncate">
+          <h1 className="flex-1 text-center text-sm font-semibold text-foreground truncate">
             {patientDisplay}
           </h1>
-          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-teal-700 text-white rounded-lg">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
@@ -1303,7 +1303,7 @@ export function NewPatientForm() {
               (vssFlexibilidad ? parseInt(vssFlexibilidad) : 0) +
               (vssAltura ? parseInt(vssAltura) : 0);
             return total > 0 ? (
-              <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+              <Badge className="bg-primary/5 text-primary border border-primary/30 hover:bg-primary/5">
                 VSS: {total}/15
               </Badge>
             ) : null;
@@ -1588,7 +1588,7 @@ export function NewPatientForm() {
                     ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
                     : val === "negative"
                       ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
-                      : "border-gray-200 text-gray-600 bg-white hover:bg-gray-50";
+                      : "border-border text-muted-foreground bg-white hover:bg-muted/40";
                   return (
                     <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
                       {t.label}
@@ -1776,12 +1776,12 @@ export function NewPatientForm() {
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 py-4 px-6">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border py-4 px-6">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-gray-600 hover:bg-gray-100">
+          <Button variant="ghost" onClick={() => navigate("/patients")} className="text-muted-foreground hover:bg-muted">
             Descartar
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-6">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-teal-700 text-white rounded-lg px-6">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Guardar admisión
           </Button>
