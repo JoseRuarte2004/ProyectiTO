@@ -203,10 +203,10 @@ function SectionCard({
   const isOff = toggle && !toggle.checked;
   return (
     <Card className="rounded-xl border-border bg-card mb-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-border">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border">
         <div className="flex items-center gap-2.5">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-serif text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
+          <h2 className="font-serif text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
         <div className="flex items-center gap-3">
           {action}
@@ -218,7 +218,7 @@ function SectionCard({
           )}
         </div>
       </div>
-      {!isOff && <CardContent className="p-6">{children}</CardContent>}
+      {!isOff && <CardContent className="p-5">{children}</CardContent>}
     </Card>
   );
 }
@@ -242,7 +242,7 @@ function SubSection({
     <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
+          <h3 className="field-label">{title}</h3>
           {badge}
         </div>
         <div className="flex items-center gap-2">
@@ -263,7 +263,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-const inputClass = "rounded-lg min-h-[44px]";
+const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 
 function DanielsTable({

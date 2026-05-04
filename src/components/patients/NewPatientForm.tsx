@@ -50,10 +50,10 @@ function SectionCard({
   const isOff = toggle && !toggle.checked;
   return (
     <Card className="rounded-xl border-border bg-card mb-6 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-border">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border">
         <div className="flex items-center gap-2.5">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-serif text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
+          <h2 className="font-serif text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
         <div className="flex items-center gap-3">
           {action}
@@ -65,7 +65,7 @@ function SectionCard({
           )}
         </div>
       </div>
-      {!isOff && <CardContent className="p-6">{children}</CardContent>}
+      {!isOff && <CardContent className="p-5">{children}</CardContent>}
     </Card>
   );
 }
@@ -87,7 +87,7 @@ function SubSection({
   return (
     <div className={`space-y-3 ${withDivider ? "pt-5 mt-5 border-t border-border" : ""}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-[13px] font-semibold text-foreground/70 tracking-tight">{title}</h3>
+        <h3 className="field-label">{title}</h3>
         <div className="flex items-center gap-2">
           <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{checked ? "Incluido" : "Incluir"}</span>
           <Switch checked={checked} onCheckedChange={onChange} />
@@ -107,10 +107,10 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
   );
 }
 
-const inputClass = "rounded-lg min-h-[44px]";
+const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 const subDivider = "pt-5 mt-5 border-t border-border";
-const subLabel = "text-[13px] font-semibold text-foreground/70 mb-3 tracking-tight";
+const subLabel = "field-label mb-3";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
