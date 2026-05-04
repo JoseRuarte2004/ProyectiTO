@@ -374,12 +374,12 @@ export function BarthelSection({
       <CollapsibleContent className="px-4 pb-4 space-y-3">
         <p className="text-xs text-muted-foreground">Seleccione el nivel de independencia para cada actividad.</p>
         {BARTHEL_ITEMS.map((item) => (
-          <div key={item.key} className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-100 last:border-0">
-            <span className="text-xs text-gray-700 font-medium flex-1 min-w-0">{item.label}</span>
+          <div key={item.key} className="flex flex-col gap-1 py-1.5 border-b border-gray-100 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <span className="text-xs text-gray-700 font-medium sm:flex-1 sm:min-w-0 sm:pr-2" title={item.label}>{item.label}</span>
             <select
               value={items[item.key] != null ? String(items[item.key]) : ""}
               onChange={(e) => onChange({ ...items, [item.key]: e.target.value !== "" ? parseInt(e.target.value) : null })}
-              className={`${selectClass} w-56`}
+              className={`${selectClass} w-full sm:w-64 sm:flex-shrink-0`}
             >
               <option value="">—</option>
               {item.options.map((opt) => (
