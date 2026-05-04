@@ -1059,7 +1059,7 @@ export function NewPatientForm() {
           onClick={() => onChange(k)}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             value === k
-              ? "bg-primary  border border-primary"
+              ? "bg-primary text-primary-foreground border border-primary"
               : "border border-border text-muted-foreground bg-white hover:bg-muted/40"
           }`}
         >
@@ -1072,9 +1072,9 @@ export function NewPatientForm() {
   const patientDisplay = `${firstName} ${lastName}`.trim() || "Nueva admisión";
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Sticky top bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-border h-14">
+      <div className="sticky top-0 z-50 bg-card border-b border-border h-14">
         <div className="max-w-2xl mx-auto h-full px-6 flex items-center justify-between gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/patients")} className="text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />

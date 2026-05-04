@@ -627,13 +627,13 @@ export default function SessionForm() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-screen bg-[#F9FAFB]">
+      <div className="flex items-center justify-center h-screen bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   if (!patient)
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-center text-muted-foreground py-12">Paciente no encontrado.</p>
       </div>
     );
@@ -1024,9 +1024,9 @@ export default function SessionForm() {
   const age = patient.birth_date ? differenceInYears(new Date(), new Date(patient.birth_date)) : null;
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Sticky top bar */}
-      <header className="sticky top-0 z-50 bg-white border-b border-border h-14 flex items-center px-4">
+      <header className="sticky top-0 z-50 bg-card border-b border-border h-14 flex items-center px-4">
         <div className="max-w-2xl w-full mx-auto flex items-center justify-between gap-2">
           <Button
             variant="ghost"
