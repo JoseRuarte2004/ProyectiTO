@@ -397,8 +397,8 @@ export default function PatientProfile() {
                     <Field label="Fecha de cirugía" value={fmtDate(clinical.surgery_date)} showEmpty />
                     <Field label="Mecanismo de lesión" value={clinical.injury_mechanism} full />
                     <Field label="Tipo de tratamiento" value={treatmentLabel} />
-                    <Field label="Semanas post-lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury)} />
-                    <Field label="Semanas post-operatorio" value={periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery)} />
+                    <Field label="Semanas post-lesión" value={periodStr(clinical.weeks_post_injury, clinical.days_post_injury) ?? periodFromDate(clinical.injury_date)} />
+                    <Field label="Semanas post-operatorio" value={periodStr(clinical.weeks_post_surgery, clinical.days_post_surgery) ?? periodFromDate(clinical.surgery_date)} />
                     <Field label="Semanas de inmovilización" value={periodStr(clinical.immobilization_weeks, clinical.immobilization_days)} />
                     <Field label="Tipo de inmovilización" value={clinical.immobilization_type} />
                     <Field label="Estudios" value={clinical.studies} full />
