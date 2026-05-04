@@ -1399,7 +1399,7 @@ export default function SessionForm() {
           </SubSection>
 
           {/* Fuerza */}
-          <SubSection title="Fuerza" checked={showStrength} onChange={setShowStrength}>
+          <SubSection title="Fuerza muscular" checked={showStrength} onChange={setShowStrength}>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel>Dinamómetro MSD (kg)</FieldLabel>
@@ -1455,7 +1455,7 @@ export default function SessionForm() {
                       onChange={(ev) =>
                         setDanielsRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, muscle: ev.target.value } : r)))
                       }
-                      placeholder="Ej: Flexor superficial de los dedos"
+                      placeholder="Ej: Flexores de hombro"
                       className={`${inputClass} flex-1`}
                     />
                     <select
@@ -1496,7 +1496,7 @@ export default function SessionForm() {
                     setDanielsRows((prev) => [...prev, { id, muscle: "", grade: "" }]);
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-1" /> Agregar músculo
+                  <Plus className="h-4 w-4 mr-1" /> Agregar grupo muscular
                 </Button>
               </div>
             </div>
