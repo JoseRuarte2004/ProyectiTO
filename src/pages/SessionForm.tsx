@@ -1209,15 +1209,15 @@ export default function SessionForm() {
           {/* Dolor */}
           <SubSection title="Dolor" checked={showPain} onChange={setShowPain} withDivider={false}>
             <div>
-              <FieldLabel>Aparición</FieldLabel>
+              <Label>Aparición</Label>
               <Input value={pain_appearance} onChange={(e) => setPainAppearance(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <FieldLabel>Localización</FieldLabel>
+              <Label>Localización</Label>
               <Input value={pain_location} onChange={(e) => setPainLocation(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <FieldLabel>Irradiación</FieldLabel>
+              <Label>Irradiación</Label>
               <RadioGroup
                 value={pain_radiates_choice}
                 onValueChange={(v) => {
@@ -1242,13 +1242,13 @@ export default function SessionForm() {
               </RadioGroup>
               {pain_radiates_choice === "si" && (
                 <div className="mt-2">
-                  <FieldLabel>¿Hacia dónde?</FieldLabel>
+                  <Label>¿Hacia dónde?</Label>
                   <Input value={pain_radiation} onChange={(e) => setPainRadiation(e.target.value)} className={inputClass} />
                 </div>
               )}
             </div>
             <div>
-              <FieldLabel>Características</FieldLabel>
+              <Label>Características</Label>
               <Input
                 value={pain_characteristics}
                 onChange={(e) => setPainCharacteristics(e.target.value)}
@@ -1257,7 +1257,7 @@ export default function SessionForm() {
               />
             </div>
             <div>
-              <FieldLabel>Intensidad EVA (0-10)</FieldLabel>
+              <Label>Intensidad EVA (0-10)</Label>
               <div className="flex items-center gap-3">
                 <Slider
                   min={0}
@@ -1286,7 +1286,7 @@ export default function SessionForm() {
               </div>
             </div>
             <div>
-              <FieldLabel>Agravantes / Atenuantes</FieldLabel>
+              <Label>Agravantes / Atenuantes</Label>
               <Textarea
                 rows={2}
                 value={pain_aggravating_factors}
@@ -1299,11 +1299,11 @@ export default function SessionForm() {
           {/* Edema */}
           <SubSection title="Edema" checked={showEdema} onChange={setShowEdema}>
             <div>
-              <FieldLabel>Observación</FieldLabel>
+              <Label>Observación</Label>
               <Textarea rows={2} value={edema_obs} onChange={(e) => setEdemaObs(e.target.value)} className={textareaClass} />
             </div>
             <div>
-              <FieldLabel>Test de Godet</FieldLabel>
+              <Label>Test de Godet</Label>
               <Select value={godet_test} onValueChange={setGodetTest}>
                 <SelectTrigger className={inputClass}>
                   <SelectValue placeholder="No evaluado" />
@@ -1322,19 +1322,19 @@ export default function SessionForm() {
               <p className="text-xs font-semibold text-muted-foreground mb-2">Circometría</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <FieldLabel>Muñeca MSD (cm)</FieldLabel>
+                  <Label>Muñeca MSD (cm)</Label>
                   <Input type="number" step="0.1" value={circ_wrist_msd} onChange={(e) => setCircWristMsd(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <FieldLabel>Muñeca MSI (cm)</FieldLabel>
+                  <Label>Muñeca MSI (cm)</Label>
                   <Input type="number" step="0.1" value={circ_wrist_msi} onChange={(e) => setCircWristMsi(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <FieldLabel>Global MSD (cm)</FieldLabel>
+                  <Label>Global MSD (cm)</Label>
                   <Input type="number" step="0.1" value={circ_global_msd} onChange={(e) => setCircGlobalMsd(e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <FieldLabel>Global MSI (cm)</FieldLabel>
+                  <Label>Global MSI (cm)</Label>
                   <Input type="number" step="0.1" value={circ_global_msi} onChange={(e) => setCircGlobalMsi(e.target.value)} className={inputClass} />
                 </div>
               </div>
@@ -1372,7 +1372,7 @@ export default function SessionForm() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <FieldLabel>Kapandji (0-10)</FieldLabel>
+                <Label>Kapandji (0-10)</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     type="number"
@@ -1391,7 +1391,7 @@ export default function SessionForm() {
                 </div>
               </div>
               <div>
-                <FieldLabel>Cierre de puño</FieldLabel>
+                <Label>Cierre de puño</Label>
                 <Input
                   value={fist_closure}
                   onChange={(e) => setFistClosure(e.target.value)}
@@ -1406,16 +1406,16 @@ export default function SessionForm() {
           <SubSection title="Fuerza muscular" checked={showStrength} onChange={setShowStrength}>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <FieldLabel>Dinamómetro MSD (kg)</FieldLabel>
+                <Label>Dinamómetro MSD (kg)</Label>
                 <Input type="number" step="0.1" value={dyn_msd} onChange={(e) => setDynMsd(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <FieldLabel>Dinamómetro MSI (kg)</FieldLabel>
+                <Label>Dinamómetro MSI (kg)</Label>
                 <Input type="number" step="0.1" value={dyn_msi} onChange={(e) => setDynMsi(e.target.value)} className={inputClass} />
               </div>
             </div>
             <div>
-              <FieldLabel>¿Qué evaluaste?</FieldLabel>
+              <Label>¿Qué evaluaste?</Label>
               <Textarea
                 rows={2}
                 value={strength_notes}
@@ -1425,7 +1425,7 @@ export default function SessionForm() {
               />
             </div>
             <div>
-              <FieldLabel>DPPD (cm) — distancia pulpejo-pliegue distal</FieldLabel>
+              <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
               <div className="grid grid-cols-5 gap-2">
                 <div>
                   <Label className="text-[10px] text-muted-foreground uppercase">Pulgar</Label>
@@ -1450,7 +1450,7 @@ export default function SessionForm() {
               </div>
             </div>
             <div>
-              <FieldLabel>Daniels — Músculos evaluados</FieldLabel>
+              <Label>Daniels — Músculos evaluados</Label>
               <div className="space-y-2">
                 {danielsRows.map((row) => (
                   <div key={row.id} className="flex items-center gap-2">
@@ -1512,19 +1512,19 @@ export default function SessionForm() {
               <p className="text-xs font-semibold text-muted-foreground mb-2">Epicrítica (funcional)</p>
               <div className="space-y-3">
                 <div>
-                  <FieldLabel>Tacto ligero</FieldLabel>
+                  <Label>Tacto ligero</Label>
                   <Textarea rows={2} value={sensitivity_tacto_ligero} onChange={(e) => setSensitivityTactoLigero(e.target.value)} className={textareaClass} />
                 </div>
                 <div>
-                  <FieldLabel>Discriminación 2 puntos</FieldLabel>
+                  <Label>Discriminación 2 puntos</Label>
                   <Textarea rows={2} value={sensitivity_dos_puntos} onChange={(e) => setSensitivityDosPuntos(e.target.value)} className={textareaClass} />
                 </div>
                 <div>
-                  <FieldLabel>Picking up test</FieldLabel>
+                  <Label>Picking up test</Label>
                   <Textarea rows={2} value={sensitivity_picking_up} onChange={(e) => setSensitivityPickingUp(e.target.value)} className={textareaClass} />
                 </div>
                 <div>
-                  <FieldLabel>Semmes-Weinstein</FieldLabel>
+                  <Label>Semmes-Weinstein</Label>
                   <Textarea rows={2} value={sensitivity_semmes_weinstein} onChange={(e) => setSensitivitySemmesWeinstein(e.target.value)} className={textareaClass} />
                 </div>
               </div>
@@ -1533,11 +1533,11 @@ export default function SessionForm() {
               <p className="text-xs font-semibold text-muted-foreground mb-2">Protopática (protectora)</p>
               <div className="space-y-3">
                 <div>
-                  <FieldLabel>Toco-pincho</FieldLabel>
+                  <Label>Toco-pincho</Label>
                   <Textarea rows={2} value={sensitivity_toco_pincho} onChange={(e) => setSensitivityTocoPincho(e.target.value)} className={textareaClass} />
                 </div>
                 <div>
-                  <FieldLabel>Temperatura frío-calor</FieldLabel>
+                  <Label>Temperatura frío-calor</Label>
                   <Textarea rows={2} value={sensitivity_temperatura} onChange={(e) => setSensitivityTemperatura(e.target.value)} className={textareaClass} />
                 </div>
               </div>
@@ -1571,7 +1571,7 @@ export default function SessionForm() {
               </CollapsibleContent>
             </Collapsible>
             <div>
-              <FieldLabel>Observaciones</FieldLabel>
+              <Label>Observaciones</Label>
               <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
             </div>
           </SubSection>
@@ -1621,15 +1621,15 @@ export default function SessionForm() {
               <p className="text-xs font-semibold text-muted-foreground mb-2">Planilla</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <FieldLabel>Localización</FieldLabel>
+                  <Label>Localización</Label>
                   <Input value={scar_localizacion} onChange={(e) => setScarLocalizacion(e.target.value)} placeholder={SCAR_PLACEHOLDER} className={inputClass} />
                 </div>
                 <div>
-                  <FieldLabel>Longitud (cm)</FieldLabel>
+                  <Label>Longitud (cm)</Label>
                   <Input type="number" step="0.1" min={0} value={scar_longitud} onChange={(e) => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} className={inputClass} />
                 </div>
                 <div>
-                  <FieldLabel>Vascularización</FieldLabel>
+                  <Label>Vascularización</Label>
                   <Select value={scar_vascularizacion} onValueChange={setScarVascularizacion}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1638,7 +1638,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Pigmentación</FieldLabel>
+                  <Label>Pigmentación</Label>
                   <Select value={scar_pigmentacion} onValueChange={setScarPigmentacion}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1647,7 +1647,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Flexibilidad</FieldLabel>
+                  <Label>Flexibilidad</Label>
                   <Select value={scar_flexibilidad} onValueChange={setScarFlexibilidad}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1656,7 +1656,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Sensibilidad</FieldLabel>
+                  <Label>Sensibilidad</Label>
                   <Select value={scar_sensibilidad} onValueChange={setScarSensibilidad}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1665,7 +1665,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Relieve</FieldLabel>
+                  <Label>Relieve</Label>
                   <Select value={scar_relieve} onValueChange={setScarRelieve}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1674,7 +1674,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Temperatura</FieldLabel>
+                  <Label>Temperatura</Label>
                   <Select value={scar_temperatura} onValueChange={setScarTemperatura}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1684,7 +1684,7 @@ export default function SessionForm() {
                 </div>
               </div>
               <div className="mt-3">
-                <FieldLabel>Observaciones / Impresión estética</FieldLabel>
+                <Label>Observaciones / Impresión estética</Label>
                 <Textarea rows={2} value={scar_observaciones} onChange={(e) => setScarObservaciones(e.target.value)} className={textareaClass} />
               </div>
             </div>
@@ -1696,7 +1696,7 @@ export default function SessionForm() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <FieldLabel>Pigmentación</FieldLabel>
+                  <Label>Pigmentación</Label>
                   <Select value={vss_pigmentacion} onValueChange={setVssPigmentacion}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1705,7 +1705,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Vascularización</FieldLabel>
+                  <Label>Vascularización</Label>
                   <Select value={vss_vascularizacion} onValueChange={setVssVascularizacion}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1714,7 +1714,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Flexibilidad</FieldLabel>
+                  <Label>Flexibilidad</Label>
                   <Select value={vss_flexibilidad} onValueChange={setVssFlexibilidad}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1723,7 +1723,7 @@ export default function SessionForm() {
                   </Select>
                 </div>
                 <div>
-                  <FieldLabel>Altura</FieldLabel>
+                  <Label>Altura</Label>
                   <Select value={vss_altura} onValueChange={setVssAltura}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
@@ -1738,15 +1738,15 @@ export default function SessionForm() {
           {/* Otros */}
           <SubSection title="Otros" checked={showOtros} onChange={setShowOtros}>
             <div>
-              <FieldLabel>Estado trófico</FieldLabel>
+              <Label>Estado trófico</Label>
               <Textarea rows={2} value={trophic_state} onChange={(e) => setTrophicState(e.target.value)} className={textareaClass} />
             </div>
             <div>
-              <FieldLabel>Postura</FieldLabel>
+              <Label>Postura</Label>
               <Textarea rows={2} value={posture} onChange={(e) => setPosture(e.target.value)} className={textareaClass} />
             </div>
             <div>
-              <FieldLabel>Emotividad</FieldLabel>
+              <Label>Emotividad</Label>
               <Textarea rows={2} value={emotional_state} onChange={(e) => setEmotionalState(e.target.value)} className={textareaClass} />
             </div>
           </SubSection>
