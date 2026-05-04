@@ -1455,7 +1455,7 @@ export default function SessionForm() {
                       onChange={(ev) =>
                         setDanielsRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, muscle: ev.target.value } : r)))
                       }
-                      placeholder="Ej: Flexor superficial de los dedos"
+                      placeholder="Ej: Flexores de hombro"
                       className={`${inputClass} flex-1`}
                     />
                     <select
