@@ -521,28 +521,47 @@ export default function SessionForm() {
           setEdemaObs(ae.edema || "");
           setGodetTest(ae.godet_test || "");
           setShowEdema(!!(ae.edema || ae.godet_test || ae.edema_circummetry));
-          const circ = ae.edema_circummetry || "";
-          setCircWristMsd(circ.match(/MSD: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
-          setCircGlobalMsd(circ.match(/MSD: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
-          setCircWristMsi(circ.match(/MSI: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
-          setCircGlobalMsi(circ.match(/MSI: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
+          const circ: any = ae.edema_circummetry;
+          if (circ && typeof circ === "object" && !Array.isArray(circ)) {
+            setCircReference(circ.reference || "");
+            setCircSide(circ.side === "I" ? "I" : "D");
+            setCircValueCm(circ.value_cm != null ? String(circ.value_cm) : "");
+            setCircManoGlobal(!!circ.mano_global);
+          }
           setShowMobility(!!(ae.goniometry || ae.arom || ae.prom || ae.kapandji));
           if (ae.goniometry && typeof ae.goniometry === "object") {
             const toGonio = (arr: any) => {
-              const base = emptyGonio();
+              const base = emptySide();
               if (Array.isArray(arr)) arr.forEach((g: any) => { if (g?.body_part && base[g.body_part as GonioPartKey]) base[g.body_part as GonioPartKey] = Object.fromEntries(Object.entries(g.values || {}).map(([k,v]) => [k, String(v)])); });
               return base;
             };
-            setAllPreGonio(toGonio((ae.goniometry as any).pre));
-            setAllPostGonio(toGonio((ae.goniometry as any).post));
-            setShowPostGonio(Array.isArray((ae.goniometry as any).post) && (ae.goniometry as any).post.length > 0);
+            const g: any = ae.goniometry;
+            const hasNew = g.MSD || g.MSI;
+            if (hasNew) {
+              setAllPreGonio({ MSD: toGonio(g.MSD?.pre), MSI: toGonio(g.MSI?.pre) });
+              setAllPostGonio({ MSD: toGonio(g.MSD?.post), MSI: toGonio(g.MSI?.post) });
+              const hasPost = (Array.isArray(g.MSD?.post) && g.MSD.post.length) || (Array.isArray(g.MSI?.post) && g.MSI.post.length);
+              setShowPostGonio(!!hasPost);
+            } else {
+              // Legacy { pre, post } → bajo MSD
+              setAllPreGonio({ MSD: toGonio(g.pre), MSI: emptySide() });
+              setAllPostGonio({ MSD: toGonio(g.post), MSI: emptySide() });
+              setShowPostGonio(Array.isArray(g.post) && g.post.length > 0);
+            }
           }
           const kap = ae.kapandji || "";
           setKapandjiVal(kap.match(/^(\d+)/)?.[1] || "");
           setKapandjiPain(kap.includes("dolor"));
-          setDynMsd(ae.dynamometer_msd != null ? String(ae.dynamometer_msd) : "");
-          setDynMsi(ae.dynamometer_msi != null ? String(ae.dynamometer_msi) : "");
-          setStrengthNotes((ae.muscle_strength || "").replace(/Cierre de puño: .*?( — )?/, ""));
+          const parseDyn = (v: any): [string, string, string] => {
+            if (v == null) return ["", "", ""];
+            if (typeof v === "object" && Array.isArray(v.values)) {
+              const a = v.values; return [a[0]!=null?String(a[0]):"", a[1]!=null?String(a[1]):"", a[2]!=null?String(a[2]):""];
+            }
+            if (typeof v === "number") return [String(v), "", ""];
+            return ["", "", ""];
+          };
+          setDynMsdVals(parseDyn(ae.dynamometer_msd));
+          setDynMsiVals(parseDyn(ae.dynamometer_msi));
           setShowStrength(!!(ae.dynamometer_msd || ae.dynamometer_msi || ae.muscle_strength || ae.muscle_strength_daniels || ae.dppd_fingers));
           const fist = (ae.muscle_strength || "").match(/Cierre de puño: ([^—]+)/)?.[1]?.trim() || "";
           setFistClosure(fist);
