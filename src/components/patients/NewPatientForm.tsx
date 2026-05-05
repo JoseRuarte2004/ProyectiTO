@@ -930,7 +930,7 @@ export function NewPatientForm() {
         showDolor ? painCharacteristics : "", showDolor ? painAggravating : "", showDolor ? painFree : "",
         showEdema ? edema : "", showEdema ? godetTest : "",
         kapandjiFinal, showMovilidad ? fistClosure : "",
-        showFuerza ? dynamometerMsd : "", showFuerza ? dynamometerMsi : "",
+        showFuerza && dynMsdJson ? String(dynMsdJson.average) : "", showFuerza && dynMsiJson ? String(dynMsiJson.average) : "",
         showFuerza && danielsFiltered.length > 0 ? danielsFiltered.map(r => `${r.muscle}: ${r.grade}`).join("; ") : "",
         showSensibilidad ? sensitivityTactoLigero : "", showSensibilidad ? sensitivityDosPuntos : "",
         showSensibilidad ? sensitivityPickingUp : "", showSensibilidad ? sensitivitySemmesWeinstein : "",
