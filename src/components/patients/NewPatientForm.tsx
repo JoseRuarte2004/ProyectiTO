@@ -1481,28 +1481,34 @@ export function NewPatientForm() {
 
             {/* Fuerza */}
             <SubSection title="Fuerza muscular" checked={showFuerza} onChange={setShowFuerza}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Dinamómetro MSD (kgf)</Label>
-                  <Input type="number" step={0.1} value={dynamometerMsd} onChange={(e) => setDynamometerMsd(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Dinamómetro MSI (kgf)</Label>
-                  <Input type="number" step={0.1} value={dynamometerMsi} onChange={(e) => setDynamometerMsi(e.target.value)} />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Evalúa: fuerza de puño isométrica en 5 posiciones (se toma 3 veces y se promedia). Primera evaluación: comparar con MS sano (10% más de FM). Mediciones siguientes: comparar con MS afectado.
-              </p>
-              <div className="space-y-2">
-                <Label>¿Qué evaluaste?</Label>
-                <Textarea
-                  rows={2}
-                  value={dynamometerNotes}
-                  onChange={(e) => setDynamometerNotes(e.target.value)}
-                  placeholder="Ej: Fuerza de puño en 5 posiciones, se tomó 3 veces y se promedió..."
-                />
-              </div>
+              {(["MSD", "MSI"] as const).map((side) => {
+                const vals = side === "MSD" ? dynMsdVals : dynMsiVals;
+                const setVals = side === "MSD" ? setDynMsdVals : setDynMsiVals;
+                const nums = vals.map(v => v.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+                const avg = nums.length > 0 ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1) : null;
+                return (
+                  <div key={side} className="space-y-2">
+                    <Label>Dinamómetro {side} (kgf)</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 1, 2].map((i) => (
+                        <Input
+                          key={i}
+                          type="number"
+                          step="0.1"
+                          placeholder={`Med. ${i + 1}`}
+                          value={vals[i]}
+                          onChange={(e) => {
+                            const next = [...vals] as [string, string, string];
+                            next[i] = e.target.value;
+                            setVals(next);
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {avg && <p className="text-xs text-muted-foreground">Promedio: {avg} kgf</p>}
+                  </div>
+                );
+              })}
               <div className="space-y-2">
                 <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
                 <div className="grid grid-cols-5 gap-2">
