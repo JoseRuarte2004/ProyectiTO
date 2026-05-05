@@ -932,7 +932,7 @@ export function NewPatientForm() {
         ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
         : null;
 
-      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
+      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || dynMsdJson || dynMsiJson || dppdFingersJson;
       if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured || scarEvalJson !== null)) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
@@ -963,13 +963,12 @@ export function NewPatientForm() {
           prom: promVal,
           goniometry: gonioJsonb,
           kapandji: showMovilidad ? or(kapandjiFinal) : null,
-          dynamometer_msd: showFuerza ? orFloat(dynamometerMsd) : null,
-          dynamometer_msi: showFuerza ? orFloat(dynamometerMsi) : null,
-          dynamometer_notes: showFuerza ? or(dynamometerNotes) : null,
+          dynamometer_msd: dynMsdJson as any,
+          dynamometer_msi: dynMsiJson as any,
           muscle_strength: msVal,
-          muscle_strength_median: medianJson,
-          muscle_strength_cubital: cubitalJson,
-          muscle_strength_radial: radialJson,
+          muscle_strength_median: null,
+          muscle_strength_cubital: null,
+          muscle_strength_radial: null,
           muscle_strength_daniels: danielsJson as any,
           specific_tests: specificTestsJson,
           dppd_fingers: dppdFingersJson,
