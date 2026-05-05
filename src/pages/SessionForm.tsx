@@ -433,11 +433,10 @@ export default function SessionForm() {
   const [edema_obs, setEdemaObs] = useState("");
   const [godet_test, setGodetTest] = useState("");
 
-  // Circometría (nuevo formato JSONB)
-  const [circ_reference, setCircReference] = useState("");
-  const [circ_side, setCircSide] = useState<"D" | "I">("D");
-  const [circ_value_cm, setCircValueCm] = useState("");
-  const [circ_mano_global, setCircManoGlobal] = useState(false);
+  // Circometría (tabla MS Sano / MS Afectado)
+  const [edema_circ_sano, setEdemaCircSano] = useState<EdemaSide>({});
+  const [edema_circ_afectado, setEdemaCircAfectado] = useState<EdemaSide>({});
+  const [edema_baseline_sano, setEdemaBaselineSano] = useState<EdemaSide | null>(null);
 
   // Goniometry PRE/POST — por lado MSD/MSI, nested by part
   type GonioBySide = Record<"MSD" | "MSI", Record<GonioPartKey, Record<string, string>>>;
