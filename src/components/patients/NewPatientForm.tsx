@@ -598,13 +598,17 @@ export function NewPatientForm() {
   const [emotionalState, setEmotionalState] = useState("");
   const [analNotes, setAnalNotes] = useState("");
 
-  // Structured goniometry — nested by body part
-  const emptyGonio = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  // Structured goniometry — por lado MSD/MSI, nested by body part
+  type GonioBySide = Record<"MSD" | "MSI", Record<GonioPartKey, Record<string, string>>>;
+  const emptySide = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  const emptyGonio = (): GonioBySide => ({ MSD: emptySide(), MSI: emptySide() });
+  const [gonioSide, setGonioSide] = useState<"MSD" | "MSI">("MSD");
   const [gonioPart, setGonioPart] = useState<GonioPartKey>("wrist");
-  const [allPreGonio, setAllPreGonio] = useState(emptyGonio);
+  const [allPreGonio, setAllPreGonio] = useState<GonioBySide>(emptyGonio);
   const [showPostGonio, setShowPostGonio] = useState(false);
+  const [gonioSidePost, setGonioSidePost] = useState<"MSD" | "MSI">("MSD");
   const [gonioPartPost, setGonioPartPost] = useState<GonioPartKey>("wrist");
-  const [allPostGonio, setAllPostGonio] = useState(emptyGonio);
+  const [allPostGonio, setAllPostGonio] = useState<GonioBySide>(emptyGonio);
 
   // Circometría (JSONB)
   const [circReference, setCircReference] = useState("");
