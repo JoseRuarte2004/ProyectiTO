@@ -373,6 +373,39 @@ export default function SessionForm() {
   const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
   const [barthel_items, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
 
+  const isAdmission = session_type === "admission";
+
+  // Ficha clínica (admission)
+  const [cli_diagnosis, setCliDiagnosis] = useState("");
+  const [cli_doctor_name, setCliDoctorName] = useState("");
+  const [cli_injury_date, setCliInjuryDate] = useState("");
+  const [cli_surgery_date, setCliSurgeryDate] = useState("");
+  const [cli_injury_mechanism, setCliInjuryMechanism] = useState("");
+  const [cli_treatment_type, setCliTreatmentType] = useState("");
+  const [cli_weeks_post_injury, setCliWeeksPostInjury] = useState("");
+  const [cli_days_post_injury, setCliDaysPostInjury] = useState("");
+  const [cli_weeks_post_surgery, setCliWeeksPostSurgery] = useState("");
+  const [cli_days_post_surgery, setCliDaysPostSurgery] = useState("");
+  const [cli_immob_weeks, setCliImmobWeeks] = useState("");
+  const [cli_immob_days, setCliImmobDays] = useState("");
+  const [cli_immob_type, setCliImmobType] = useState("");
+  const [cli_medical_history, setCliMedicalHistory] = useState("");
+  const [cli_pharma, setCliPharma] = useState("");
+  const [cli_studies, setCliStudies] = useState("");
+  const [cli_next_oyt, setCliNextOyt] = useState("");
+  const [editingClinicalId, setEditingClinicalId] = useState<string | null>(null);
+
+  // Perfil ocupacional (admission)
+  const [occ_dominance, setOccDominance] = useState("");
+  const [occ_support_network, setOccSupportNetwork] = useState("");
+  const [occ_education, setOccEducation] = useState("");
+  const [occ_job, setOccJob] = useState("");
+  const [occ_leisure, setOccLeisure] = useState("");
+  const [occ_physical_activity, setOccPhysicalActivity] = useState("");
+  const [occ_sleep_rest, setOccSleepRest] = useState("");
+  const [occ_health_management, setOccHealthManagement] = useState("");
+  const [editingOccId, setEditingOccId] = useState<string | null>(null);
+
   // Functional eval toggle (default on for admission, off for follow_up/discharge)
   const [showFunctional, setShowFunctional] = useState(typeParam === "admission");
 
