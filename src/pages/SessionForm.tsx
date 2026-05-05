@@ -382,17 +382,13 @@ export default function SessionForm() {
   const [cli_surgery_date, setCliSurgeryDate] = useState("");
   const [cli_injury_mechanism, setCliInjuryMechanism] = useState("");
   const [cli_treatment_type, setCliTreatmentType] = useState("");
-  const [cli_weeks_post_injury, setCliWeeksPostInjury] = useState("");
-  const [cli_days_post_injury, setCliDaysPostInjury] = useState("");
-  const [cli_weeks_post_surgery, setCliWeeksPostSurgery] = useState("");
-  const [cli_days_post_surgery, setCliDaysPostSurgery] = useState("");
   const [cli_immob_weeks, setCliImmobWeeks] = useState("");
   const [cli_immob_days, setCliImmobDays] = useState("");
   const [cli_immob_type, setCliImmobType] = useState("");
   const [cli_medical_history, setCliMedicalHistory] = useState("");
   const [cli_pharma, setCliPharma] = useState("");
   const [cli_studies, setCliStudies] = useState("");
-  const [cli_next_oyt, setCliNextOyt] = useState("");
+  
   const [editingClinicalId, setEditingClinicalId] = useState<string | null>(null);
 
   // Perfil ocupacional (admission)
@@ -705,17 +701,12 @@ export default function SessionForm() {
         setCliSurgeryDate(cliRow.surgery_date || "");
         setCliInjuryMechanism(cliRow.injury_mechanism || "");
         setCliTreatmentType(cliRow.treatment_type || "");
-        setCliWeeksPostInjury(cliRow.weeks_post_injury != null ? String(cliRow.weeks_post_injury) : "");
-        setCliDaysPostInjury(cliRow.days_post_injury != null ? String(cliRow.days_post_injury) : "");
-        setCliWeeksPostSurgery(cliRow.weeks_post_surgery != null ? String(cliRow.weeks_post_surgery) : "");
-        setCliDaysPostSurgery(cliRow.days_post_surgery != null ? String(cliRow.days_post_surgery) : "");
         setCliImmobWeeks(cliRow.immobilization_weeks != null ? String(cliRow.immobilization_weeks) : "");
         setCliImmobDays(cliRow.immobilization_days != null ? String(cliRow.immobilization_days) : "");
         setCliImmobType(cliRow.immobilization_type || "");
         setCliMedicalHistory(cliRow.medical_history || "");
         setCliPharma(cliRow.pharmacological_treatment || "");
         setCliStudies(cliRow.studies || "");
-        setCliNextOyt(cliRow.next_oyt_appointment || "");
       }
       const { data: occRow } = await supabase
         .from("patient_occupational_profiles").select("*").eq("patient_id", patientId).maybeSingle();
@@ -942,17 +933,12 @@ export default function SessionForm() {
         surgery_date: cli_surgery_date || null,
         injury_mechanism: cli_injury_mechanism.trim() || null,
         treatment_type: cli_treatment_type || null,
-        weeks_post_injury: cli_weeks_post_injury ? parseInt(cli_weeks_post_injury) : null,
-        days_post_injury: cli_days_post_injury ? parseInt(cli_days_post_injury) : null,
-        weeks_post_surgery: cli_weeks_post_surgery ? parseInt(cli_weeks_post_surgery) : null,
-        days_post_surgery: cli_days_post_surgery ? parseInt(cli_days_post_surgery) : null,
         immobilization_weeks: cli_immob_weeks ? parseInt(cli_immob_weeks) : null,
         immobilization_days: cli_immob_days ? parseInt(cli_immob_days) : null,
         immobilization_type: cli_immob_type.trim() || null,
         medical_history: cli_medical_history.trim() || null,
         pharmacological_treatment: cli_pharma.trim() || null,
         studies: cli_studies.trim() || null,
-        next_oyt_appointment: cli_next_oyt || null,
       };
       if (editingClinicalId) {
         await supabase.from("patient_clinical_records").update(cliPayload).eq("id", editingClinicalId);
@@ -1367,12 +1353,6 @@ export default function SessionForm() {
                 <FieldLabel>Mecanismo de lesión</FieldLabel>
                 <Textarea rows={2} value={cli_injury_mechanism} onChange={(e) => setCliInjuryMechanism(e.target.value)} className={textareaClass} />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div><FieldLabel>Sem. post-lesión</FieldLabel><Input type="number" min={0} value={cli_weeks_post_injury} onChange={(e) => setCliWeeksPostInjury(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Días post-lesión</FieldLabel><Input type="number" min={0} value={cli_days_post_injury} onChange={(e) => setCliDaysPostInjury(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Sem. post-cirugía</FieldLabel><Input type="number" min={0} value={cli_weeks_post_surgery} onChange={(e) => setCliWeeksPostSurgery(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Días post-cirugía</FieldLabel><Input type="number" min={0} value={cli_days_post_surgery} onChange={(e) => setCliDaysPostSurgery(e.target.value)} className={inputClass} /></div>
-              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div><FieldLabel>Sem. inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_weeks} onChange={(e) => setCliImmobWeeks(e.target.value)} className={inputClass} /></div>
                 <div><FieldLabel>Días inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_days} onChange={(e) => setCliImmobDays(e.target.value)} className={inputClass} /></div>
@@ -1381,7 +1361,6 @@ export default function SessionForm() {
               <div><FieldLabel>Antecedentes médicos</FieldLabel><Textarea rows={2} value={cli_medical_history} onChange={(e) => setCliMedicalHistory(e.target.value)} className={textareaClass} /></div>
               <div><FieldLabel>Tratamiento farmacológico</FieldLabel><Textarea rows={2} value={cli_pharma} onChange={(e) => setCliPharma(e.target.value)} className={textareaClass} /></div>
               <div><FieldLabel>Estudios realizados</FieldLabel><Textarea rows={2} value={cli_studies} onChange={(e) => setCliStudies(e.target.value)} className={textareaClass} /></div>
-              <div><FieldLabel>Próximo turno OYT</FieldLabel><Input type="date" value={cli_next_oyt} onChange={(e) => setCliNextOyt(e.target.value)} className={inputClass} /></div>
             </div>
           </SectionCard>
         )}
@@ -1433,7 +1412,8 @@ export default function SessionForm() {
           </div>
         </SectionCard>
 
-        {/* Card 2: Evolución */}
+        {/* Card 2: Evolución (no en admisión) */}
+        {!isAdmission && (
         <SectionCard icon={FileText} title="Evolución">
           <div className="space-y-4">
             <div>
@@ -1466,6 +1446,7 @@ export default function SessionForm() {
             </div>
           </div>
         </SectionCard>
+        )}
 
         {/* Card 3: Evaluación analítica */}
         <SectionCard
