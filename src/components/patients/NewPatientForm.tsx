@@ -1034,14 +1034,10 @@ export function NewPatientForm() {
           <div key={f.key} className="space-y-1">
             <Label className="text-xs">{f.label} °</Label>
             <Input
-              key={`${partKey}-${f.key}-${values[f.key] || ""}`}
               type="number"
               placeholder={f.norm}
-              defaultValue={values[f.key] || ""}
-              onBlur={e => {
-                const v = e.target.value;
-                if (v !== (values[f.key] || "")) setValues({ ...values, [f.key]: v });
-              }}
+              value={values[f.key] || ""}
+              onChange={e => setValues({ ...values, [f.key]: e.target.value })}
             />
           </div>
         ))}
