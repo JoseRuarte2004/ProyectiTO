@@ -43,6 +43,7 @@ import {
   calcFimTotal,
   calcBarthelTotal,
 } from "@/components/evaluations/FunctionalScales";
+import { EdemaCircometryTable, buildEdemaPayload, normalizeEdemaValue, isNewEdemaFormat, type EdemaSide } from "@/components/clinical/EdemaCircometryTable";
 
 // ── Goniometry config by body part ──
 const GONIO_PARTS = {
