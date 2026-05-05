@@ -841,11 +841,35 @@ export function NewPatientForm() {
       const sessionId = admissionSession.id;
 
       // 6. Analytical evaluation — build structured fields (gated by sub-section toggles)
-      const aromVal = showMovilidad ? buildAllGonioText(allPreGonio) : null;
-      const promVal = showMovilidad && showPostGonio ? buildAllGonioText(allPostGonio) : null;
-      const preJsonArr = showMovilidad ? buildAllGonioJsonArray(allPreGonio) : null;
-      const postJsonArr = showMovilidad && showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
-      const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
+      const buildSideText = (allVals: GonioBySide) => {
+        const parts: string[] = [];
+        (["MSD", "MSI"] as const).forEach((side) => {
+          const t = buildAllGonioText(allVals[side]);
+          if (t) parts.push(`[${side}] ${t}`);
+        });
+        return parts.length > 0 ? parts.join(" ") : null;
+      };
+      const aromVal = showMovilidad ? buildSideText(allPreGonio) : null;
+      const promVal = showMovilidad && showPostGonio ? buildSideText(allPostGonio) : null;
+      const buildGonioBySideJson = (allVals: GonioBySide) => {
+        const out: Record<string, any> = {};
+        (["MSD", "MSI"] as const).forEach((side) => {
+          const arr = buildAllGonioJsonArray(allVals[side]);
+          if (arr) out[side] = arr;
+        });
+        return Object.keys(out).length > 0 ? out : null;
+      };
+      const preBySide = showMovilidad ? buildGonioBySideJson(allPreGonio) : null;
+      const postBySide = showMovilidad && showPostGonio ? buildGonioBySideJson(allPostGonio) : null;
+      let gonioJsonb: any = null;
+      if (preBySide || postBySide) {
+        gonioJsonb = {};
+        (["MSD", "MSI"] as const).forEach((side) => {
+          const pre = preBySide?.[side] || null;
+          const post = postBySide?.[side] || null;
+          if (pre || post) gonioJsonb[side] = { pre, post };
+        });
+      }
 
       const edemaCirc = showEdema && (circReference.trim() || circValueCm.trim())
         ? { reference: circReference.trim(), side: circSide, value_cm: circValueCm.trim() ? Number(circValueCm) : null, mano_global: circManoGlobal }
