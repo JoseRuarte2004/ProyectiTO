@@ -345,11 +345,6 @@ export default function SessionForm() {
   ]);
   const danielsNextId = useRef(2);
 
-  // Daniels by nerve
-  const [daniels_median, setDanielsMedian] = useState<Record<string, string>>({});
-  const [daniels_cubital, setDanielsCubital] = useState<Record<string, string>>({});
-  const [daniels_radial, setDanielsRadial] = useState<Record<string, string>>({});
-  const [show_daniels, setShowDaniels] = useState(false);
 
   // Specific tests
   const [specificTests, setSpecificTests] = useState<Record<string, TestResult>>(
