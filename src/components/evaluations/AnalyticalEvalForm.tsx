@@ -434,7 +434,16 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
             <AccordionTrigger className="text-sm font-semibold">Edema</AccordionTrigger>
             <AccordionContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <Row label="Observación" value={e.edema} />
-              <Row label="Circometría" value={e.edema_circummetry} />
+              {(() => {
+                const c = e.edema_circummetry;
+                if (!c) return null;
+                if (typeof c === "object") {
+                  if (!c.reference && c.value_cm == null) return null;
+                  const txt = `${c.reference || ""}${c.side ? ` (${c.side})` : ""}${c.value_cm != null ? ` — ${c.value_cm} cm` : ""}${c.mano_global ? " · Mano global" : ""}`.trim();
+                  return <Row label="Circometría" value={txt} />;
+                }
+                return <Row label="Circometría" value={c} />;
+              })()}
               <Row label="Test de Godet" value={e.godet_test} />
             </AccordionContent>
           </AccordionItem>
@@ -528,72 +537,27 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
             <AccordionTrigger className="text-sm font-semibold">Fuerza Muscular</AccordionTrigger>
             <AccordionContent className="space-y-4 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Row label="Dinamómetro MSD" value={e.dynamometer_msd != null ? `${e.dynamometer_msd} kgf` : null} />
-                <Row label="Dinamómetro MSI" value={e.dynamometer_msi != null ? `${e.dynamometer_msi} kgf` : null} />
-                <Row label="Fuerza general" value={e.muscle_strength} />
-                <Row label="Notas dinamómetro" value={e.dynamometer_notes} />
-              </div>
-
               {(() => {
-                const nerves = [
-                  { label: "Nervio Mediano", val: e.muscle_strength_median, color: "bg-primary/10 text-primary border-primary/20" },
-                  { label: "Nervio Cubital", val: e.muscle_strength_cubital, color: "bg-blue-50 text-blue-700 border-blue-200" },
-                  { label: "Nervio Radial", val: e.muscle_strength_radial, color: "bg-amber-50 text-amber-700 border-amber-200" },
-                ];
-
-                const parsed = nerves.map(n => {
-                  if (!n.val) return { ...n, entries: [] as [string, string][] };
-                  let obj: any = n.val;
-                  if (typeof n.val === "string") {
-                    try { obj = JSON.parse(n.val); } catch { return { ...n, entries: [] as [string, string][] }; }
+                const fmtDyn = (raw: any) => {
+                  if (raw == null) return null;
+                  if (typeof raw === "object" && (Array.isArray(raw.values) || raw.average != null)) {
+                    const vals = (raw.values || []).map((v: any) => (v != null && v !== "" ? v : "—")).join(" / ");
+                    return `${vals} kgf → Promedio: ${raw.average ?? "—"} kgf`;
                   }
-                  if (!obj || typeof obj !== "object") return { ...n, entries: [] as [string, string][] };
-                  const entries = Object.entries(obj).filter(([, v]) => v != null && v !== "") as [string, string][];
-                  return { ...n, entries };
-                }).filter(n => n.entries.length > 0);
-
-                if (parsed.length === 0) return null;
-
-                const formatMuscle = (key: string) =>
-                  key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-
-                const gradeBadge = (grade: string) => {
-                  const g = parseInt(grade);
-                  let cls = "bg-muted text-muted-foreground";
-                  if (g >= 4) cls = "bg-emerald-100 text-emerald-700";
-                  else if (g === 3) cls = "bg-amber-100 text-amber-700";
-                  else if (g <= 2 && g >= 0) cls = "bg-rose-100 text-rose-700";
-                  return (
-                    <span className={`inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 text-xs font-semibold rounded ${cls}`}>
-                      {grade}/5
-                    </span>
-                  );
+                  return `${raw} kgf`;
                 };
-
+                const msd = fmtDyn(e.dynamometer_msd);
+                const msi = fmtDyn(e.dynamometer_msi);
                 return (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Daniels / Kendall</p>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {parsed.map(n => (
-                        <div key={n.label} className={`rounded-lg border p-3 ${n.color}`}>
-                          <p className="text-xs font-semibold uppercase tracking-wide mb-2">{n.label}</p>
-                          <div className="space-y-1.5">
-                            {n.entries.map(([muscle, grade]) => (
-                              <div key={muscle} className="flex items-center justify-between gap-2 bg-background/60 rounded px-2 py-1">
-                                <span className="text-xs text-foreground/80 truncate">{formatMuscle(muscle)}</span>
-                                {gradeBadge(grade)}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <>
+                    <Row label="Dinamómetro MSD" value={msd} />
+                    <Row label="Dinamómetro MSI" value={msi} />
+                    <Row label="Fuerza general" value={e.muscle_strength} />
+                  </>
                 );
               })()}
+              </div>
+
               {danielsArr.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
