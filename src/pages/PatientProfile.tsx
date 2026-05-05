@@ -450,7 +450,13 @@ export default function PatientProfile() {
               <h2 className="font-semibold text-foreground">Historial de visitas</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{sessions.length} {sessions.length === 1 ? "visita registrada" : "visitas registradas"}</p>
             </div>
-            <Button onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} size="sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
+            <Button onClick={() => {
+              const isFirst = sessions.length === 0;
+              const params = new URLSearchParams();
+              if (activeEpisodeId) params.set("episode", activeEpisodeId);
+              if (isFirst) params.set("type", "admission");
+              navigate(`/patients/${id}/sessions/new${params.toString() ? `?${params.toString()}` : ''}`);
+            }} size="sm"><Plus className="h-4 w-4 mr-2" />{sessions.length === 0 ? "Registrar admisión" : "Nueva sesión"}</Button>
           </div>
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
