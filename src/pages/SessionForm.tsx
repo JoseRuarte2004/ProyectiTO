@@ -1367,12 +1367,6 @@ export default function SessionForm() {
                 <FieldLabel>Mecanismo de lesión</FieldLabel>
                 <Textarea rows={2} value={cli_injury_mechanism} onChange={(e) => setCliInjuryMechanism(e.target.value)} className={textareaClass} />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div><FieldLabel>Sem. post-lesión</FieldLabel><Input type="number" min={0} value={cli_weeks_post_injury} onChange={(e) => setCliWeeksPostInjury(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Días post-lesión</FieldLabel><Input type="number" min={0} value={cli_days_post_injury} onChange={(e) => setCliDaysPostInjury(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Sem. post-cirugía</FieldLabel><Input type="number" min={0} value={cli_weeks_post_surgery} onChange={(e) => setCliWeeksPostSurgery(e.target.value)} className={inputClass} /></div>
-                <div><FieldLabel>Días post-cirugía</FieldLabel><Input type="number" min={0} value={cli_days_post_surgery} onChange={(e) => setCliDaysPostSurgery(e.target.value)} className={inputClass} /></div>
-              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div><FieldLabel>Sem. inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_weeks} onChange={(e) => setCliImmobWeeks(e.target.value)} className={inputClass} /></div>
                 <div><FieldLabel>Días inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_days} onChange={(e) => setCliImmobDays(e.target.value)} className={inputClass} /></div>
@@ -1381,7 +1375,6 @@ export default function SessionForm() {
               <div><FieldLabel>Antecedentes médicos</FieldLabel><Textarea rows={2} value={cli_medical_history} onChange={(e) => setCliMedicalHistory(e.target.value)} className={textareaClass} /></div>
               <div><FieldLabel>Tratamiento farmacológico</FieldLabel><Textarea rows={2} value={cli_pharma} onChange={(e) => setCliPharma(e.target.value)} className={textareaClass} /></div>
               <div><FieldLabel>Estudios realizados</FieldLabel><Textarea rows={2} value={cli_studies} onChange={(e) => setCliStudies(e.target.value)} className={textareaClass} /></div>
-              <div><FieldLabel>Próximo turno OYT</FieldLabel><Input type="date" value={cli_next_oyt} onChange={(e) => setCliNextOyt(e.target.value)} className={inputClass} /></div>
             </div>
           </SectionCard>
         )}
