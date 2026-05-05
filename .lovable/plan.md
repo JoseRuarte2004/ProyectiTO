@@ -1,21 +1,23 @@
-## Unificar estilo de títulos/labels en sesiones y admisiones
+## Vista de paciente: usar pantalla completa vertical
 
-En las **evaluaciones** (`AnalyticalEvalForm.tsx`) los títulos de campo usan `Label className="text-xs"` → texto fino, capitalización normal (ej: "Lateralidad").
+**Problema:** En `/patients/:id` aparece una franja vacía debajo porque el contenedor calcula su altura como `calc(100vh - 56px)` reservando espacio para el header móvil — pero en desktop ese header no existe (`lg:hidden`), por lo que sobran 56px.
 
-En **sesiones** (`SessionForm.tsx`) y **admisiones** (`NewPatientForm.tsx`) los títulos usan la clase `.field-label` → MAYÚSCULAS, tracking ancho, color tenue.
+### Cambio
 
-Cambio: que sesiones y admisiones usen el mismo estilo que evaluaciones.
+**`src/pages/PatientProfile.tsx`** (línea 190):
 
-### Archivos a modificar
+Reemplazar:
+```tsx
+<div className="flex flex-col -m-4 md:-m-6 lg:-m-8 overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
+```
 
-1. **`src/pages/SessionForm.tsx`** (línea 231-237)
-   - En `FieldLabel`, reemplazar `className="field-label mb-1.5 block"` por `className="text-xs mb-1.5 block"`.
+Por:
+```tsx
+<div className="flex flex-col -m-4 md:-m-6 lg:-m-8 overflow-hidden h-[calc(100vh-56px)] lg:h-screen">
+```
 
-2. **`src/components/patients/NewPatientForm.tsx`** (líneas 102-113)
-   - En `FieldLabel`, mismo cambio: `field-label` → `text-xs`.
-   - Cambiar la constante `subLabel` de `"field-label mb-3"` a `"text-xs mb-3 block"`.
+Así en mobile/tablet sigue restando los 56px del header, y en desktop (`lg:`, donde el header está oculto) ocupa toda la altura del viewport.
 
-### Notas
+### No se toca
 
-- No se toca `.field-label` en `index.css` ni los usos en `PatientProfile.tsx` (visualización del paciente, donde el estilo uppercase sí tiene sentido como micro-label).
-- No se modifican los `<Label>` directos que ya usan `text-xs` u otras clases; sólo el componente `FieldLabel` y `subLabel`, que cubren la mayoría de los títulos de campo en los formularios.
+Resto del layout, sidebar, ni los paddings internos.
