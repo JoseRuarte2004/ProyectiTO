@@ -843,20 +843,21 @@ export function NewPatientForm() {
       const postJsonArr = showMovilidad && showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
       const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
-      const circParts: string[] = [];
-      if (showEdema && (circWristMsd || circGlobalMsd)) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
-      if (showEdema && (circWristMsi || circGlobalMsi)) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
-      const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
+      const edemaCirc = showEdema && (circReference.trim() || circValueCm.trim())
+        ? { reference: circReference.trim(), side: circSide, value_cm: circValueCm.trim() ? Number(circValueCm) : null, mano_global: circManoGlobal }
+        : null;
 
       const hasTests = showPruebas && Object.values(specificTests).some(v => v !== null);
       const specificTestsJson = hasTests ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v])) : null;
 
-      const hasMedian = showSensibilidad && Object.values(danielsMedian).some(v => v);
-      const hasCubital = showSensibilidad && Object.values(danielsCubital).some(v => v);
-      const hasRadial = showSensibilidad && Object.values(danielsRadial).some(v => v);
-      const medianJson = hasMedian ? JSON.stringify(danielsMedian) : null;
-      const cubitalJson = hasCubital ? JSON.stringify(danielsCubital) : null;
-      const radialJson = hasRadial ? JSON.stringify(danielsRadial) : null;
+      const buildDyn = (vals: [string, string, string]) => {
+        const nums = vals.map(v => v.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+        if (nums.length === 0) return null;
+        const avg = Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+        return { values: vals.map(v => (v.trim() ? Number(v) : null)), average: avg };
+      };
+      const dynMsdJson = showFuerza ? buildDyn(dynMsdVals) : null;
+      const dynMsiJson = showFuerza ? buildDyn(dynMsiVals) : null;
 
       const msParts: string[] = [];
       if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
