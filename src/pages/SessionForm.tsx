@@ -370,27 +370,30 @@ export default function SessionForm() {
   const [edema_obs, setEdemaObs] = useState("");
   const [godet_test, setGodetTest] = useState("");
 
-  // Circummetry
-  const [circ_wrist_msd, setCircWristMsd] = useState("");
-  const [circ_wrist_msi, setCircWristMsi] = useState("");
-  const [circ_global_msd, setCircGlobalMsd] = useState("");
-  const [circ_global_msi, setCircGlobalMsi] = useState("");
+  // Circometría (nuevo formato JSONB)
+  const [circ_reference, setCircReference] = useState("");
+  const [circ_side, setCircSide] = useState<"D" | "I">("D");
+  const [circ_value_cm, setCircValueCm] = useState("");
+  const [circ_mano_global, setCircManoGlobal] = useState(false);
 
-  // Goniometry PRE/POST with body part selector — nested by part
-  const emptyGonio = () =>
-    ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  // Goniometry PRE/POST — por lado MSD/MSI, nested by part
+  type GonioBySide = Record<"MSD" | "MSI", Record<GonioPartKey, Record<string, string>>>;
+  const emptySide = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  const emptyGonio = (): GonioBySide => ({ MSD: emptySide(), MSI: emptySide() });
+  const [gonio_side, setGonioSide] = useState<"MSD" | "MSI">("MSD");
   const [gonio_part, setGonioPart] = useState<GonioPartKey>("wrist");
-  const [all_pre_gonio, setAllPreGonio] = useState(emptyGonio);
+  const [all_pre_gonio, setAllPreGonio] = useState<GonioBySide>(emptyGonio);
   const [show_post_gonio, setShowPostGonio] = useState(false);
+  const [gonio_side_post, setGonioSidePost] = useState<"MSD" | "MSI">("MSD");
   const [gonio_part_post, setGonioPartPost] = useState<GonioPartKey>("wrist");
-  const [all_post_gonio, setAllPostGonio] = useState(emptyGonio);
+  const [all_post_gonio, setAllPostGonio] = useState<GonioBySide>(emptyGonio);
 
   // Fist closure
   const [fist_closure, setFistClosure] = useState("");
 
-  // Strength
-  const [dyn_msd, setDynMsd] = useState("");
-  const [dyn_msi, setDynMsi] = useState("");
+  // Strength — dinamometría con 3 mediciones por lado
+  const [dyn_msd_vals, setDynMsdVals] = useState<[string, string, string]>(["", "", ""]);
+  const [dyn_msi_vals, setDynMsiVals] = useState<[string, string, string]>(["", "", ""]);
   const [kapandji_val, setKapandjiVal] = useState("");
   const [kapandji_pain, setKapandjiPain] = useState(false);
   const [dppd_pulgar, setDppdPulgar] = useState("");
@@ -398,7 +401,6 @@ export default function SessionForm() {
   const [dppd_medio, setDppdMedio] = useState("");
   const [dppd_anular, setDppdAnular] = useState("");
   const [dppd_menique, setDppdMenique] = useState("");
-  const [strength_notes, setStrengthNotes] = useState("");
   const [danielsRows, setDanielsRows] = useState<{ id: number; muscle: string; grade: string }[]>([
     { id: 1, muscle: "", grade: "" },
   ]);
