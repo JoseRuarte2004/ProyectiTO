@@ -925,6 +925,17 @@ export default function SessionForm() {
       }
     }
 
+    // Si la sesión es de alta, marcar paciente y episodio como "discharged"
+    if (session_type === "discharge") {
+      await supabase.from("patients").update({ status: "discharged" }).eq("id", patientId!);
+      if (activeEpisodeId) {
+        await supabase
+          .from("treatment_episodes")
+          .update({ status: "discharged", discharge_date: session_date })
+          .eq("id", activeEpisodeId);
+      }
+    }
+
     setSaving(false);
     toast.success(isEditMode ? "Sesión actualizada correctamente" : "Sesión registrada correctamente");
     navigate(`/patients/${patientId}`);
