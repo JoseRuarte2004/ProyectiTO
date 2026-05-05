@@ -1378,12 +1378,37 @@ function SessionTimeline({ sessions, analEvals, funcEvals, patientId, onDeleted 
   const handleDeleteSession = async () => {
     if (!deleteSession || deleteSession.session_type === "admission") return;
     setDeleting(true);
+    const wasDischarge = deleteSession.session_type === "discharge";
+    const episodeId = deleteSession.episode_id;
     const { error } = await supabase.from("therapy_sessions").update({ is_deleted: true }).eq("id", deleteSession.id).eq("patient_id", patientId);
-    setDeleting(false);
     if (error) {
-      toast.error("Error al eliminar la sesión");
+      console.error("Error al eliminar la sesión:", error);
+      setDeleting(false);
+      toast.error(`Error al eliminar la sesión: ${error.message}`);
       return;
     }
+
+    // Si la sesión eliminada era de alta, revertir estado si no quedan otras altas
+    if (wasDischarge) {
+      const { data: remaining } = await supabase
+        .from("therapy_sessions")
+        .select("id")
+        .eq("patient_id", patientId)
+        .eq("session_type", "discharge")
+        .eq("is_deleted", false)
+        .limit(1);
+      if (!remaining || remaining.length === 0) {
+        await supabase.from("patients").update({ status: "active" }).eq("id", patientId);
+        if (episodeId) {
+          await supabase
+            .from("treatment_episodes")
+            .update({ status: "active", discharge_date: null })
+            .eq("id", episodeId);
+        }
+      }
+    }
+
+    setDeleting(false);
     toast.success("Sesión eliminada correctamente");
     setDeleteSession(null);
     onDeleted();
