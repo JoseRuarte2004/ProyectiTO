@@ -1,23 +1,36 @@
-## Vista de paciente: usar pantalla completa vertical
+## Fix: marcar paciente como "Dado de alta" al guardar sesión de alta
 
-**Problema:** En `/patients/:id` aparece una franja vacía debajo porque el contenedor calcula su altura como `calc(100vh - 56px)` reservando espacio para el header móvil — pero en desktop ese header no existe (`lg:hidden`), por lo que sobran 56px.
+**Problema:** Cuando se guarda una sesión con `session_type = "discharge"`, sólo se inserta la sesión en `therapy_sessions`, pero no se actualiza:
+- `patients.status` → sigue en `active`
+- `treatment_episodes.status` del episodio activo → sigue en `active`
+
+Por eso el paciente no aparece como dado de alta en el listado ni en su ficha.
 
 ### Cambio
 
-**`src/pages/PatientProfile.tsx`** (línea 190):
+**`src/pages/SessionForm.tsx`** — en `handleSave`, después del `if (editingAnEval)` block (alrededor de línea 926, antes de `setSaving(false)` y `toast.success`), agregar:
 
-Reemplazar:
-```tsx
-<div className="flex flex-col -m-4 md:-m-6 lg:-m-8 overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
+```ts
+// Si la sesión es de alta, marcar paciente y episodio como "discharged"
+if (session_type === "discharge") {
+  await supabase
+    .from("patients")
+    .update({ status: "discharged" })
+    .eq("id", patientId!);
+
+  if (activeEpisodeId) {
+    await supabase
+      .from("treatment_episodes")
+      .update({ status: "discharged", discharge_date: session_date })
+      .eq("id", activeEpisodeId);
+  }
+}
 ```
 
-Por:
-```tsx
-<div className="flex flex-col -m-4 md:-m-6 lg:-m-8 overflow-hidden h-[calc(100vh-56px)] lg:h-screen">
-```
-
-Así en mobile/tablet sigue restando los 56px del header, y en desktop (`lg:`, donde el header está oculto) ocupa toda la altura del viewport.
+El trigger `handle_patient_discharge` ya existe y completa `discharged_at` automáticamente cuando `status` pasa a `discharged`.
 
 ### No se toca
 
-Resto del layout, sidebar, ni los paddings internos.
+- Lógica de creación de admisión / sesiones de seguimiento.
+- Visualización en `PatientProfile` (ya detecta `discharge_session` y muestra el banner).
+- Filtros del listado (`Patients.tsx` ya tiene la opción `discharged`).
