@@ -1012,7 +1012,6 @@ function MeasurementsBlock({ e }: { e: any }) {
       </p>
     );
   };
-  const hasKendall = !!(e.muscle_strength_median || e.muscle_strength_cubital || e.muscle_strength_radial);
   const danielsArr: { muscle: string; grade: string }[] = (() => {
     const raw = e.muscle_strength_daniels;
     if (!raw) return [];
@@ -1022,8 +1021,8 @@ function MeasurementsBlock({ e }: { e: any }) {
     return arr.filter((r: any) => r && typeof r === "object" && r.muscle && r.grade);
   })();
   const hasDaniels = danielsArr.length > 0;
-  const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi) || nn(e.dynamometer_notes)
-    || nn(e.muscle_strength) || hasDppdJson || hasKendall || hasDaniels;
+  const hasStrength = nn(e.dynamometer_msd) || nn(e.dynamometer_msi)
+    || nn(e.muscle_strength) || hasDppdJson || hasDaniels;
 
   // ---------- SENSIBILIDAD ----------
   const hasSensitivity = !!(e.sensitivity_tacto_ligero || e.sensitivity_dos_puntos || e.sensitivity_picking_up || e.sensitivity_semmes_weinstein || e.sensitivity_toco_pincho || e.sensitivity_temperatura || e.sensitivity);
