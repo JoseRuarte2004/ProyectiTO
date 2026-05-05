@@ -301,7 +301,20 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
             </AccordionContent>
           </AccordionItem>
 
-          {/* SECTION 6: Pruebas Específicas */}
+          {/* SECTION 6: Estado Trófico y Cicatriz */}
+          <AccordionItem value="trofico">
+            <AccordionTrigger className="text-sm font-semibold">Estado Trófico y Cicatriz</AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <div className="space-y-1"><Label className="text-xs">Estado trófico</Label><Textarea value={form.trophic_state} onChange={e => u("trophic_state", e.target.value)} rows={2} /></div>
+              <div className="space-y-1"><Label className="text-xs">Cicatriz (descripción general)</Label><Textarea value={form.scar} onChange={e => u("scar", e.target.value)} rows={2} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1"><Label className="text-xs">Escala Vancouver VSS (0-15)</Label><Input type="number" min={0} max={15} value={form.vancouver_score} onChange={e => u("vancouver_score", e.target.value)} /></div>
+                <div className="space-y-1"><Label className="text-xs">Escala OSAS observador (0-60)</Label><Input type="number" min={0} max={60} value={form.osas_score} onChange={e => u("osas_score", e.target.value)} /></div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* SECTION 7: Pruebas Específicas */}
           <AccordionItem value="pruebas">
             <AccordionTrigger className="text-sm font-semibold">Pruebas Específicas</AccordionTrigger>
             <AccordionContent className="space-y-2 pt-2">
@@ -330,19 +343,6 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
                   </div>
                 );
               })}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* SECTION 7: Estado Trófico y Cicatriz */}
-          <AccordionItem value="trofico">
-            <AccordionTrigger className="text-sm font-semibold">Estado Trófico y Cicatriz</AccordionTrigger>
-            <AccordionContent className="space-y-3 pt-2">
-              <div className="space-y-1"><Label className="text-xs">Estado trófico</Label><Textarea value={form.trophic_state} onChange={e => u("trophic_state", e.target.value)} rows={2} /></div>
-              <div className="space-y-1"><Label className="text-xs">Cicatriz (descripción general)</Label><Textarea value={form.scar} onChange={e => u("scar", e.target.value)} rows={2} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">Escala Vancouver VSS (0-15)</Label><Input type="number" min={0} max={15} value={form.vancouver_score} onChange={e => u("vancouver_score", e.target.value)} /></div>
-                <div className="space-y-1"><Label className="text-xs">Escala OSAS observador (0-60)</Label><Input type="number" min={0} max={60} value={form.osas_score} onChange={e => u("osas_score", e.target.value)} /></div>
-              </div>
             </AccordionContent>
           </AccordionItem>
 
@@ -603,6 +603,16 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="trofico">
+            <AccordionTrigger className="text-sm font-semibold">Estado Trófico y Cicatriz</AccordionTrigger>
+            <AccordionContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <Row label="Estado trófico" value={e.trophic_state} />
+              <Row label="Cicatriz" value={e.scar} />
+              <Row label="Vancouver VSS" value={e.vancouver_score != null ? `${e.vancouver_score}/15` : null} />
+              <Row label="OSAS observador" value={e.osas_score != null ? `${e.osas_score}/60` : null} />
+            </AccordionContent>
+          </AccordionItem>
+
           <AccordionItem value="pruebas">
             <AccordionTrigger className="text-sm font-semibold">Pruebas Específicas</AccordionTrigger>
             <AccordionContent className="space-y-1 pt-2">
@@ -616,16 +626,6 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
                   </div>
                 ))
               ) : <p className="text-sm text-muted-foreground">No se registraron pruebas.</p>}
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="trofico">
-            <AccordionTrigger className="text-sm font-semibold">Estado Trófico y Cicatriz</AccordionTrigger>
-            <AccordionContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <Row label="Estado trófico" value={e.trophic_state} />
-              <Row label="Cicatriz" value={e.scar} />
-              <Row label="Vancouver VSS" value={e.vancouver_score != null ? `${e.vancouver_score}/15` : null} />
-              <Row label="OSAS observador" value={e.osas_score != null ? `${e.osas_score}/60` : null} />
             </AccordionContent>
           </AccordionItem>
 

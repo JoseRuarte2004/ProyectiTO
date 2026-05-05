@@ -1588,29 +1588,6 @@ export function NewPatientForm() {
 
             </SubSection>
 
-            {/* Pruebas específicas */}
-            <SubSection title="Pruebas específicas" checked={showPruebas} onChange={setShowPruebas}>
-              <div className="flex flex-wrap gap-2">
-                {SPECIFIC_TESTS.map(t => {
-                  const val = specificTests[t.key];
-                  const base = "h-9 px-3 text-xs font-medium rounded-lg border transition-colors inline-flex items-center gap-1.5";
-                  const cls = val === "positive"
-                    ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
-                    : val === "negative"
-                      ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
-                      : "border-border text-muted-foreground bg-white hover:bg-muted/40";
-                  return (
-                    <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
-                      {t.label}
-                      {val === "positive" && <span className="font-bold">+</span>}
-                      {val === "negative" && <span className="font-bold">−</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
-            </SubSection>
-
             {/* Cicatriz */}
             <SubSection title="Cicatriz" checked={showCicatriz} onChange={setShowCicatriz}>
               <div className="space-y-4 rounded-md border border-border p-3">
@@ -1703,6 +1680,29 @@ export function NewPatientForm() {
                   </div>
                 </div>
               </div>
+            </SubSection>
+
+            {/* Pruebas específicas */}
+            <SubSection title="Pruebas específicas" checked={showPruebas} onChange={setShowPruebas}>
+              <div className="flex flex-wrap gap-2">
+                {SPECIFIC_TESTS.map(t => {
+                  const val = specificTests[t.key];
+                  const base = "h-9 px-3 text-xs font-medium rounded-lg border transition-colors inline-flex items-center gap-1.5";
+                  const cls = val === "positive"
+                    ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100"
+                    : val === "negative"
+                      ? "bg-green-50 border-green-400 text-green-700 hover:bg-green-100"
+                      : "border-border text-muted-foreground bg-white hover:bg-muted/40";
+                  return (
+                    <button key={t.key} type="button" className={`${base} ${cls}`} onClick={() => cycleTest(t.key)}>
+                      {t.label}
+                      {val === "positive" && <span className="font-bold">+</span>}
+                      {val === "negative" && <span className="font-bold">−</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">Clic para alternar: sin evaluar → positivo (+) → negativo (−)</p>
             </SubSection>
 
             {/* Otros */}
