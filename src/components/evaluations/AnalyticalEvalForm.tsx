@@ -224,6 +224,12 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
 
               <div className="space-y-2 pt-2">
                 <Label className="text-xs font-semibold">Goniometría estructurada</Label>
+                <Tabs value={gonioSide} onValueChange={(v) => setGonioSide(v as "MSD" | "MSI")}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="MSD">MSD</TabsTrigger>
+                    <TabsTrigger value="MSI">MSI</TabsTrigger>
+                  </TabsList>
+                </Tabs>
                 {GONIOMETRY_GROUPS.map(group => (
                   <div key={group.label} className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">{group.label}</p>
@@ -237,8 +243,8 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
                               type="number"
                               className="h-7 text-xs"
                               placeholder="°"
-                              value={gonio[key] || ""}
-                              onChange={e => setGonio(prev => ({ ...prev, [key]: e.target.value }))}
+                              value={gonio[gonioSide][key] || ""}
+                              onChange={e => setGonio(prev => ({ ...prev, [gonioSide]: { ...prev[gonioSide], [key]: e.target.value } }))}
                             />
                           </div>
                         );
@@ -254,14 +260,34 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
           <AccordionItem value="fuerza">
             <AccordionTrigger className="text-sm font-semibold">Fuerza Muscular</AccordionTrigger>
             <AccordionContent className="space-y-3 pt-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">Dinamómetro MSD (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msd} onChange={e => u("dynamometer_msd", e.target.value)} /></div>
-                <div className="space-y-1"><Label className="text-xs">Dinamómetro MSI (kgf)</Label><Input type="number" step="0.1" value={form.dynamometer_msi} onChange={e => u("dynamometer_msi", e.target.value)} /></div>
-              </div>
+              {(["MSD", "MSI"] as const).map(side => {
+                const vals = side === "MSD" ? dynMsdVals : dynMsiVals;
+                const setVals = side === "MSD" ? setDynMsdVals : setDynMsiVals;
+                const avg = dynAvg(vals);
+                return (
+                  <div key={side} className="space-y-1">
+                    <Label className="text-xs">Dinamómetro {side} (kgf)</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 1, 2].map(i => (
+                        <Input
+                          key={i}
+                          type="number"
+                          step="0.1"
+                          placeholder={`Med. ${i + 1}`}
+                          value={vals[i]}
+                          onChange={e => {
+                            const next = [...vals] as [string, string, string];
+                            next[i] = e.target.value;
+                            setVals(next);
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {avg && <p className="text-[11px] text-muted-foreground">Promedio: {avg} kgf</p>}
+                  </div>
+                );
+              })}
               <div className="space-y-1"><Label className="text-xs">Fuerza general (texto libre)</Label><Textarea value={form.muscle_strength} onChange={e => u("muscle_strength", e.target.value)} rows={2} /></div>
-              <div className="space-y-1"><Label className="text-xs">Nervio Mediano — Escala Daniels</Label><Textarea value={form.muscle_strength_median} onChange={e => u("muscle_strength_median", e.target.value)} rows={2} placeholder="Pronador redondo /5, Flexor largo del pulgar /5..." /></div>
-              <div className="space-y-1"><Label className="text-xs">Nervio Cubital — Escala Daniels</Label><Textarea value={form.muscle_strength_cubital} onChange={e => u("muscle_strength_cubital", e.target.value)} rows={2} placeholder="Add pulgar /5, Flexor corto del pulgar /5..." /></div>
-              <div className="space-y-1"><Label className="text-xs">Nervio Radial — Escala Daniels</Label><Textarea value={form.muscle_strength_radial} onChange={e => u("muscle_strength_radial", e.target.value)} rows={2} placeholder="Extensor largo del pulgar /5, Extensor del índice /5..." /></div>
             </AccordionContent>
           </AccordionItem>
 
