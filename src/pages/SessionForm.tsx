@@ -580,11 +580,10 @@ export default function SessionForm() {
           setGodetTest(ae.godet_test || "");
           setShowEdema(!!(ae.edema || ae.godet_test || ae.edema_circummetry));
           const circ: any = ae.edema_circummetry;
-          if (circ && typeof circ === "object" && !Array.isArray(circ)) {
-            setCircReference(circ.reference || "");
-            setCircSide(circ.side === "I" ? "I" : "D");
-            setCircValueCm(circ.value_cm != null ? String(circ.value_cm) : "");
-            setCircManoGlobal(!!circ.mano_global);
+          if (isNewEdemaFormat(circ)) {
+            const norm = normalizeEdemaValue(circ);
+            setEdemaCircSano(norm.sano);
+            setEdemaCircAfectado(norm.afectado);
           }
           setShowMobility(!!(ae.goniometry || ae.arom || ae.prom || ae.kapandji));
           if (ae.goniometry && typeof ae.goniometry === "object") {
