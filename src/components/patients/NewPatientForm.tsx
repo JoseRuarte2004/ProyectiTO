@@ -557,8 +557,6 @@ export function NewPatientForm() {
   const [kapandjiVal, setKapandjiVal] = useState("");
   const [kapandjiPain, setKapandjiPain] = useState(false);
   const [fistClosure, setFistClosure] = useState("");
-  const [dynamometerMsd, setDynamometerMsd] = useState("");
-  const [dynamometerMsi, setDynamometerMsi] = useState("");
   const [dynMsdVals, setDynMsdVals] = useState<[string, string, string]>(["", "", ""]);
   const [dynMsiVals, setDynMsiVals] = useState<[string, string, string]>(["", "", ""]);
   const [danielsRows, setDanielsRows] = useState<{ id: number; muscle: string; grade: string }[]>([
