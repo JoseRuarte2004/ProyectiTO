@@ -113,35 +113,8 @@ const SPECIFIC_TESTS = [
 
 type TestResult = "positive" | "negative" | null;
 
-// ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0", "1", "2", "3", "4", "5"];
+// ── Daniels grades ──
 const DANIELS_FULL_GRADES = ["0", "1", "1+", "2-", "2", "2+", "3-", "3", "3+", "4-", "4", "4+", "5"];
-
-const MEDIAN_MUSCLES = [
-  "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
-  "Flexor profundo 1 y 2", "Palmar mayor", "Palmar menor",
-  "Abd corto del pulgar", "Oponente del pulgar", "Flexor corto del pulgar",
-  "Lumbricales 1 y 2", "Pronador cuadrado",
-];
-const CUBITAL_MUSCLES = [
-  "Aductor del pulgar", "Flexor corto del pulgar", "Abd del meñique",
-  "Oponente del meñique", "Flexor del meñique", "Interóseos dorsales",
-  "Interóseos palmares", "Lumbricales 3 y 4", "Flexor profundo 3 y 4",
-  "Cubital anterior",
-];
-const RADIAL_MUSCLES = [
-  "Extensor largo del pulgar", "Extensor corto del pulgar", "Abd largo del pulgar",
-  "Extensor del índice", "Extensor del meñique", "Extensor común dedos",
-  "Primer radial externo", "Segundo radial externo",
-];
-
-function muscleKey(name: string) {
-  return name
-    .toLowerCase()
-    .replace(/[áéíóú]/g, (m) => ({ á: "a", é: "e", í: "i", ó: "o", ú: "u" } as any)[m] || m)
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
-}
 
 // ── Cicatriz: opciones planilla ──
 const SCAR_OPTIONS: Record<string, string[]> = {
