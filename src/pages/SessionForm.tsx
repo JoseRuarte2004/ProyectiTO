@@ -370,27 +370,30 @@ export default function SessionForm() {
   const [edema_obs, setEdemaObs] = useState("");
   const [godet_test, setGodetTest] = useState("");
 
-  // Circummetry
-  const [circ_wrist_msd, setCircWristMsd] = useState("");
-  const [circ_wrist_msi, setCircWristMsi] = useState("");
-  const [circ_global_msd, setCircGlobalMsd] = useState("");
-  const [circ_global_msi, setCircGlobalMsi] = useState("");
+  // Circometría (nuevo formato JSONB)
+  const [circ_reference, setCircReference] = useState("");
+  const [circ_side, setCircSide] = useState<"D" | "I">("D");
+  const [circ_value_cm, setCircValueCm] = useState("");
+  const [circ_mano_global, setCircManoGlobal] = useState(false);
 
-  // Goniometry PRE/POST with body part selector — nested by part
-  const emptyGonio = () =>
-    ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  // Goniometry PRE/POST — por lado MSD/MSI, nested by part
+  type GonioBySide = Record<"MSD" | "MSI", Record<GonioPartKey, Record<string, string>>>;
+  const emptySide = () => ({ shoulder: {}, elbow: {}, wrist: {}, hand: {}, thumb: {} } as Record<GonioPartKey, Record<string, string>>);
+  const emptyGonio = (): GonioBySide => ({ MSD: emptySide(), MSI: emptySide() });
+  const [gonio_side, setGonioSide] = useState<"MSD" | "MSI">("MSD");
   const [gonio_part, setGonioPart] = useState<GonioPartKey>("wrist");
-  const [all_pre_gonio, setAllPreGonio] = useState(emptyGonio);
+  const [all_pre_gonio, setAllPreGonio] = useState<GonioBySide>(emptyGonio);
   const [show_post_gonio, setShowPostGonio] = useState(false);
+  const [gonio_side_post, setGonioSidePost] = useState<"MSD" | "MSI">("MSD");
   const [gonio_part_post, setGonioPartPost] = useState<GonioPartKey>("wrist");
-  const [all_post_gonio, setAllPostGonio] = useState(emptyGonio);
+  const [all_post_gonio, setAllPostGonio] = useState<GonioBySide>(emptyGonio);
 
   // Fist closure
   const [fist_closure, setFistClosure] = useState("");
 
-  // Strength
-  const [dyn_msd, setDynMsd] = useState("");
-  const [dyn_msi, setDynMsi] = useState("");
+  // Strength — dinamometría con 3 mediciones por lado
+  const [dyn_msd_vals, setDynMsdVals] = useState<[string, string, string]>(["", "", ""]);
+  const [dyn_msi_vals, setDynMsiVals] = useState<[string, string, string]>(["", "", ""]);
   const [kapandji_val, setKapandjiVal] = useState("");
   const [kapandji_pain, setKapandjiPain] = useState(false);
   const [dppd_pulgar, setDppdPulgar] = useState("");
@@ -398,7 +401,6 @@ export default function SessionForm() {
   const [dppd_medio, setDppdMedio] = useState("");
   const [dppd_anular, setDppdAnular] = useState("");
   const [dppd_menique, setDppdMenique] = useState("");
-  const [strength_notes, setStrengthNotes] = useState("");
   const [danielsRows, setDanielsRows] = useState<{ id: number; muscle: string; grade: string }[]>([
     { id: 1, muscle: "", grade: "" },
   ]);
@@ -519,28 +521,47 @@ export default function SessionForm() {
           setEdemaObs(ae.edema || "");
           setGodetTest(ae.godet_test || "");
           setShowEdema(!!(ae.edema || ae.godet_test || ae.edema_circummetry));
-          const circ = ae.edema_circummetry || "";
-          setCircWristMsd(circ.match(/MSD: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
-          setCircGlobalMsd(circ.match(/MSD: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
-          setCircWristMsi(circ.match(/MSI: ([^-|]+)cm muñeca/)?.[1]?.trim() || "");
-          setCircGlobalMsi(circ.match(/MSI: [^-|]+cm muñeca \/ ([^-|]+)cm global/)?.[1]?.trim() || "");
+          const circ: any = ae.edema_circummetry;
+          if (circ && typeof circ === "object" && !Array.isArray(circ)) {
+            setCircReference(circ.reference || "");
+            setCircSide(circ.side === "I" ? "I" : "D");
+            setCircValueCm(circ.value_cm != null ? String(circ.value_cm) : "");
+            setCircManoGlobal(!!circ.mano_global);
+          }
           setShowMobility(!!(ae.goniometry || ae.arom || ae.prom || ae.kapandji));
           if (ae.goniometry && typeof ae.goniometry === "object") {
             const toGonio = (arr: any) => {
-              const base = emptyGonio();
+              const base = emptySide();
               if (Array.isArray(arr)) arr.forEach((g: any) => { if (g?.body_part && base[g.body_part as GonioPartKey]) base[g.body_part as GonioPartKey] = Object.fromEntries(Object.entries(g.values || {}).map(([k,v]) => [k, String(v)])); });
               return base;
             };
-            setAllPreGonio(toGonio((ae.goniometry as any).pre));
-            setAllPostGonio(toGonio((ae.goniometry as any).post));
-            setShowPostGonio(Array.isArray((ae.goniometry as any).post) && (ae.goniometry as any).post.length > 0);
+            const g: any = ae.goniometry;
+            const hasNew = g.MSD || g.MSI;
+            if (hasNew) {
+              setAllPreGonio({ MSD: toGonio(g.MSD?.pre), MSI: toGonio(g.MSI?.pre) });
+              setAllPostGonio({ MSD: toGonio(g.MSD?.post), MSI: toGonio(g.MSI?.post) });
+              const hasPost = (Array.isArray(g.MSD?.post) && g.MSD.post.length) || (Array.isArray(g.MSI?.post) && g.MSI.post.length);
+              setShowPostGonio(!!hasPost);
+            } else {
+              // Legacy { pre, post } → bajo MSD
+              setAllPreGonio({ MSD: toGonio(g.pre), MSI: emptySide() });
+              setAllPostGonio({ MSD: toGonio(g.post), MSI: emptySide() });
+              setShowPostGonio(Array.isArray(g.post) && g.post.length > 0);
+            }
           }
           const kap = ae.kapandji || "";
           setKapandjiVal(kap.match(/^(\d+)/)?.[1] || "");
           setKapandjiPain(kap.includes("dolor"));
-          setDynMsd(ae.dynamometer_msd != null ? String(ae.dynamometer_msd) : "");
-          setDynMsi(ae.dynamometer_msi != null ? String(ae.dynamometer_msi) : "");
-          setStrengthNotes((ae.muscle_strength || "").replace(/Cierre de puño: .*?( — )?/, ""));
+          const parseDyn = (v: any): [string, string, string] => {
+            if (v == null) return ["", "", ""];
+            if (typeof v === "object" && Array.isArray(v.values)) {
+              const a = v.values; return [a[0]!=null?String(a[0]):"", a[1]!=null?String(a[1]):"", a[2]!=null?String(a[2]):""];
+            }
+            if (typeof v === "number") return [String(v), "", ""];
+            return ["", "", ""];
+          };
+          setDynMsdVals(parseDyn(ae.dynamometer_msd));
+          setDynMsiVals(parseDyn(ae.dynamometer_msi));
           setShowStrength(!!(ae.dynamometer_msd || ae.dynamometer_msi || ae.muscle_strength || ae.muscle_strength_daniels || ae.dppd_fingers));
           const fist = (ae.muscle_strength || "").match(/Cierre de puño: ([^—]+)/)?.[1]?.trim() || "";
           setFistClosure(fist);
@@ -701,28 +722,52 @@ export default function SessionForm() {
         : null
       : null;
 
-    // ── Edema circometry (gated) ──
-    const circParts: string[] = [];
-    if (showEdema) {
-      if (circ_wrist_msd || circ_global_msd)
-        circParts.push(`MSD: ${circ_wrist_msd || "-"}cm muñeca / ${circ_global_msd || "-"}cm global`);
-      if (circ_wrist_msi || circ_global_msi)
-        circParts.push(`MSI: ${circ_wrist_msi || "-"}cm muñeca / ${circ_global_msi || "-"}cm global`);
-    }
-    const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
+    // ── Edema circometría (gated) — JSONB ──
+    const edemaCirc = showEdema && (circ_reference.trim() || circ_value_cm.trim())
+      ? {
+          reference: circ_reference.trim(),
+          side: circ_side,
+          value_cm: circ_value_cm.trim() ? Number(circ_value_cm) : null,
+          mano_global: circ_mano_global,
+        }
+      : null;
 
-    // ── Mobility (gated) ──
-    const aromVal = showMobility ? buildAllGonioText(all_pre_gonio) : null;
-    const promVal = showMobility && show_post_gonio ? buildAllGonioText(all_post_gonio) : null;
-    const preJsonArr = showMobility ? buildAllGonioJsonArray(all_pre_gonio) : null;
-    const postJsonArr = showMobility && show_post_gonio ? buildAllGonioJsonArray(all_post_gonio) : null;
-    const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
+    // ── Mobility (gated) — por lado MSD/MSI ──
+    const buildSideJsonb = (allVals: GonioBySide) => {
+      const out: any = {};
+      (["MSD", "MSI"] as const).forEach((side) => {
+        const pre = showMobility ? buildAllGonioJsonArray(allVals[side]) : null;
+        const post = showMobility && show_post_gonio ? buildAllGonioJsonArray(all_post_gonio[side]) : null;
+        if (pre || post) out[side] = { pre, post };
+      });
+      return Object.keys(out).length > 0 ? out : null;
+    };
+    const buildSideText = (allVals: GonioBySide) => {
+      const parts: string[] = [];
+      (["MSD", "MSI"] as const).forEach((side) => {
+        const t = buildAllGonioText(allVals[side]);
+        if (t) parts.push(`[${side}] ${t}`);
+      });
+      return parts.length > 0 ? parts.join(" ") : null;
+    };
+    const aromVal = showMobility ? buildSideText(all_pre_gonio) : null;
+    const promVal = showMobility && show_post_gonio ? buildSideText(all_post_gonio) : null;
+    const gonioJsonb = showMobility ? buildSideJsonb(all_pre_gonio) : null;
     const kapandjiFinal = showMobility && kapandji_val ? `${kapandji_val}/10${kapandji_pain ? " con dolor" : ""}` : null;
 
-    // ── Strength (gated) ──
+    // ── Dinamometría: 3 mediciones + promedio ──
+    const buildDyn = (vals: [string, string, string]) => {
+      const nums = vals.map((v) => v.trim()).filter(Boolean).map(Number).filter((n) => !isNaN(n));
+      if (nums.length === 0) return null;
+      const avg = Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+      return { values: vals.map((v) => (v.trim() ? Number(v) : null)), average: avg };
+    };
+    const dynMsdJson = showStrength ? buildDyn(dyn_msd_vals) : null;
+    const dynMsiJson = showStrength ? buildDyn(dyn_msi_vals) : null;
+
+    // ── Strength notes ──
     const msParts: string[] = [];
     if (showMobility && fist_closure) msParts.push(`Cierre de puño: ${fist_closure}`);
-    if (showStrength && strength_notes) msParts.push(strength_notes);
     const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
     // ── Daniels rows (gated by strength) ──
@@ -754,13 +799,6 @@ export default function SessionForm() {
       ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v]))
       : null;
 
-    // ── Daniels by nerve (gated by sensitivity, where the table lives) ──
-    const hasMedian = showSensitivity && Object.values(daniels_median).some((v) => v);
-    const hasCubital = showSensitivity && Object.values(daniels_cubital).some((v) => v);
-    const hasRadial = showSensitivity && Object.values(daniels_radial).some((v) => v);
-    const medianJson = hasMedian ? JSON.stringify(daniels_median) : null;
-    const cubitalJson = hasCubital ? JSON.stringify(daniels_cubital) : null;
-    const radialJson = hasRadial ? JSON.stringify(daniels_radial) : null;
 
     const sessionPayload = {
       patient_id: patientId!,
@@ -873,8 +911,8 @@ export default function SessionForm() {
         aromVal,
         promVal,
         showMobility && fist_closure,
-        showStrength && dyn_msd,
-        showStrength && dyn_msi,
+        dynMsdJson,
+        dynMsiJson,
         kapandjiFinal,
         msVal,
         danielsJson,
@@ -889,9 +927,6 @@ export default function SessionForm() {
         showOtros && posture,
         showOtros && emotional_state,
         specificTestsJson,
-        medianJson,
-        cubitalJson,
-        radialJson,
         gonioJsonb,
         dppdFingersJson,
         scarEvalJson,
@@ -916,13 +951,13 @@ export default function SessionForm() {
       arom: aromVal,
       prom: promVal,
       goniometry: gonioJsonb,
-      dynamometer_msd: showStrength && dyn_msd ? parseFloat(dyn_msd) : null,
-      dynamometer_msi: showStrength && dyn_msi ? parseFloat(dyn_msi) : null,
+      dynamometer_msd: dynMsdJson as any,
+      dynamometer_msi: dynMsiJson as any,
       kapandji: kapandjiFinal,
       muscle_strength: msVal,
-      muscle_strength_median: medianJson,
-      muscle_strength_cubital: cubitalJson,
-      muscle_strength_radial: radialJson,
+      muscle_strength_median: null,
+      muscle_strength_cubital: null,
+      muscle_strength_radial: null,
       muscle_strength_daniels: danielsJson as any,
       specific_tests: specificTestsJson,
       dppd_fingers: dppdFingersJson,
@@ -1320,22 +1355,36 @@ export default function SessionForm() {
             </div>
             <div>
               <h4 className="text-xs font-medium text-muted-foreground mb-2">Circometría</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Muñeca MSD (cm)</Label>
-                  <Input type="number" step="0.1" value={circ_wrist_msd} onChange={(e) => setCircWristMsd(e.target.value)} className={inputClass} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <Label>Reparo anatómico de referencia</Label>
+                  <Input
+                    value={circ_reference}
+                    onChange={(e) => setCircReference(e.target.value)}
+                    placeholder="ej: articulación MCF, tercio distal antebrazo"
+                    className={inputClass}
+                  />
                 </div>
                 <div>
-                  <Label>Muñeca MSI (cm)</Label>
-                  <Input type="number" step="0.1" value={circ_wrist_msi} onChange={(e) => setCircWristMsi(e.target.value)} className={inputClass} />
+                  <Label>Lado</Label>
+                  <RadioGroup value={circ_side} onValueChange={(v) => setCircSide(v as "D" | "I")} className="flex gap-6 pt-2">
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="D" id="circ-d-sf" />
+                      <Label htmlFor="circ-d-sf" className="font-normal cursor-pointer text-sm">Derecho</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="I" id="circ-i-sf" />
+                      <Label htmlFor="circ-i-sf" className="font-normal cursor-pointer text-sm">Izquierdo</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
                 <div>
-                  <Label>Global MSD (cm)</Label>
-                  <Input type="number" step="0.1" value={circ_global_msd} onChange={(e) => setCircGlobalMsd(e.target.value)} className={inputClass} />
+                  <Label>Valor (cm)</Label>
+                  <Input type="number" step="0.1" value={circ_value_cm} onChange={(e) => setCircValueCm(e.target.value)} className={inputClass} />
                 </div>
-                <div>
-                  <Label>Global MSI (cm)</Label>
-                  <Input type="number" step="0.1" value={circ_global_msi} onChange={(e) => setCircGlobalMsi(e.target.value)} className={inputClass} />
+                <div className="sm:col-span-2 flex items-center gap-3">
+                  <Switch checked={circ_mano_global} onCheckedChange={setCircManoGlobal} id="circ-global-sf" />
+                  <Label htmlFor="circ-global-sf" className="font-normal cursor-pointer text-sm">Mano global</Label>
                 </div>
               </div>
             </div>
@@ -1343,13 +1392,19 @@ export default function SessionForm() {
 
           {/* Movilidad */}
           <SubSection title="Movilidad" checked={showMobility} onChange={setShowMobility}>
+            <Tabs value={gonio_side} onValueChange={(v) => { setGonioSide(v as "MSD" | "MSI"); setGonioSidePost(v as "MSD" | "MSI"); }} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="MSD">MSD</TabsTrigger>
+                <TabsTrigger value="MSI">MSI</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <div>
-              <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría PRE</h4>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría PRE — {gonio_side}</h4>
               <GonioPartSelector value={gonio_part} onChange={setGonioPart} />
               <GonioGrid
                 partKey={gonio_part}
-                values={all_pre_gonio[gonio_part]}
-                setValues={(v) => setAllPreGonio((prev) => ({ ...prev, [gonio_part]: v }))}
+                values={all_pre_gonio[gonio_side][gonio_part]}
+                setValues={(v) => setAllPreGonio((prev) => ({ ...prev, [gonio_side]: { ...prev[gonio_side], [gonio_part]: v } }))}
               />
             </div>
             <div className="pt-2">
@@ -1361,11 +1416,12 @@ export default function SessionForm() {
               </div>
               {show_post_gonio && (
                 <>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría POST — {gonio_side}</h4>
                   <GonioPartSelector value={gonio_part_post} onChange={setGonioPartPost} />
                   <GonioGrid
                     partKey={gonio_part_post}
-                    values={all_post_gonio[gonio_part_post]}
-                    setValues={(v) => setAllPostGonio((prev) => ({ ...prev, [gonio_part_post]: v }))}
+                    values={all_post_gonio[gonio_side][gonio_part_post]}
+                    setValues={(v) => setAllPostGonio((prev) => ({ ...prev, [gonio_side]: { ...prev[gonio_side], [gonio_part_post]: v } }))}
                   />
                 </>
               )}
@@ -1404,26 +1460,35 @@ export default function SessionForm() {
 
           {/* Fuerza */}
           <SubSection title="Fuerza muscular" checked={showStrength} onChange={setShowStrength}>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Dinamómetro MSD (kg)</Label>
-                <Input type="number" step="0.1" value={dyn_msd} onChange={(e) => setDynMsd(e.target.value)} className={inputClass} />
-              </div>
-              <div>
-                <Label>Dinamómetro MSI (kg)</Label>
-                <Input type="number" step="0.1" value={dyn_msi} onChange={(e) => setDynMsi(e.target.value)} className={inputClass} />
-              </div>
-            </div>
-            <div>
-              <Label>¿Qué evaluaste?</Label>
-              <Textarea
-                rows={2}
-                value={strength_notes}
-                onChange={(e) => setStrengthNotes(e.target.value)}
-                placeholder="Fuerza isométrica de puño en 5 posiciones..."
-                className={textareaClass}
-              />
-            </div>
+            {(["MSD", "MSI"] as const).map((side) => {
+              const vals = side === "MSD" ? dyn_msd_vals : dyn_msi_vals;
+              const setVals = side === "MSD" ? setDynMsdVals : setDynMsiVals;
+              const nums = vals.map((v) => v.trim()).filter(Boolean).map(Number).filter((n) => !isNaN(n));
+              const avg = nums.length > 0 ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1) : null;
+              return (
+                <div key={side}>
+                  <Label>Dinamómetro {side} (kgf)</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {[0, 1, 2].map((i) => (
+                      <Input
+                        key={i}
+                        type="number"
+                        step="0.1"
+                        placeholder={`Med. ${i + 1}`}
+                        value={vals[i]}
+                        onChange={(e) => {
+                          const next = [...vals] as [string, string, string];
+                          next[i] = e.target.value;
+                          setVals(next);
+                        }}
+                        className={inputClass}
+                      />
+                    ))}
+                  </div>
+                  {avg && <p className="text-xs text-muted-foreground mt-1">Promedio: {avg} kgf</p>}
+                </div>
+              );
+            })}
             <div>
               <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
               <div className="grid grid-cols-5 gap-2">
@@ -1543,33 +1608,6 @@ export default function SessionForm() {
               </div>
             </div>
 
-            {/* Tabla Kendall */}
-            <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-foreground mt-2 border border-border rounded-lg">
-                  <span className="font-semibold">Tabla Kendall (por nervio)</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${show_daniels ? "rotate-180" : ""}`} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Tabs defaultValue="median" className="mt-3">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="median" className="flex-1 text-xs">N. Mediano</TabsTrigger>
-                    <TabsTrigger value="cubital" className="flex-1 text-xs">N. Cubital</TabsTrigger>
-                    <TabsTrigger value="radial" className="flex-1 text-xs">N. Radial</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="median">
-                    <DanielsTable muscles={MEDIAN_MUSCLES} values={daniels_median} onChange={(k, v) => setDanielsMedian((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                  <TabsContent value="cubital">
-                    <DanielsTable muscles={CUBITAL_MUSCLES} values={daniels_cubital} onChange={(k, v) => setDanielsCubital((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                  <TabsContent value="radial">
-                    <DanielsTable muscles={RADIAL_MUSCLES} values={daniels_radial} onChange={(k, v) => setDanielsRadial((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                </Tabs>
-              </CollapsibleContent>
-            </Collapsible>
             <div>
               <Label>Observaciones</Label>
               <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
@@ -1618,7 +1656,6 @@ export default function SessionForm() {
             }
           >
             <div>
-              <h4 className="text-xs font-medium text-muted-foreground mb-2">Planilla</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Localización</Label>
@@ -1629,47 +1666,11 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" min={0} value={scar_longitud} onChange={(e) => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} className={inputClass} />
                 </div>
                 <div>
-                  <Label>Vascularización</Label>
-                  <Select value={scar_vascularizacion} onValueChange={setScarVascularizacion}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.vascularizacion.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Pigmentación</Label>
-                  <Select value={scar_pigmentacion} onValueChange={setScarPigmentacion}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.pigmentacion.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Flexibilidad</Label>
-                  <Select value={scar_flexibilidad} onValueChange={setScarFlexibilidad}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.flexibilidad.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <Label>Sensibilidad</Label>
                   <Select value={scar_sensibilidad} onValueChange={setScarSensibilidad}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
                       {SCAR_OPTIONS.sensibilidad.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Relieve</Label>
-                  <Select value={scar_relieve} onValueChange={setScarRelieve}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.relieve.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1684,7 +1685,7 @@ export default function SessionForm() {
                 </div>
               </div>
               <div className="mt-3">
-                <Label>Observaciones / Impresión estética</Label>
+                <Label>Observaciones</Label>
                 <Textarea rows={2} value={scar_observaciones} onChange={(e) => setScarObservaciones(e.target.value)} className={textareaClass} />
               </div>
             </div>

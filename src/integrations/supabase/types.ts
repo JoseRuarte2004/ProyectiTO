@@ -19,11 +19,11 @@ export type Database = {
           arom: string | null
           created_at: string
           dppd_fingers: Json | null
-          dynamometer_msd: number | null
-          dynamometer_msi: number | null
+          dynamometer_msd: Json | null
+          dynamometer_msi: Json | null
           dynamometer_notes: string | null
           edema: string | null
-          edema_circummetry: string | null
+          edema_circummetry: Json | null
           emotional_state: string | null
           episode_id: string | null
           evaluation_date: string
@@ -70,11 +70,11 @@ export type Database = {
           arom?: string | null
           created_at?: string
           dppd_fingers?: Json | null
-          dynamometer_msd?: number | null
-          dynamometer_msi?: number | null
+          dynamometer_msd?: Json | null
+          dynamometer_msi?: Json | null
           dynamometer_notes?: string | null
           edema?: string | null
-          edema_circummetry?: string | null
+          edema_circummetry?: Json | null
           emotional_state?: string | null
           episode_id?: string | null
           evaluation_date?: string
@@ -121,11 +121,11 @@ export type Database = {
           arom?: string | null
           created_at?: string
           dppd_fingers?: Json | null
-          dynamometer_msd?: number | null
-          dynamometer_msi?: number | null
+          dynamometer_msd?: Json | null
+          dynamometer_msi?: Json | null
           dynamometer_notes?: string | null
           edema?: string | null
-          edema_circummetry?: string | null
+          edema_circummetry?: Json | null
           emotional_state?: string | null
           episode_id?: string | null
           evaluation_date?: string
