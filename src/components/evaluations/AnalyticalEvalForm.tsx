@@ -434,7 +434,16 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
             <AccordionTrigger className="text-sm font-semibold">Edema</AccordionTrigger>
             <AccordionContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <Row label="Observación" value={e.edema} />
-              <Row label="Circometría" value={e.edema_circummetry} />
+              {(() => {
+                const c = e.edema_circummetry;
+                if (!c) return null;
+                if (typeof c === "object") {
+                  if (!c.reference && c.value_cm == null) return null;
+                  const txt = `${c.reference || ""}${c.side ? ` (${c.side})` : ""}${c.value_cm != null ? ` — ${c.value_cm} cm` : ""}${c.mano_global ? " · Mano global" : ""}`.trim();
+                  return <Row label="Circometría" value={txt} />;
+                }
+                return <Row label="Circometría" value={c} />;
+              })()}
               <Row label="Test de Godet" value={e.godet_test} />
             </AccordionContent>
           </AccordionItem>
