@@ -388,7 +388,7 @@ export default function SessionForm() {
   const [cli_medical_history, setCliMedicalHistory] = useState("");
   const [cli_pharma, setCliPharma] = useState("");
   const [cli_studies, setCliStudies] = useState("");
-  const [cli_next_oyt, setCliNextOyt] = useState("");
+  
   const [editingClinicalId, setEditingClinicalId] = useState<string | null>(null);
 
   // Perfil ocupacional (admission)
