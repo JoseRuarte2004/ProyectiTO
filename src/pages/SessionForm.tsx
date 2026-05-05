@@ -1392,13 +1392,19 @@ export default function SessionForm() {
 
           {/* Movilidad */}
           <SubSection title="Movilidad" checked={showMobility} onChange={setShowMobility}>
+            <Tabs value={gonio_side} onValueChange={(v) => { setGonioSide(v as "MSD" | "MSI"); setGonioSidePost(v as "MSD" | "MSI"); }} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="MSD">MSD</TabsTrigger>
+                <TabsTrigger value="MSI">MSI</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <div>
-              <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría PRE</h4>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría PRE — {gonio_side}</h4>
               <GonioPartSelector value={gonio_part} onChange={setGonioPart} />
               <GonioGrid
                 partKey={gonio_part}
-                values={all_pre_gonio[gonio_part]}
-                setValues={(v) => setAllPreGonio((prev) => ({ ...prev, [gonio_part]: v }))}
+                values={all_pre_gonio[gonio_side][gonio_part]}
+                setValues={(v) => setAllPreGonio((prev) => ({ ...prev, [gonio_side]: { ...prev[gonio_side], [gonio_part]: v } }))}
               />
             </div>
             <div className="pt-2">
@@ -1410,11 +1416,12 @@ export default function SessionForm() {
               </div>
               {show_post_gonio && (
                 <>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-2">Goniometría POST — {gonio_side}</h4>
                   <GonioPartSelector value={gonio_part_post} onChange={setGonioPartPost} />
                   <GonioGrid
                     partKey={gonio_part_post}
-                    values={all_post_gonio[gonio_part_post]}
-                    setValues={(v) => setAllPostGonio((prev) => ({ ...prev, [gonio_part_post]: v }))}
+                    values={all_post_gonio[gonio_side][gonio_part_post]}
+                    setValues={(v) => setAllPostGonio((prev) => ({ ...prev, [gonio_side]: { ...prev[gonio_side], [gonio_part_post]: v } }))}
                   />
                 </>
               )}
@@ -1453,26 +1460,35 @@ export default function SessionForm() {
 
           {/* Fuerza */}
           <SubSection title="Fuerza muscular" checked={showStrength} onChange={setShowStrength}>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Dinamómetro MSD (kg)</Label>
-                <Input type="number" step="0.1" value={dyn_msd} onChange={(e) => setDynMsd(e.target.value)} className={inputClass} />
-              </div>
-              <div>
-                <Label>Dinamómetro MSI (kg)</Label>
-                <Input type="number" step="0.1" value={dyn_msi} onChange={(e) => setDynMsi(e.target.value)} className={inputClass} />
-              </div>
-            </div>
-            <div>
-              <Label>¿Qué evaluaste?</Label>
-              <Textarea
-                rows={2}
-                value={strength_notes}
-                onChange={(e) => setStrengthNotes(e.target.value)}
-                placeholder="Fuerza isométrica de puño en 5 posiciones..."
-                className={textareaClass}
-              />
-            </div>
+            {(["MSD", "MSI"] as const).map((side) => {
+              const vals = side === "MSD" ? dyn_msd_vals : dyn_msi_vals;
+              const setVals = side === "MSD" ? setDynMsdVals : setDynMsiVals;
+              const nums = vals.map((v) => v.trim()).filter(Boolean).map(Number).filter((n) => !isNaN(n));
+              const avg = nums.length > 0 ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1) : null;
+              return (
+                <div key={side}>
+                  <Label>Dinamómetro {side} (kgf)</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {[0, 1, 2].map((i) => (
+                      <Input
+                        key={i}
+                        type="number"
+                        step="0.1"
+                        placeholder={`Med. ${i + 1}`}
+                        value={vals[i]}
+                        onChange={(e) => {
+                          const next = [...vals] as [string, string, string];
+                          next[i] = e.target.value;
+                          setVals(next);
+                        }}
+                        className={inputClass}
+                      />
+                    ))}
+                  </div>
+                  {avg && <p className="text-xs text-muted-foreground mt-1">Promedio: {avg} kgf</p>}
+                </div>
+              );
+            })}
             <div>
               <Label>DPPD (cm) — distancia pulpejo-pliegue distal</Label>
               <div className="grid grid-cols-5 gap-2">
