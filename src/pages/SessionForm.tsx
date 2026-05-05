@@ -942,17 +942,12 @@ export default function SessionForm() {
         surgery_date: cli_surgery_date || null,
         injury_mechanism: cli_injury_mechanism.trim() || null,
         treatment_type: cli_treatment_type || null,
-        weeks_post_injury: cli_weeks_post_injury ? parseInt(cli_weeks_post_injury) : null,
-        days_post_injury: cli_days_post_injury ? parseInt(cli_days_post_injury) : null,
-        weeks_post_surgery: cli_weeks_post_surgery ? parseInt(cli_weeks_post_surgery) : null,
-        days_post_surgery: cli_days_post_surgery ? parseInt(cli_days_post_surgery) : null,
         immobilization_weeks: cli_immob_weeks ? parseInt(cli_immob_weeks) : null,
         immobilization_days: cli_immob_days ? parseInt(cli_immob_days) : null,
         immobilization_type: cli_immob_type.trim() || null,
         medical_history: cli_medical_history.trim() || null,
         pharmacological_treatment: cli_pharma.trim() || null,
         studies: cli_studies.trim() || null,
-        next_oyt_appointment: cli_next_oyt || null,
       };
       if (editingClinicalId) {
         await supabase.from("patient_clinical_records").update(cliPayload).eq("id", editingClinicalId);
