@@ -799,13 +799,6 @@ export default function SessionForm() {
       ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v]))
       : null;
 
-    // ── Daniels by nerve (gated by sensitivity, where the table lives) ──
-    const hasMedian = showSensitivity && Object.values(daniels_median).some((v) => v);
-    const hasCubital = showSensitivity && Object.values(daniels_cubital).some((v) => v);
-    const hasRadial = showSensitivity && Object.values(daniels_radial).some((v) => v);
-    const medianJson = hasMedian ? JSON.stringify(daniels_median) : null;
-    const cubitalJson = hasCubital ? JSON.stringify(daniels_cubital) : null;
-    const radialJson = hasRadial ? JSON.stringify(daniels_radial) : null;
 
     const sessionPayload = {
       patient_id: patientId!,
