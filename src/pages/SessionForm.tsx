@@ -723,10 +723,10 @@ export default function SessionForm() {
 
       // Cargar baseline MS Sano (de la sesión de admisión del episodio) para follow_up/discharge
       if (!isAdmission && patientId) {
-        const baseQ = supabase.from("sessions").select("id").eq("patient_id", patientId).eq("session_type", "admission");
+        const q: any = supabase.from("sessions").select("id").eq("patient_id", patientId).eq("session_type", "admission");
         const { data: admSession } = epId
-          ? await baseQ.eq("episode_id", epId).maybeSingle()
-          : await baseQ.maybeSingle();
+          ? await q.eq("episode_id", epId).maybeSingle()
+          : await q.maybeSingle();
         if (admSession?.id) {
           const { data: admEval } = await supabase
             .from("analytical_evaluations")
