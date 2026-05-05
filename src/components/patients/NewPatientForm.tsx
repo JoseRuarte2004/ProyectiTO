@@ -1590,33 +1590,6 @@ export function NewPatientForm() {
                 <Textarea value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} rows={2} />
               </div>
 
-              {/* Tabla Kendall */}
-              <Collapsible open={showDaniels} onOpenChange={setShowDaniels}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-full justify-between text-xs text-muted-foreground mt-2">
-                    Tabla Kendall
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showDaniels ? "rotate-180" : ""}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <Tabs defaultValue="median" className="mt-2">
-                    <TabsList className="w-full">
-                      <TabsTrigger value="median" className="flex-1 text-xs">N. Mediano</TabsTrigger>
-                      <TabsTrigger value="cubital" className="flex-1 text-xs">N. Cubital</TabsTrigger>
-                      <TabsTrigger value="radial" className="flex-1 text-xs">N. Radial</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="median">
-                      <DanielsTable muscles={MEDIAN_MUSCLES} values={danielsMedian} onChange={(k, v) => setDanielsMedian(p => ({ ...p, [k]: v }))} />
-                    </TabsContent>
-                    <TabsContent value="cubital">
-                      <DanielsTable muscles={CUBITAL_MUSCLES} values={danielsCubital} onChange={(k, v) => setDanielsCubital(p => ({ ...p, [k]: v }))} />
-                    </TabsContent>
-                    <TabsContent value="radial">
-                      <DanielsTable muscles={RADIAL_MUSCLES} values={danielsRadial} onChange={(k, v) => setDanielsRadial(p => ({ ...p, [k]: v }))} />
-                    </TabsContent>
-                  </Tabs>
-                </CollapsibleContent>
-              </Collapsible>
             </SubSection>
 
             {/* Pruebas específicas */}
