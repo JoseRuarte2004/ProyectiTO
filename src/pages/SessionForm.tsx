@@ -1608,33 +1608,6 @@ export default function SessionForm() {
               </div>
             </div>
 
-            {/* Tabla Kendall */}
-            <Collapsible open={show_daniels} onOpenChange={setShowDaniels}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-between text-sm text-foreground mt-2 border border-border rounded-lg">
-                  <span className="font-semibold">Tabla Kendall (por nervio)</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${show_daniels ? "rotate-180" : ""}`} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Tabs defaultValue="median" className="mt-3">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="median" className="flex-1 text-xs">N. Mediano</TabsTrigger>
-                    <TabsTrigger value="cubital" className="flex-1 text-xs">N. Cubital</TabsTrigger>
-                    <TabsTrigger value="radial" className="flex-1 text-xs">N. Radial</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="median">
-                    <DanielsTable muscles={MEDIAN_MUSCLES} values={daniels_median} onChange={(k, v) => setDanielsMedian((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                  <TabsContent value="cubital">
-                    <DanielsTable muscles={CUBITAL_MUSCLES} values={daniels_cubital} onChange={(k, v) => setDanielsCubital((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                  <TabsContent value="radial">
-                    <DanielsTable muscles={RADIAL_MUSCLES} values={daniels_radial} onChange={(k, v) => setDanielsRadial((p) => ({ ...p, [k]: v }))} />
-                  </TabsContent>
-                </Tabs>
-              </CollapsibleContent>
-            </Collapsible>
             <div>
               <Label>Observaciones</Label>
               <Textarea rows={2} value={sensitivity} onChange={(e) => setSensitivity(e.target.value)} className={textareaClass} />
