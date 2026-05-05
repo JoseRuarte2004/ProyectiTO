@@ -239,40 +239,6 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 
-function DanielsTable({
-  muscles,
-  values,
-  onChange,
-}: {
-  muscles: string[];
-  values: Record<string, string>;
-  onChange: (k: string, v: string) => void;
-}) {
-  return (
-    <div className="space-y-1">
-      {muscles.map((m) => {
-        const k = muscleKey(m);
-        return (
-          <div key={k} className="flex items-center gap-2">
-            <span className="text-xs flex-1 min-w-0 truncate">{m}</span>
-            <Select value={values[k] || ""} onValueChange={(v) => onChange(k, v)}>
-              <SelectTrigger className="h-8 w-16 text-xs border-border rounded-lg">
-                <SelectValue placeholder="—" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {DANIELS_GRADES.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 export default function SessionForm() {
   const { patientId, sessionId } = useParams<{ patientId: string; sessionId?: string }>();
