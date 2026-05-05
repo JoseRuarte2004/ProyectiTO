@@ -1340,9 +1340,9 @@ export default function SessionForm() {
                   <Select value={cli_treatment_type} onValueChange={setCliTreatmentType}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                     <SelectContent position="popper">
-                      <SelectItem value="conservador">Conservador</SelectItem>
-                      <SelectItem value="quirurgico">Quirúrgico</SelectItem>
-                      <SelectItem value="mixto">Mixto</SelectItem>
+                      <SelectItem value="conservative">Conservador</SelectItem>
+                      <SelectItem value="surgery">Quirúrgico</SelectItem>
+                      <SelectItem value="mixed">Mixto</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
