@@ -722,28 +722,52 @@ export default function SessionForm() {
         : null
       : null;
 
-    // ── Edema circometry (gated) ──
-    const circParts: string[] = [];
-    if (showEdema) {
-      if (circ_wrist_msd || circ_global_msd)
-        circParts.push(`MSD: ${circ_wrist_msd || "-"}cm muñeca / ${circ_global_msd || "-"}cm global`);
-      if (circ_wrist_msi || circ_global_msi)
-        circParts.push(`MSI: ${circ_wrist_msi || "-"}cm muñeca / ${circ_global_msi || "-"}cm global`);
-    }
-    const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
+    // ── Edema circometría (gated) — JSONB ──
+    const edemaCirc = showEdema && (circ_reference.trim() || circ_value_cm.trim())
+      ? {
+          reference: circ_reference.trim(),
+          side: circ_side,
+          value_cm: circ_value_cm.trim() ? Number(circ_value_cm) : null,
+          mano_global: circ_mano_global,
+        }
+      : null;
 
-    // ── Mobility (gated) ──
-    const aromVal = showMobility ? buildAllGonioText(all_pre_gonio) : null;
-    const promVal = showMobility && show_post_gonio ? buildAllGonioText(all_post_gonio) : null;
-    const preJsonArr = showMobility ? buildAllGonioJsonArray(all_pre_gonio) : null;
-    const postJsonArr = showMobility && show_post_gonio ? buildAllGonioJsonArray(all_post_gonio) : null;
-    const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
+    // ── Mobility (gated) — por lado MSD/MSI ──
+    const buildSideJsonb = (allVals: GonioBySide) => {
+      const out: any = {};
+      (["MSD", "MSI"] as const).forEach((side) => {
+        const pre = showMobility ? buildAllGonioJsonArray(allVals[side]) : null;
+        const post = showMobility && show_post_gonio ? buildAllGonioJsonArray(all_post_gonio[side]) : null;
+        if (pre || post) out[side] = { pre, post };
+      });
+      return Object.keys(out).length > 0 ? out : null;
+    };
+    const buildSideText = (allVals: GonioBySide) => {
+      const parts: string[] = [];
+      (["MSD", "MSI"] as const).forEach((side) => {
+        const t = buildAllGonioText(allVals[side]);
+        if (t) parts.push(`[${side}] ${t}`);
+      });
+      return parts.length > 0 ? parts.join(" ") : null;
+    };
+    const aromVal = showMobility ? buildSideText(all_pre_gonio) : null;
+    const promVal = showMobility && show_post_gonio ? buildSideText(all_post_gonio) : null;
+    const gonioJsonb = showMobility ? buildSideJsonb(all_pre_gonio) : null;
     const kapandjiFinal = showMobility && kapandji_val ? `${kapandji_val}/10${kapandji_pain ? " con dolor" : ""}` : null;
 
-    // ── Strength (gated) ──
+    // ── Dinamometría: 3 mediciones + promedio ──
+    const buildDyn = (vals: [string, string, string]) => {
+      const nums = vals.map((v) => v.trim()).filter(Boolean).map(Number).filter((n) => !isNaN(n));
+      if (nums.length === 0) return null;
+      const avg = Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+      return { values: vals.map((v) => (v.trim() ? Number(v) : null)), average: avg };
+    };
+    const dynMsdJson = showStrength ? buildDyn(dyn_msd_vals) : null;
+    const dynMsiJson = showStrength ? buildDyn(dyn_msi_vals) : null;
+
+    // ── Strength notes ──
     const msParts: string[] = [];
     if (showMobility && fist_closure) msParts.push(`Cierre de puño: ${fist_closure}`);
-    if (showStrength && strength_notes) msParts.push(strength_notes);
     const msVal = msParts.length > 0 ? msParts.join(" — ") : null;
 
     // ── Daniels rows (gated by strength) ──
