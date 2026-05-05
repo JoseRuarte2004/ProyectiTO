@@ -701,17 +701,12 @@ export default function SessionForm() {
         setCliSurgeryDate(cliRow.surgery_date || "");
         setCliInjuryMechanism(cliRow.injury_mechanism || "");
         setCliTreatmentType(cliRow.treatment_type || "");
-        setCliWeeksPostInjury(cliRow.weeks_post_injury != null ? String(cliRow.weeks_post_injury) : "");
-        setCliDaysPostInjury(cliRow.days_post_injury != null ? String(cliRow.days_post_injury) : "");
-        setCliWeeksPostSurgery(cliRow.weeks_post_surgery != null ? String(cliRow.weeks_post_surgery) : "");
-        setCliDaysPostSurgery(cliRow.days_post_surgery != null ? String(cliRow.days_post_surgery) : "");
         setCliImmobWeeks(cliRow.immobilization_weeks != null ? String(cliRow.immobilization_weeks) : "");
         setCliImmobDays(cliRow.immobilization_days != null ? String(cliRow.immobilization_days) : "");
         setCliImmobType(cliRow.immobilization_type || "");
         setCliMedicalHistory(cliRow.medical_history || "");
         setCliPharma(cliRow.pharmacological_treatment || "");
         setCliStudies(cliRow.studies || "");
-        setCliNextOyt(cliRow.next_oyt_appointment || "");
       }
       const { data: occRow } = await supabase
         .from("patient_occupational_profiles").select("*").eq("patient_id", patientId).maybeSingle();
