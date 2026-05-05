@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.insert_audit_log(audit_action, text, uuid, text) TO authenticated;

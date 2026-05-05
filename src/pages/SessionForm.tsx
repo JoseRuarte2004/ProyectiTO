@@ -925,7 +925,7 @@ export default function SessionForm() {
       }
     }
 
-    // Si la sesión es de alta, marcar paciente y episodio como "discharged"
+    // Sincronizar estado del paciente y episodio según tipo de sesión
     if (session_type === "discharge") {
       await supabase.from("patients").update({ status: "discharged" }).eq("id", patientId!);
       if (activeEpisodeId) {
@@ -933,6 +933,24 @@ export default function SessionForm() {
           .from("treatment_episodes")
           .update({ status: "discharged", discharge_date: session_date })
           .eq("id", activeEpisodeId);
+      }
+    } else if (isEditMode) {
+      // Si se editó una sesión que ya no es de alta, revertir si no quedan otras sesiones de alta en el episodio
+      const { data: remainingDischarges } = await supabase
+        .from("therapy_sessions")
+        .select("id")
+        .eq("patient_id", patientId!)
+        .eq("session_type", "discharge")
+        .eq("is_deleted", false)
+        .limit(1);
+      if (!remainingDischarges || remainingDischarges.length === 0) {
+        await supabase.from("patients").update({ status: "active" }).eq("id", patientId!);
+        if (activeEpisodeId) {
+          await supabase
+            .from("treatment_episodes")
+            .update({ status: "active", discharge_date: null })
+            .eq("id", activeEpisodeId);
+        }
       }
     }
 
