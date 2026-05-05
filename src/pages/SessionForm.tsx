@@ -510,11 +510,7 @@ export default function SessionForm() {
           setDppdMedio(dppd.medio != null ? String(dppd.medio) : "");
           setDppdAnular(dppd.anular != null ? String(dppd.anular) : "");
           setDppdMenique(dppd.menique != null ? String(dppd.menique) : "");
-          const parseJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : (v || {}); } catch { return {}; } };
-          setDanielsMedian(parseJson(ae.muscle_strength_median));
-          setDanielsCubital(parseJson(ae.muscle_strength_cubital));
-          setDanielsRadial(parseJson(ae.muscle_strength_radial));
-          setShowSensitivity(!!(ae.sensitivity || ae.sensitivity_tacto_ligero || ae.sensitivity_dos_puntos || ae.sensitivity_picking_up || ae.sensitivity_semmes_weinstein || ae.sensitivity_toco_pincho || ae.sensitivity_temperatura || ae.muscle_strength_median || ae.muscle_strength_cubital || ae.muscle_strength_radial));
+          setShowSensitivity(!!(ae.sensitivity || ae.sensitivity_tacto_ligero || ae.sensitivity_dos_puntos || ae.sensitivity_picking_up || ae.sensitivity_semmes_weinstein || ae.sensitivity_toco_pincho || ae.sensitivity_temperatura));
           setSensitivity(ae.sensitivity || "");
           setSensitivityTactoLigero(ae.sensitivity_tacto_ligero || "");
           setSensitivityDosPuntos(ae.sensitivity_dos_puntos || "");
