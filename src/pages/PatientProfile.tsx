@@ -952,23 +952,32 @@ function MeasurementsBlock({ e }: { e: any }) {
     const g = e.goniometry;
     if (!g || typeof g !== "object") return [];
     const parts: JSX.Element[] = [];
-    const renderPart = (which: "pre" | "post", data: any) => {
+    const renderEntry = (which: "pre" | "post", side: string | null, data: any) => {
       if (!data || !data.values || typeof data.values !== "object") return null;
       const vals = Object.entries(data.values).filter(([, v]) => v != null && v !== "").map(([k, v]) => `${k} ${v}°`);
       if (vals.length === 0) return null;
       const partLabel = PART_NAMES[data.body_part] || data.body_part || "";
+      const key = `${side || ""}-${which}-${partLabel}`;
       return (
-        <p key={`${which}-${partLabel}`} className="text-sm">
+        <p key={key} className="text-sm">
+          {side && <span className="font-medium text-gray-700">[{side}]</span>}{" "}
           <span className="font-medium text-gray-700">[{partLabel}]</span>{" "}
           <span className="text-xs font-semibold text-gray-500 uppercase">{which.toUpperCase()}:</span>{" "}
           {vals.join(" · ")}
         </p>
       );
     };
-    const pre = renderPart("pre", g.pre);
-    const post = renderPart("post", g.post);
-    if (pre) parts.push(pre);
-    if (post) parts.push(post);
+    if (g.MSD || g.MSI) {
+      (["MSD", "MSI"] as const).forEach((side) => {
+        const sideData = g[side];
+        if (!sideData) return;
+        (Array.isArray(sideData.pre) ? sideData.pre : []).forEach((d: any) => { const n = renderEntry("pre", side, d); if (n) parts.push(n); });
+        (Array.isArray(sideData.post) ? sideData.post : []).forEach((d: any) => { const n = renderEntry("post", side, d); if (n) parts.push(n); });
+      });
+    } else {
+      (Array.isArray(g.pre) ? g.pre : (g.pre ? [g.pre] : [])).forEach((d: any) => { const n = renderEntry("pre", null, d); if (n) parts.push(n); });
+      (Array.isArray(g.post) ? g.post : (g.post ? [g.post] : [])).forEach((d: any) => { const n = renderEntry("post", null, d); if (n) parts.push(n); });
+    }
     return parts;
   };
   const gonioParts = renderGonio();
