@@ -113,35 +113,8 @@ const SPECIFIC_TESTS = [
 
 type TestResult = "positive" | "negative" | null;
 
-// ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0", "1", "2", "3", "4", "5"];
+// ── Daniels grades ──
 const DANIELS_FULL_GRADES = ["0", "1", "1+", "2-", "2", "2+", "3-", "3", "3+", "4-", "4", "4+", "5"];
-
-const MEDIAN_MUSCLES = [
-  "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
-  "Flexor profundo 1 y 2", "Palmar mayor", "Palmar menor",
-  "Abd corto del pulgar", "Oponente del pulgar", "Flexor corto del pulgar",
-  "Lumbricales 1 y 2", "Pronador cuadrado",
-];
-const CUBITAL_MUSCLES = [
-  "Aductor del pulgar", "Flexor corto del pulgar", "Abd del meñique",
-  "Oponente del meñique", "Flexor del meñique", "Interóseos dorsales",
-  "Interóseos palmares", "Lumbricales 3 y 4", "Flexor profundo 3 y 4",
-  "Cubital anterior",
-];
-const RADIAL_MUSCLES = [
-  "Extensor largo del pulgar", "Extensor corto del pulgar", "Abd largo del pulgar",
-  "Extensor del índice", "Extensor del meñique", "Extensor común dedos",
-  "Primer radial externo", "Segundo radial externo",
-];
-
-function muscleKey(name: string) {
-  return name
-    .toLowerCase()
-    .replace(/[áéíóú]/g, (m) => ({ á: "a", é: "e", í: "i", ó: "o", ú: "u" } as any)[m] || m)
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
-}
 
 // ── Cicatriz: opciones planilla ──
 const SCAR_OPTIONS: Record<string, string[]> = {
@@ -266,40 +239,6 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 
-function DanielsTable({
-  muscles,
-  values,
-  onChange,
-}: {
-  muscles: string[];
-  values: Record<string, string>;
-  onChange: (k: string, v: string) => void;
-}) {
-  return (
-    <div className="space-y-1">
-      {muscles.map((m) => {
-        const k = muscleKey(m);
-        return (
-          <div key={k} className="flex items-center gap-2">
-            <span className="text-xs flex-1 min-w-0 truncate">{m}</span>
-            <Select value={values[k] || ""} onValueChange={(v) => onChange(k, v)}>
-              <SelectTrigger className="h-8 w-16 text-xs border-border rounded-lg">
-                <SelectValue placeholder="—" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {DANIELS_GRADES.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 export default function SessionForm() {
   const { patientId, sessionId } = useParams<{ patientId: string; sessionId?: string }>();
@@ -406,11 +345,6 @@ export default function SessionForm() {
   ]);
   const danielsNextId = useRef(2);
 
-  // Daniels by nerve
-  const [daniels_median, setDanielsMedian] = useState<Record<string, string>>({});
-  const [daniels_cubital, setDanielsCubital] = useState<Record<string, string>>({});
-  const [daniels_radial, setDanielsRadial] = useState<Record<string, string>>({});
-  const [show_daniels, setShowDaniels] = useState(false);
 
   // Specific tests
   const [specificTests, setSpecificTests] = useState<Record<string, TestResult>>(
@@ -576,11 +510,7 @@ export default function SessionForm() {
           setDppdMedio(dppd.medio != null ? String(dppd.medio) : "");
           setDppdAnular(dppd.anular != null ? String(dppd.anular) : "");
           setDppdMenique(dppd.menique != null ? String(dppd.menique) : "");
-          const parseJson = (v: any) => { try { return typeof v === "string" ? JSON.parse(v) : (v || {}); } catch { return {}; } };
-          setDanielsMedian(parseJson(ae.muscle_strength_median));
-          setDanielsCubital(parseJson(ae.muscle_strength_cubital));
-          setDanielsRadial(parseJson(ae.muscle_strength_radial));
-          setShowSensitivity(!!(ae.sensitivity || ae.sensitivity_tacto_ligero || ae.sensitivity_dos_puntos || ae.sensitivity_picking_up || ae.sensitivity_semmes_weinstein || ae.sensitivity_toco_pincho || ae.sensitivity_temperatura || ae.muscle_strength_median || ae.muscle_strength_cubital || ae.muscle_strength_radial));
+          setShowSensitivity(!!(ae.sensitivity || ae.sensitivity_tacto_ligero || ae.sensitivity_dos_puntos || ae.sensitivity_picking_up || ae.sensitivity_semmes_weinstein || ae.sensitivity_toco_pincho || ae.sensitivity_temperatura));
           setSensitivity(ae.sensitivity || "");
           setSensitivityTactoLigero(ae.sensitivity_tacto_ligero || "");
           setSensitivityDosPuntos(ae.sensitivity_dos_puntos || "");

@@ -406,52 +406,8 @@ const SPECIFIC_TESTS = [
 
 type TestResult = "positive" | "negative" | null;
 
-// ── Daniels muscles by nerve ──
-const DANIELS_GRADES = ["0","1","2","3","4","5"];
+// ── Daniels grades ──
 const DANIELS_FULL_GRADES = ["0","1","1+","2-","2","2+","3-","3","3+","4-","4","4+","5"];
-
-const MEDIAN_MUSCLES = [
-  "Pronador redondo", "Flexor largo del pulgar", "Flexor superficial dedos",
-  "Flexor profundo 1 y 2", "Palmar mayor", "Palmar menor",
-  "Abd corto del pulgar", "Oponente del pulgar", "Flexor corto del pulgar",
-  "Lumbricales 1 y 2", "Pronador cuadrado",
-];
-const CUBITAL_MUSCLES = [
-  "Aductor del pulgar", "Flexor corto del pulgar", "Abd del meñique",
-  "Oponente del meñique", "Flexor del meñique", "Interóseos dorsales",
-  "Interóseos palmares", "Lumbricales 3 y 4", "Flexor profundo 3 y 4",
-  "Cubital anterior",
-];
-const RADIAL_MUSCLES = [
-  "Extensor largo del pulgar", "Extensor corto del pulgar", "Abd largo del pulgar",
-  "Extensor del índice", "Extensor del meñique", "Extensor común dedos",
-  "Primer radial externo", "Segundo radial externo",
-];
-
-function muscleKey(name: string) {
-  return name.toLowerCase().replace(/[áéíóú]/g, m => ({ á: "a", é: "e", í: "i", ó: "o", ú: "u" } as any)[m] || m).replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-}
-
-function DanielsTable({ muscles, values, onChange }: { muscles: string[]; values: Record<string, string>; onChange: (k: string, v: string) => void }) {
-  return (
-    <div className="space-y-1">
-      {muscles.map(m => {
-        const k = muscleKey(m);
-        return (
-          <div key={k} className="flex items-center gap-2">
-            <span className="text-xs flex-1 min-w-0 truncate">{m}</span>
-            <Select value={values[k] || ""} onValueChange={v => onChange(k, v)}>
-              <SelectTrigger className="h-7 w-16 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent position="popper">
-                {DANIELS_GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Cicatriz: opciones planilla ──
 const SCAR_OPTIONS: Record<string, string[]> = {
@@ -603,7 +559,8 @@ export function NewPatientForm() {
   const [fistClosure, setFistClosure] = useState("");
   const [dynamometerMsd, setDynamometerMsd] = useState("");
   const [dynamometerMsi, setDynamometerMsi] = useState("");
-  const [dynamometerNotes, setDynamometerNotes] = useState("");
+  const [dynMsdVals, setDynMsdVals] = useState<[string, string, string]>(["", "", ""]);
+  const [dynMsiVals, setDynMsiVals] = useState<[string, string, string]>(["", "", ""]);
   const [danielsRows, setDanielsRows] = useState<{ id: number; muscle: string; grade: string }[]>([
     { id: 1, muscle: "", grade: "" },
   ]);
@@ -649,11 +606,11 @@ export function NewPatientForm() {
   const [gonioPartPost, setGonioPartPost] = useState<GonioPartKey>("wrist");
   const [allPostGonio, setAllPostGonio] = useState(emptyGonio);
 
-  // Circummetry grid
-  const [circWristMsd, setCircWristMsd] = useState("");
-  const [circWristMsi, setCircWristMsi] = useState("");
-  const [circGlobalMsd, setCircGlobalMsd] = useState("");
-  const [circGlobalMsi, setCircGlobalMsi] = useState("");
+  // Circometría (JSONB)
+  const [circReference, setCircReference] = useState("");
+  const [circSide, setCircSide] = useState<"D" | "I">("D");
+  const [circValueCm, setCircValueCm] = useState("");
+  const [circManoGlobal, setCircManoGlobal] = useState(false);
 
   // Specific tests
   const [specificTests, setSpecificTests] = useState<Record<string, TestResult>>(
@@ -886,20 +843,21 @@ export function NewPatientForm() {
       const postJsonArr = showMovilidad && showPostGonio ? buildAllGonioJsonArray(allPostGonio) : null;
       const gonioJsonb = preJsonArr || postJsonArr ? { pre: preJsonArr, post: postJsonArr } : null;
 
-      const circParts: string[] = [];
-      if (showEdema && (circWristMsd || circGlobalMsd)) circParts.push(`MSD: ${circWristMsd || "-"}cm muñeca / ${circGlobalMsd || "-"}cm global`);
-      if (showEdema && (circWristMsi || circGlobalMsi)) circParts.push(`MSI: ${circWristMsi || "-"}cm muñeca / ${circGlobalMsi || "-"}cm global`);
-      const edemaCirc = circParts.length > 0 ? circParts.join(" | ") : null;
+      const edemaCirc = showEdema && (circReference.trim() || circValueCm.trim())
+        ? { reference: circReference.trim(), side: circSide, value_cm: circValueCm.trim() ? Number(circValueCm) : null, mano_global: circManoGlobal }
+        : null;
 
       const hasTests = showPruebas && Object.values(specificTests).some(v => v !== null);
       const specificTestsJson = hasTests ? Object.fromEntries(Object.entries(specificTests).map(([k, v]) => [k, v])) : null;
 
-      const hasMedian = showSensibilidad && Object.values(danielsMedian).some(v => v);
-      const hasCubital = showSensibilidad && Object.values(danielsCubital).some(v => v);
-      const hasRadial = showSensibilidad && Object.values(danielsRadial).some(v => v);
-      const medianJson = hasMedian ? JSON.stringify(danielsMedian) : null;
-      const cubitalJson = hasCubital ? JSON.stringify(danielsCubital) : null;
-      const radialJson = hasRadial ? JSON.stringify(danielsRadial) : null;
+      const buildDyn = (vals: [string, string, string]) => {
+        const nums = vals.map(v => v.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+        if (nums.length === 0) return null;
+        const avg = Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+        return { values: vals.map(v => (v.trim() ? Number(v) : null)), average: avg };
+      };
+      const dynMsdJson = showFuerza ? buildDyn(dynMsdVals) : null;
+      const dynMsiJson = showFuerza ? buildDyn(dynMsiVals) : null;
 
       const msParts: string[] = [];
       if (showFuerza && fistClosure.trim()) msParts.push(`Cierre de puño: ${fistClosure}`);
@@ -974,7 +932,7 @@ export function NewPatientForm() {
         ? Object.fromEntries(dppdEntries.map(([k, v]) => [k, parseFloat(v)]))
         : null;
 
-      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || medianJson || cubitalJson || radialJson || dppdFingersJson;
+      const hasStructured = aromVal || promVal || gonioJsonb || edemaCirc || specificTestsJson || dynMsdJson || dynMsiJson || dppdFingersJson;
       if (showAnalytical && (analFields.some((f) => f.trim()) || hasStructured || scarEvalJson !== null)) {
         await supabase.from("analytical_evaluations").insert({
           patient_id: pid,
@@ -1005,13 +963,12 @@ export function NewPatientForm() {
           prom: promVal,
           goniometry: gonioJsonb,
           kapandji: showMovilidad ? or(kapandjiFinal) : null,
-          dynamometer_msd: showFuerza ? orFloat(dynamometerMsd) : null,
-          dynamometer_msi: showFuerza ? orFloat(dynamometerMsi) : null,
-          dynamometer_notes: showFuerza ? or(dynamometerNotes) : null,
+          dynamometer_msd: dynMsdJson as any,
+          dynamometer_msi: dynMsiJson as any,
           muscle_strength: msVal,
-          muscle_strength_median: medianJson,
-          muscle_strength_cubital: cubitalJson,
-          muscle_strength_radial: radialJson,
+          muscle_strength_median: null,
+          muscle_strength_cubital: null,
+          muscle_strength_radial: null,
           muscle_strength_daniels: danielsJson as any,
           specific_tests: specificTestsJson,
           dppd_fingers: dppdFingersJson,
