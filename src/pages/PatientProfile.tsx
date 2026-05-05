@@ -1221,12 +1221,6 @@ function MeasurementsBlock({ e }: { e: any }) {
         </SubSection>
       )}
 
-      {hasTests && (
-        <SubSection label="Pruebas específicas">
-          {testsNode}
-        </SubSection>
-      )}
-
       {hasScar && (
         <SubSection label="Cicatriz">
           {scarRendered.fields}
@@ -1237,6 +1231,12 @@ function MeasurementsBlock({ e }: { e: any }) {
               VSS: {e.vancouver_score}/15
             </span>
           )}
+        </SubSection>
+      )}
+
+      {hasTests && (
+        <SubSection label="Pruebas específicas">
+          {testsNode}
         </SubSection>
       )}
 
