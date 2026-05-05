@@ -1287,12 +1287,12 @@ export default function SessionForm() {
             </div>
             <div>
               <FieldLabel>Tipo de sesión</FieldLabel>
-              <Select value={session_type} onValueChange={setSessionType} disabled={typeParam === "admission"}>
+              <Select value={session_type} onValueChange={setSessionType} disabled={isAdmission}>
                 <SelectTrigger className={inputClass}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  {typeParam === "admission" && <SelectItem value="admission">Admisión</SelectItem>}
+                  {isAdmission && <SelectItem value="admission">Admisión</SelectItem>}
                   <SelectItem value="follow_up">Seguimiento</SelectItem>
                   <SelectItem value="discharge">Alta</SelectItem>
                 </SelectContent>
