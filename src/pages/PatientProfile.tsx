@@ -1058,9 +1058,9 @@ function MeasurementsBlock({ e }: { e: any }) {
   const renderScar = () => {
     const s = e.scar_evaluation;
     if (!s || typeof s !== "object") return { fields: [] as JSX.Element[], vss: null as JSX.Element | null };
-    const fieldOrder = ["location", "localizacion", "length", "longitud", "vascularization", "vascularizacion",
-      "pigmentation", "pigmentacion", "flexibility", "flexibilidad", "sensitivity", "sensibilidad",
-      "relief", "relieve", "temperature", "temperatura", "observations", "observaciones", "notes"];
+    const fieldOrder = ["location", "localizacion", "length", "longitud", "longitud_cm",
+      "sensitivity", "sensibilidad",
+      "temperature", "temperatura", "observations", "observaciones", "notes"];
     const seen = new Set<string>();
     const fields: JSX.Element[] = [];
     fieldOrder.forEach((k) => {
