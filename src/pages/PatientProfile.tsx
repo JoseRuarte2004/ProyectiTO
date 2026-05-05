@@ -24,7 +24,7 @@ import { DialogDescription } from "@/components/ui/dialog";
 import { format, differenceInYears } from "date-fns";
 import { es } from "date-fns/locale";
 import { exportPlanPdf } from "@/components/plans/PlanPdfExport";
-import { NewAnalEvalDialog as NewAnalEvalDialogFull, AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
+import { AnalEvalList } from "@/components/evaluations/AnalyticalEvalForm";
 import { QUICKDASH_QUESTIONS, FIM_MOTOR, FIM_COGNITIVE } from "@/components/evaluations/FunctionalScales";
 
 const ALLOWED_CLINICAL_FILE_TYPES = [
@@ -65,7 +65,7 @@ export default function PatientProfile() {
   // Dialog states
   
   const [showNewFuncEval, setShowNewFuncEval] = useState(false);
-  const [showNewAnalEval, setShowNewAnalEval] = useState(false);
+  
   const [showNewAppt, setShowNewAppt] = useState(false);
   const [showNewPlan, setShowNewPlan] = useState(false);
   const [showPlanDetail, setShowPlanDetail] = useState<any>(null);
@@ -267,11 +267,17 @@ export default function PatientProfile() {
           {/* Actions */}
           <div className="space-y-2">
             <Button 
-              onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} 
+              onClick={() => {
+                const isFirst = sessions.length === 0;
+                const params = new URLSearchParams();
+                if (activeEpisodeId) params.set("episode", activeEpisodeId);
+                if (isFirst) params.set("type", "admission");
+                navigate(`/patients/${id}/sessions/new${params.toString() ? `?${params.toString()}` : ''}`);
+              }}
               size="sm"
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" /> Nueva sesión
+              <Plus className="h-4 w-4 mr-2" /> {sessions.length === 0 ? "Registrar admisión" : "Nueva sesión"}
             </Button>
             <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setShowNewAppt(true)}>
               <Calendar className="h-4 w-4 mr-2" /> Nuevo turno
@@ -444,7 +450,13 @@ export default function PatientProfile() {
               <h2 className="font-semibold text-foreground">Historial de visitas</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{sessions.length} {sessions.length === 1 ? "visita registrada" : "visitas registradas"}</p>
             </div>
-            <Button onClick={() => navigate(`/patients/${id}/sessions/new${activeEpisodeId ? `?episode=${activeEpisodeId}` : ''}`)} size="sm"><Plus className="h-4 w-4 mr-2" />Registrar visita</Button>
+            <Button onClick={() => {
+              const isFirst = sessions.length === 0;
+              const params = new URLSearchParams();
+              if (activeEpisodeId) params.set("episode", activeEpisodeId);
+              if (isFirst) params.set("type", "admission");
+              navigate(`/patients/${id}/sessions/new${params.toString() ? `?${params.toString()}` : ''}`);
+            }} size="sm"><Plus className="h-4 w-4 mr-2" />{sessions.length === 0 ? "Registrar admisión" : "Nueva sesión"}</Button>
           </div>
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -655,7 +667,7 @@ export default function PatientProfile() {
       }} />
       <EditFichaDialog open={showEditFicha} onClose={() => setShowEditFicha(false)} patient={patient} clinical={clinical} occupational={occupational} activeEpisodeId={activeEpisodeId} onSaved={fetchAll} />
       <NewFuncEvalDialog open={showNewFuncEval} onClose={() => setShowNewFuncEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
-      <NewAnalEvalDialogFull open={showNewAnalEval} onClose={() => setShowNewAnalEval(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
+      
       <NewPatientApptDialog open={showNewAppt} onClose={() => setShowNewAppt(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
       <NewPlanDialog open={showNewPlan} onClose={() => setShowNewPlan(false)} patientId={id!} userId={user!.id} onSaved={fetchAll} />
       <PlanDetailDialog plan={showPlanDetail} onClose={() => setShowPlanDetail(null)} />

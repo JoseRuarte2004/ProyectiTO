@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,8 @@ import {
   MessageSquare,
   X,
   Plus,
+  Briefcase,
+  Stethoscope,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -240,6 +243,98 @@ const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 
 
+// ── Cie10 autocomplete (inline) ──
+function Cie10Autocomplete({ value, onChange, placeholder, className }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<Array<{ code: string; description: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const [rect, setRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const updateRect = () => {
+    if (wrapperRef.current) {
+      const r = wrapperRef.current.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    }
+  };
+
+  useEffect(() => {
+    const term = value.trim();
+    if (term.length < 2) { setResults([]); setOpen(false); return; }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc('search_cie10', { search_input: term, max_results: 10 });
+      if (cancelled) return;
+      setResults(data || []);
+      updateRect();
+      setOpen(true);
+      setLoading(false);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); setLoading(false); };
+  }, [value]);
+
+  useEffect(() => {
+    if (!open) return;
+    updateRect();
+    const onResize = () => updateRect();
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onResize, true);
+    return () => { window.removeEventListener("resize", onResize); window.removeEventListener("scroll", onResize, true); };
+  }, [open]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (wrapperRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => { if (results.length > 0) { updateRect(); setOpen(true); } }}
+        placeholder={placeholder}
+        className={className}
+        autoComplete="off"
+      />
+      {loading && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+      {open && results.length > 0 && createPortal(
+        <div
+          ref={panelRef}
+          style={{ position: "fixed", top: rect.top + rect.height + 4, left: rect.left, width: rect.width, zIndex: 60 }}
+          className="max-h-64 overflow-auto rounded-md border bg-popover shadow-md"
+        >
+          {results.map((r) => (
+            <button
+              key={r.code}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { onChange(`${r.code} — ${r.description}`); setOpen(false); }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              <span className="font-medium">{r.code}</span> — {r.description}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+
 export default function SessionForm() {
   const { patientId, sessionId } = useParams<{ patientId: string; sessionId?: string }>();
   const [searchParams] = useSearchParams();
@@ -277,6 +372,39 @@ export default function SessionForm() {
   const [qd_items, setQdItems] = useState<(number | null)[]>(emptyQuickDash());
   const [fim_items, setFimItems] = useState<Record<string, number | null>>(emptyFim());
   const [barthel_items, setBarthelItems] = useState<Record<string, number | null>>(emptyBarthel());
+
+  const isAdmission = session_type === "admission";
+
+  // Ficha clínica (admission)
+  const [cli_diagnosis, setCliDiagnosis] = useState("");
+  const [cli_doctor_name, setCliDoctorName] = useState("");
+  const [cli_injury_date, setCliInjuryDate] = useState("");
+  const [cli_surgery_date, setCliSurgeryDate] = useState("");
+  const [cli_injury_mechanism, setCliInjuryMechanism] = useState("");
+  const [cli_treatment_type, setCliTreatmentType] = useState("");
+  const [cli_weeks_post_injury, setCliWeeksPostInjury] = useState("");
+  const [cli_days_post_injury, setCliDaysPostInjury] = useState("");
+  const [cli_weeks_post_surgery, setCliWeeksPostSurgery] = useState("");
+  const [cli_days_post_surgery, setCliDaysPostSurgery] = useState("");
+  const [cli_immob_weeks, setCliImmobWeeks] = useState("");
+  const [cli_immob_days, setCliImmobDays] = useState("");
+  const [cli_immob_type, setCliImmobType] = useState("");
+  const [cli_medical_history, setCliMedicalHistory] = useState("");
+  const [cli_pharma, setCliPharma] = useState("");
+  const [cli_studies, setCliStudies] = useState("");
+  const [cli_next_oyt, setCliNextOyt] = useState("");
+  const [editingClinicalId, setEditingClinicalId] = useState<string | null>(null);
+
+  // Perfil ocupacional (admission)
+  const [occ_dominance, setOccDominance] = useState("");
+  const [occ_support_network, setOccSupportNetwork] = useState("");
+  const [occ_education, setOccEducation] = useState("");
+  const [occ_job, setOccJob] = useState("");
+  const [occ_leisure, setOccLeisure] = useState("");
+  const [occ_physical_activity, setOccPhysicalActivity] = useState("");
+  const [occ_sleep_rest, setOccSleepRest] = useState("");
+  const [occ_health_management, setOccHealthManagement] = useState("");
+  const [editingOccId, setEditingOccId] = useState<string | null>(null);
 
   // Functional eval toggle (default on for admission, off for follow_up/discharge)
   const [showFunctional, setShowFunctional] = useState(typeParam === "admission");
@@ -560,6 +688,51 @@ export default function SessionForm() {
     load();
   }, [patientId, sessionId]);
 
+  // Load existing clinical record + occupational profile for admission editing/upsert
+  useEffect(() => {
+    if (!patientId) return;
+    (async () => {
+      const epId = activeEpisodeId;
+      const cliQuery = supabase.from("patient_clinical_records").select("*").eq("patient_id", patientId);
+      const { data: cliRow } = epId
+        ? await cliQuery.eq("episode_id", epId).maybeSingle()
+        : await cliQuery.maybeSingle();
+      if (cliRow) {
+        setEditingClinicalId(cliRow.id);
+        setCliDiagnosis(cliRow.diagnosis || "");
+        setCliDoctorName(cliRow.doctor_name || "");
+        setCliInjuryDate(cliRow.injury_date || "");
+        setCliSurgeryDate(cliRow.surgery_date || "");
+        setCliInjuryMechanism(cliRow.injury_mechanism || "");
+        setCliTreatmentType(cliRow.treatment_type || "");
+        setCliWeeksPostInjury(cliRow.weeks_post_injury != null ? String(cliRow.weeks_post_injury) : "");
+        setCliDaysPostInjury(cliRow.days_post_injury != null ? String(cliRow.days_post_injury) : "");
+        setCliWeeksPostSurgery(cliRow.weeks_post_surgery != null ? String(cliRow.weeks_post_surgery) : "");
+        setCliDaysPostSurgery(cliRow.days_post_surgery != null ? String(cliRow.days_post_surgery) : "");
+        setCliImmobWeeks(cliRow.immobilization_weeks != null ? String(cliRow.immobilization_weeks) : "");
+        setCliImmobDays(cliRow.immobilization_days != null ? String(cliRow.immobilization_days) : "");
+        setCliImmobType(cliRow.immobilization_type || "");
+        setCliMedicalHistory(cliRow.medical_history || "");
+        setCliPharma(cliRow.pharmacological_treatment || "");
+        setCliStudies(cliRow.studies || "");
+        setCliNextOyt(cliRow.next_oyt_appointment || "");
+      }
+      const { data: occRow } = await supabase
+        .from("patient_occupational_profiles").select("*").eq("patient_id", patientId).maybeSingle();
+      if (occRow) {
+        setEditingOccId(occRow.id);
+        setOccDominance(occRow.dominance || "");
+        setOccSupportNetwork(occRow.support_network || "");
+        setOccEducation(occRow.education || "");
+        setOccJob(occRow.job || "");
+        setOccLeisure(occRow.leisure || "");
+        setOccPhysicalActivity(occRow.physical_activity || "");
+        setOccSleepRest(occRow.sleep_rest || "");
+        setOccHealthManagement(occRow.health_management || "");
+      }
+    })();
+  }, [patientId, activeEpisodeId]);
+
   // Auto-calculate weeks at session from injury date (or symptom start as fallback)
   const weekCalcSource: "injury" | "symptom" | null = clinical?.injury_date
     ? "injury"
@@ -758,7 +931,57 @@ export default function SessionForm() {
       return;
     }
 
-    // Functional eval for admission
+    // ── Ficha clínica + perfil ocupacional (solo admisión) ──
+    if (isAdmission) {
+      const cliPayload: any = {
+        patient_id: patientId!,
+        episode_id: activeEpisodeId,
+        diagnosis: cli_diagnosis.trim() || null,
+        doctor_name: cli_doctor_name.trim() || null,
+        injury_date: cli_injury_date || null,
+        surgery_date: cli_surgery_date || null,
+        injury_mechanism: cli_injury_mechanism.trim() || null,
+        treatment_type: cli_treatment_type || null,
+        weeks_post_injury: cli_weeks_post_injury ? parseInt(cli_weeks_post_injury) : null,
+        days_post_injury: cli_days_post_injury ? parseInt(cli_days_post_injury) : null,
+        weeks_post_surgery: cli_weeks_post_surgery ? parseInt(cli_weeks_post_surgery) : null,
+        days_post_surgery: cli_days_post_surgery ? parseInt(cli_days_post_surgery) : null,
+        immobilization_weeks: cli_immob_weeks ? parseInt(cli_immob_weeks) : null,
+        immobilization_days: cli_immob_days ? parseInt(cli_immob_days) : null,
+        immobilization_type: cli_immob_type.trim() || null,
+        medical_history: cli_medical_history.trim() || null,
+        pharmacological_treatment: cli_pharma.trim() || null,
+        studies: cli_studies.trim() || null,
+        next_oyt_appointment: cli_next_oyt || null,
+      };
+      if (editingClinicalId) {
+        await supabase.from("patient_clinical_records").update(cliPayload).eq("id", editingClinicalId);
+      } else {
+        const { data: newCli } = await supabase.from("patient_clinical_records").insert(cliPayload).select("id").single();
+        if (newCli) setEditingClinicalId(newCli.id);
+      }
+
+      const occPayload: any = {
+        patient_id: patientId!,
+        dominance: occ_dominance || null,
+        support_network: occ_support_network.trim() || null,
+        education: occ_education.trim() || null,
+        job: occ_job.trim() || null,
+        leisure: occ_leisure.trim() || null,
+        physical_activity: occ_physical_activity.trim() || null,
+        sleep_rest: occ_sleep_rest.trim() || null,
+        health_management: occ_health_management.trim() || null,
+        avd: func_avd || null,
+        aivd: func_aivd || null,
+      };
+      if (editingOccId) {
+        await supabase.from("patient_occupational_profiles").update(occPayload).eq("id", editingOccId);
+      } else {
+        const { data: newOcc } = await supabase.from("patient_occupational_profiles").insert(occPayload).select("id").single();
+        if (newOcc) setEditingOccId(newOcc.id);
+      }
+    }
+
     const qd_answered = qd_items.some((v) => v !== null);
     const fim_answered = Object.values(fim_items).some((v) => v !== null);
     const barthel_answered = Object.values(barthel_items).some((v) => v !== null);
@@ -1064,12 +1287,12 @@ export default function SessionForm() {
             </div>
             <div>
               <FieldLabel>Tipo de sesión</FieldLabel>
-              <Select value={session_type} onValueChange={setSessionType} disabled={typeParam === "admission"}>
+              <Select value={session_type} onValueChange={setSessionType} disabled={isAdmission}>
                 <SelectTrigger className={inputClass}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  {typeParam === "admission" && <SelectItem value="admission">Admisión</SelectItem>}
+                  {isAdmission && <SelectItem value="admission">Admisión</SelectItem>}
                   <SelectItem value="follow_up">Seguimiento</SelectItem>
                   <SelectItem value="discharge">Alta</SelectItem>
                 </SelectContent>
@@ -1116,6 +1339,79 @@ export default function SessionForm() {
           )}
         </SectionCard>
 
+        {/* Ficha clínica (admission only) */}
+        {isAdmission && (
+          <SectionCard icon={Stethoscope} title="Ficha clínica">
+            <div className="space-y-4">
+              <div>
+                <FieldLabel>Diagnóstico (CIE-10)</FieldLabel>
+                <Cie10Autocomplete value={cli_diagnosis} onChange={setCliDiagnosis} placeholder="Buscar por código o descripción…" className={inputClass} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><FieldLabel>Médico derivante</FieldLabel><Input value={cli_doctor_name} onChange={(e) => setCliDoctorName(e.target.value)} className={inputClass} /></div>
+                <div>
+                  <FieldLabel>Tipo de tratamiento</FieldLabel>
+                  <Select value={cli_treatment_type} onValueChange={setCliTreatmentType}>
+                    <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                    <SelectContent position="popper">
+                      <SelectItem value="conservador">Conservador</SelectItem>
+                      <SelectItem value="quirurgico">Quirúrgico</SelectItem>
+                      <SelectItem value="mixto">Mixto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><FieldLabel>Fecha de lesión</FieldLabel><Input type="date" value={cli_injury_date} onChange={(e) => setCliInjuryDate(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Fecha de cirugía</FieldLabel><Input type="date" value={cli_surgery_date} onChange={(e) => setCliSurgeryDate(e.target.value)} className={inputClass} /></div>
+              </div>
+              <div>
+                <FieldLabel>Mecanismo de lesión</FieldLabel>
+                <Textarea rows={2} value={cli_injury_mechanism} onChange={(e) => setCliInjuryMechanism(e.target.value)} className={textareaClass} />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div><FieldLabel>Sem. post-lesión</FieldLabel><Input type="number" min={0} value={cli_weeks_post_injury} onChange={(e) => setCliWeeksPostInjury(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Días post-lesión</FieldLabel><Input type="number" min={0} value={cli_days_post_injury} onChange={(e) => setCliDaysPostInjury(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Sem. post-cirugía</FieldLabel><Input type="number" min={0} value={cli_weeks_post_surgery} onChange={(e) => setCliWeeksPostSurgery(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Días post-cirugía</FieldLabel><Input type="number" min={0} value={cli_days_post_surgery} onChange={(e) => setCliDaysPostSurgery(e.target.value)} className={inputClass} /></div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div><FieldLabel>Sem. inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_weeks} onChange={(e) => setCliImmobWeeks(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Días inmovilización</FieldLabel><Input type="number" min={0} value={cli_immob_days} onChange={(e) => setCliImmobDays(e.target.value)} className={inputClass} /></div>
+                <div><FieldLabel>Tipo de inmovilización</FieldLabel><Input value={cli_immob_type} onChange={(e) => setCliImmobType(e.target.value)} className={inputClass} /></div>
+              </div>
+              <div><FieldLabel>Antecedentes médicos</FieldLabel><Textarea rows={2} value={cli_medical_history} onChange={(e) => setCliMedicalHistory(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Tratamiento farmacológico</FieldLabel><Textarea rows={2} value={cli_pharma} onChange={(e) => setCliPharma(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Estudios realizados</FieldLabel><Textarea rows={2} value={cli_studies} onChange={(e) => setCliStudies(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Próximo turno OYT</FieldLabel><Input type="date" value={cli_next_oyt} onChange={(e) => setCliNextOyt(e.target.value)} className={inputClass} /></div>
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Perfil ocupacional (admission only, sin AVD/AIVD) */}
+        {isAdmission && (
+          <SectionCard icon={Briefcase} title="Perfil ocupacional">
+            <div className="space-y-4">
+              <div>
+                <FieldLabel>Dominancia</FieldLabel>
+                <Select value={occ_dominance} onValueChange={setOccDominance}>
+                  <SelectTrigger className={inputClass}><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="right">Diestro/a</SelectItem>
+                    <SelectItem value="left">Zurdo/a</SelectItem>
+                    <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><FieldLabel>Red de apoyo</FieldLabel><Textarea rows={2} value={occ_support_network} onChange={(e) => setOccSupportNetwork(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Educación</FieldLabel><Textarea rows={2} value={occ_education} onChange={(e) => setOccEducation(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Trabajo / ocupación</FieldLabel><Textarea rows={2} value={occ_job} onChange={(e) => setOccJob(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Ocio y tiempo libre</FieldLabel><Textarea rows={2} value={occ_leisure} onChange={(e) => setOccLeisure(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Actividad física</FieldLabel><Textarea rows={2} value={occ_physical_activity} onChange={(e) => setOccPhysicalActivity(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Sueño y descanso</FieldLabel><Textarea rows={2} value={occ_sleep_rest} onChange={(e) => setOccSleepRest(e.target.value)} className={textareaClass} /></div>
+              <div><FieldLabel>Gestión de la salud</FieldLabel><Textarea rows={2} value={occ_health_management} onChange={(e) => setOccHealthManagement(e.target.value)} className={textareaClass} /></div>
+            </div>
+          </SectionCard>
+        )}
+
         {/* Functional eval */}
         <SectionCard
           icon={ClipboardList}
@@ -1123,19 +1419,7 @@ export default function SessionForm() {
           toggle={{ checked: showFunctional, onChange: setShowFunctional }}
         >
           <div className="space-y-5">
-            <div>
-              <Label>Lateralidad</Label>
-              <Select value={func_dominance} onValueChange={setFuncDominance}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="right">Diestro/a</SelectItem>
-                  <SelectItem value="left">Zurdo/a</SelectItem>
-                  <SelectItem value="ambidextrous">Ambidiestro/a</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <QuickDashSection items={qd_items} onChange={setQdItems} />
-            <FimSection items={fim_items} onChange={setFimItems} />
             <BarthelSection items={barthel_items} onChange={setBarthelItems} />
             <div className="space-y-2">
               <Label>AVD — Actividades de la vida diaria</Label>
@@ -1145,14 +1429,7 @@ export default function SessionForm() {
               <Label>AIVD — Actividades instrumentales</Label>
               <Textarea rows={3} value={func_aivd} onChange={(e) => setFuncAivd(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Sueño y descanso</Label>
-              <Textarea rows={2} value={func_sleep} onChange={(e) => setFuncSleep(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Gestión de la salud</Label>
-              <Textarea rows={2} value={func_health} onChange={(e) => setFuncHealth(e.target.value)} />
-            </div>
+            <FimSection items={fim_items} onChange={setFimItems} />
           </div>
         </SectionCard>
 
