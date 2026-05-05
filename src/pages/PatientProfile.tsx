@@ -1143,70 +1143,28 @@ function MeasurementsBlock({ e }: { e: any }) {
 
       {hasStrength && (
         <SubSection label="Fuerza muscular">
-          {(nn(e.dynamometer_msd) || nn(e.dynamometer_msi)) && (
-            <p className="text-sm">
-              <span className="font-medium text-gray-700">Dinamómetro:</span>{" "}
-              {nn(e.dynamometer_msd) ? `MSD ${e.dynamometer_msd}kg` : ""}
-              {nn(e.dynamometer_msd) && nn(e.dynamometer_msi) ? " / " : ""}
-              {nn(e.dynamometer_msi) ? `MSI ${e.dynamometer_msi}kg` : ""}
-            </p>
-          )}
-          <FieldLine label="Nota evaluación" value={e.dynamometer_notes} />
-          {!hasDppdJson && <FieldLine label="Fuerza muscular" value={e.muscle_strength} />}
-          {dppdNode}
-          {hasKendall && (() => {
-            const nerves: { label: string; raw: any; cls: string }[] = [
-              { label: "N. Mediano", raw: e.muscle_strength_median, cls: "bg-primary/5 border-primary/20 text-primary" },
-              { label: "N. Cubital", raw: e.muscle_strength_cubital, cls: "bg-blue-50 border-blue-200 text-blue-800" },
-              { label: "N. Radial", raw: e.muscle_strength_radial, cls: "bg-amber-50 border-amber-200 text-amber-800" },
-            ];
-            const parsed = nerves.map(n => {
-              if (!nn(n.raw)) return { ...n, entries: [] as [string, string][] };
-              let obj: any = n.raw;
-              if (typeof n.raw === "string") {
-                try { obj = JSON.parse(n.raw); } catch { return { ...n, entries: [["", String(n.raw)]] as [string, string][] }; }
+          {(() => {
+            const renderDyn = (side: "MSD" | "MSI", raw: any) => {
+              if (!nn(raw)) return null;
+              if (typeof raw === "object" && raw && (Array.isArray(raw.values) || nn(raw.average))) {
+                const vals = (raw.values || []).map((v: any) => (nn(v) ? v : "—")).join(" / ");
+                return `${side}: ${vals} kgf → Promedio: ${raw.average ?? "—"} kgf`;
               }
-              if (!obj || typeof obj !== "object") return { ...n, entries: [["", String(n.raw)]] as [string, string][] };
-              const entries = Object.entries(obj).filter(([, v]) => nn(v)) as [string, string][];
-              return { ...n, entries };
-            }).filter(n => n.entries.length > 0);
-            if (parsed.length === 0) return null;
-            const fmt = (k: string) => k.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-            const gradeBadge = (grade: string) => {
-              const g = parseInt(grade);
-              let cls = "bg-muted text-muted-foreground";
-              if (!isNaN(g)) {
-                if (g >= 4) cls = "bg-emerald-100 text-emerald-700";
-                else if (g === 3) cls = "bg-amber-100 text-amber-700";
-                else if (g <= 2 && g >= 0) cls = "bg-rose-100 text-rose-700";
-              }
-              return (
-                <span className={`inline-flex items-center justify-center min-w-[32px] h-5 px-1.5 text-[11px] font-semibold rounded ${cls}`}>
-                  {isNaN(g) ? grade : `${grade}/5`}
-                </span>
-              );
+              return `${side} ${raw}kg`;
             };
+            const msd = renderDyn("MSD", e.dynamometer_msd);
+            const msi = renderDyn("MSI", e.dynamometer_msi);
+            if (!msd && !msi) return null;
             return (
-              <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-gray-500 uppercase">Kendall / Daniels</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {parsed.map(n => (
-                    <div key={n.label} className={`rounded-md border p-2 ${n.cls}`}>
-                      <p className="text-[10px] font-bold uppercase tracking-wide mb-1.5">{n.label}</p>
-                      <div className="space-y-1">
-                        {n.entries.map(([muscle, grade], i) => (
-                          <div key={i} className="flex items-center justify-between gap-2 bg-white/70 rounded px-1.5 py-0.5">
-                            {muscle && <span className="text-[11px] text-foreground/80 truncate">{fmt(muscle)}</span>}
-                            {gradeBadge(grade)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-gray-700">Dinamómetro:</p>
+                {msd && <p className="text-sm">{msd}</p>}
+                {msi && <p className="text-sm">{msi}</p>}
               </div>
             );
           })()}
+          {!hasDppdJson && <FieldLine label="Fuerza muscular" value={e.muscle_strength} />}
+          {dppdNode}
           {hasDaniels && (
             <div className="space-y-1">
               <p className="text-xs font-semibold text-gray-500 uppercase">Daniels — Músculos evaluados</p>
