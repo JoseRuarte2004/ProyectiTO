@@ -1656,7 +1656,6 @@ export default function SessionForm() {
             }
           >
             <div>
-              <h4 className="text-xs font-medium text-muted-foreground mb-2">Planilla</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Localización</Label>
@@ -1667,47 +1666,11 @@ export default function SessionForm() {
                   <Input type="number" step="0.1" min={0} value={scar_longitud} onChange={(e) => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} className={inputClass} />
                 </div>
                 <div>
-                  <Label>Vascularización</Label>
-                  <Select value={scar_vascularizacion} onValueChange={setScarVascularizacion}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.vascularizacion.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Pigmentación</Label>
-                  <Select value={scar_pigmentacion} onValueChange={setScarPigmentacion}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.pigmentacion.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Flexibilidad</Label>
-                  <Select value={scar_flexibilidad} onValueChange={setScarFlexibilidad}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.flexibilidad.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <Label>Sensibilidad</Label>
                   <Select value={scar_sensibilidad} onValueChange={setScarSensibilidad}>
                     <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                     <SelectContent position="popper">
                       {SCAR_OPTIONS.sensibilidad.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Relieve</Label>
-                  <Select value={scar_relieve} onValueChange={setScarRelieve}>
-                    <SelectTrigger className={inputClass}><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                    <SelectContent position="popper">
-                      {SCAR_OPTIONS.relieve.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1722,7 +1685,7 @@ export default function SessionForm() {
                 </div>
               </div>
               <div className="mt-3">
-                <Label>Observaciones / Impresión estética</Label>
+                <Label>Observaciones</Label>
                 <Textarea rows={2} value={scar_observaciones} onChange={(e) => setScarObservaciones(e.target.value)} className={textareaClass} />
               </div>
             </div>
