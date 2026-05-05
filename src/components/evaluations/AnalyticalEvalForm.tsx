@@ -537,10 +537,25 @@ export function AnalEvalDetailDialog({ evaluation, onClose }: { evaluation: any;
             <AccordionTrigger className="text-sm font-semibold">Fuerza Muscular</AccordionTrigger>
             <AccordionContent className="space-y-4 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Row label="Dinamómetro MSD" value={e.dynamometer_msd != null ? `${e.dynamometer_msd} kgf` : null} />
-                <Row label="Dinamómetro MSI" value={e.dynamometer_msi != null ? `${e.dynamometer_msi} kgf` : null} />
-                <Row label="Fuerza general" value={e.muscle_strength} />
-                <Row label="Notas dinamómetro" value={e.dynamometer_notes} />
+              {(() => {
+                const fmtDyn = (raw: any) => {
+                  if (raw == null) return null;
+                  if (typeof raw === "object" && (Array.isArray(raw.values) || raw.average != null)) {
+                    const vals = (raw.values || []).map((v: any) => (v != null && v !== "" ? v : "—")).join(" / ");
+                    return `${vals} kgf → Promedio: ${raw.average ?? "—"} kgf`;
+                  }
+                  return `${raw} kgf`;
+                };
+                const msd = fmtDyn(e.dynamometer_msd);
+                const msi = fmtDyn(e.dynamometer_msi);
+                return (
+                  <>
+                    <Row label="Dinamómetro MSD" value={msd} />
+                    <Row label="Dinamómetro MSI" value={msi} />
+                    <Row label="Fuerza general" value={e.muscle_strength} />
+                  </>
+                );
+              })()}
               </div>
 
               {(() => {
