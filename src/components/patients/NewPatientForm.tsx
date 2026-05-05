@@ -1376,11 +1376,28 @@ export function NewPatientForm() {
                 </Select>
               </div>
               <h4 className="text-xs font-medium text-muted-foreground mt-2">Circometría</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">Muñeca MSD (cm)</Label><Input type="number" step="0.1" value={circWristMsd} onChange={e => setCircWristMsd(e.target.value)} /></div>
-                <div className="space-y-1"><Label className="text-xs">Muñeca MSI (cm)</Label><Input type="number" step="0.1" value={circWristMsi} onChange={e => setCircWristMsi(e.target.value)} /></div>
-                <div className="space-y-1"><Label className="text-xs">Global MSD (cm)</Label><Input type="number" step="0.1" value={circGlobalMsd} onChange={e => setCircGlobalMsd(e.target.value)} /></div>
-                <div className="space-y-1"><Label className="text-xs">Global MSI (cm)</Label><Input type="number" step="0.1" value={circGlobalMsi} onChange={e => setCircGlobalMsi(e.target.value)} /></div>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Reparo anatómico de referencia</Label>
+                  <Input value={circReference} onChange={e => setCircReference(e.target.value)} placeholder="ej: articulación MCF, tercio distal antebrazo" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Lado</Label>
+                    <RadioGroup value={circSide} onValueChange={(v) => setCircSide(v as "D" | "I")} className="flex gap-4">
+                      <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="D" id="circ-d-np" /> Derecho</label>
+                      <label className="flex items-center gap-2 text-sm"><RadioGroupItem value="I" id="circ-i-np" /> Izquierdo</label>
+                    </RadioGroup>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Valor (cm)</Label>
+                    <Input type="number" step="0.1" value={circValueCm} onChange={e => setCircValueCm(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={circManoGlobal} onCheckedChange={setCircManoGlobal} />
+                  <Label className="font-normal text-sm">Mano global</Label>
+                </div>
               </div>
             </SubSection>
 
