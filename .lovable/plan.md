@@ -1,24 +1,21 @@
-## Cambio de orden: Cicatriz antes de Pruebas específicas
+## Unificar estilo de títulos/labels en sesiones y admisiones
 
-Mover el bloque "Cicatriz" para que aparezca **arriba** de "Pruebas específicas" en los formularios y visualizaciones.
+En las **evaluaciones** (`AnalyticalEvalForm.tsx`) los títulos de campo usan `Label className="text-xs"` → texto fino, capitalización normal (ej: "Lateralidad").
 
-Orden final de la evaluación analítica:
-Dolor → Edema → Movilidad → Fuerza → Sensibilidad → **Cicatriz** → **Pruebas específicas**
+En **sesiones** (`SessionForm.tsx`) y **admisiones** (`NewPatientForm.tsx`) los títulos usan la clase `.field-label` → MAYÚSCULAS, tracking ancho, color tenue.
+
+Cambio: que sesiones y admisiones usen el mismo estilo que evaluaciones.
 
 ### Archivos a modificar
 
-1. **`src/pages/SessionForm.tsx`** (sesión)
-   - Intercambiar bloques JSX: mover el `SubSection "Cicatriz"` (líneas ~1577+) para que quede antes del `SubSection "Pruebas específicas"` (línea 1547).
+1. **`src/pages/SessionForm.tsx`** (línea 231-237)
+   - En `FieldLabel`, reemplazar `className="field-label mb-1.5 block"` por `className="text-xs mb-1.5 block"`.
 
-2. **`src/components/patients/NewPatientForm.tsx`** (admisión)
-   - Intercambiar bloques JSX: mover `SubSection "Cicatriz"` (línea 1615) antes de `SubSection "Pruebas específicas"` (línea 1592).
+2. **`src/components/patients/NewPatientForm.tsx`** (líneas 102-113)
+   - En `FieldLabel`, mismo cambio: `field-label` → `text-xs`.
+   - Cambiar la constante `subLabel` de `"field-label mb-3"` a `"text-xs mb-3 block"`.
 
-3. **`src/pages/PatientProfile.tsx`** (visualización)
-   - Intercambiar `SubSection label="Cicatriz"` (línea 1231) y `SubSection label="Pruebas específicas"` (línea 1225) para que Cicatriz se renderice primero.
+### Notas
 
-4. **`src/components/evaluations/AnalyticalEvalForm.tsx`** (form/visualización alterna)
-   - Verificar el orden de las secciones de Accordion. Si "Pruebas específicas" aparece antes de "Cicatriz", intercambiarlas tanto en el modo edición como en el modo visualización (línea 623).
-
-### No se toca
-
-Lógica de carga/guardado, contenido de los campos, ni ningún otro orden de secciones.
+- No se toca `.field-label` en `index.css` ni los usos en `PatientProfile.tsx` (visualización del paciente, donde el estilo uppercase sí tiene sentido como micro-label).
+- No se modifican los `<Label>` directos que ya usan `text-xs` u otras clases; sólo el componente `FieldLabel` y `subLabel`, que cubren la mayoría de los títulos de campo en los formularios.

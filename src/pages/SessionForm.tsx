@@ -230,7 +230,7 @@ function SubSection({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Label className="field-label mb-1.5 block">
+    <Label className="text-xs mb-1.5 block">
       {children}
     </Label>
   );

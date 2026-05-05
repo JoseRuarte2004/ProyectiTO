@@ -101,7 +101,7 @@ function SubSection({
 // ── Reusable label with optional required asterisk ──
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <Label className="field-label mb-1.5 block">
+    <Label className="text-xs mb-1.5 block">
       {children}{required && <span className="text-destructive ml-0.5">*</span>}
     </Label>
   );
@@ -110,7 +110,7 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
 const inputClass = "rounded-md h-10 text-sm";
 const textareaClass = "rounded-lg";
 const subDivider = "pt-5 mt-5 border-t border-border";
-const subLabel = "field-label mb-3";
+const subLabel = "text-xs mb-3 block";
 
 // ── Cie10 autocomplete (inline) ──
 function Cie10Autocomplete({ value, onChange, placeholder, className }: {
