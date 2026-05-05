@@ -1620,7 +1620,6 @@ export function NewPatientForm() {
               <div className="space-y-4 rounded-md border border-border p-3">
                 {/* Sub-sección A — Planilla */}
                 <div className="space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground">Planilla</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs">Localización</Label>
@@ -1631,47 +1630,11 @@ export function NewPatientForm() {
                       <Input type="number" step="0.1" min={0} value={scarLongitud} onChange={(e) => setScarLongitud(e.target.value)} placeholder={SCAR_PLACEHOLDER} />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Vascularización</Label>
-                      <Select value={scarVascularizacion} onValueChange={setScarVascularizacion}>
-                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent position="popper">
-                          {SCAR_OPTIONS.vascularizacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Pigmentación</Label>
-                      <Select value={scarPigmentacion} onValueChange={setScarPigmentacion}>
-                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent position="popper">
-                          {SCAR_OPTIONS.pigmentacion.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Flexibilidad</Label>
-                      <Select value={scarFlexibilidad} onValueChange={setScarFlexibilidad}>
-                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent position="popper">
-                          {SCAR_OPTIONS.flexibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
                       <Label className="text-xs">Sensibilidad</Label>
                       <Select value={scarSensibilidad} onValueChange={setScarSensibilidad}>
                         <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
                         <SelectContent position="popper">
                           {SCAR_OPTIONS.sensibilidad.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Relieve</Label>
-                      <Select value={scarRelieve} onValueChange={setScarRelieve}>
-                        <SelectTrigger><SelectValue placeholder={SCAR_PLACEHOLDER} /></SelectTrigger>
-                        <SelectContent position="popper">
-                          {SCAR_OPTIONS.relieve.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
