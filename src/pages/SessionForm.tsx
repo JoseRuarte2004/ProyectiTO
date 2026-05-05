@@ -1566,38 +1566,13 @@ export default function SessionForm() {
             </div>
             <div>
               <h4 className="text-xs font-medium text-muted-foreground mb-2">Circometría</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2">
-                  <Label>Reparo anatómico de referencia</Label>
-                  <Input
-                    value={circ_reference}
-                    onChange={(e) => setCircReference(e.target.value)}
-                    placeholder="ej: articulación MCF, tercio distal antebrazo"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <Label>Lado</Label>
-                  <RadioGroup value={circ_side} onValueChange={(v) => setCircSide(v as "D" | "I")} className="flex gap-6 pt-2">
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="D" id="circ-d-sf" />
-                      <Label htmlFor="circ-d-sf" className="font-normal cursor-pointer text-sm">Derecho</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="I" id="circ-i-sf" />
-                      <Label htmlFor="circ-i-sf" className="font-normal cursor-pointer text-sm">Izquierdo</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                <div>
-                  <Label>Valor (cm)</Label>
-                  <Input type="number" step="0.1" value={circ_value_cm} onChange={(e) => setCircValueCm(e.target.value)} className={inputClass} />
-                </div>
-                <div className="sm:col-span-2 flex items-center gap-3">
-                  <Switch checked={circ_mano_global} onCheckedChange={setCircManoGlobal} id="circ-global-sf" />
-                  <Label htmlFor="circ-global-sf" className="font-normal cursor-pointer text-sm">Mano global</Label>
-                </div>
-              </div>
+              <EdemaCircometryTable
+                mode={isAdmission ? "admission" : "follow_up"}
+                baselineSano={edema_baseline_sano}
+                sano={edema_circ_sano}
+                afectado={edema_circ_afectado}
+                onChange={({ sano, afectado }) => { setEdemaCircSano(sano); setEdemaCircAfectado(afectado); }}
+              />
             </div>
           </SubSection>
 
