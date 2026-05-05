@@ -901,11 +901,7 @@ export function NewPatientForm() {
       const scarPlanillaEntries: [string, string][] = showCicatriz ? ([
         ["localizacion", scarLocalizacion],
         ["longitud_cm", scarLongitud],
-        ["vascularizacion", scarVascularizacion],
-        ["pigmentacion", scarPigmentacion],
-        ["flexibilidad", scarFlexibilidad],
         ["sensibilidad", scarSensibilidad],
-        ["relieve", scarRelieve],
         ["temperatura", scarTemperatura],
       ].filter(([, v]) => v && String(v).trim()) as [string, string][]) : [];
 
