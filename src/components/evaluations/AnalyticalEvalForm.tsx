@@ -59,17 +59,24 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
 }) {
   const [saving, setSaving] = useState(false);
   const [painScore, setPainScore] = useState([0]);
-  const [gonio, setGonio] = useState<Record<string, string>>({});
+  const [gonioSide, setGonioSide] = useState<"MSD" | "MSI">("MSD");
+  const [gonio, setGonio] = useState<{ MSD: Record<string, string>; MSI: Record<string, string> }>({ MSD: {}, MSI: {} });
   const [tests, setTests] = useState<Record<string, TestResult>>({});
+  // Circometría
+  const [circRef, setCircRef] = useState("");
+  const [circSide, setCircSide] = useState<"D" | "I">("D");
+  const [circValueCm, setCircValueCm] = useState("");
+  const [circManoGlobal, setCircManoGlobal] = useState(false);
+  // Dinamometría 3 mediciones
+  const [dynMsdVals, setDynMsdVals] = useState<[string, string, string]>(["", "", ""]);
+  const [dynMsiVals, setDynMsiVals] = useState<[string, string, string]>(["", "", ""]);
   const [form, setForm] = useState({
     evaluation_date: new Date().toISOString().split("T")[0],
     pain_appearance: "", pain_location: "", pain_radiation: "",
     pain_characteristics: "", pain: "", pain_aggravating_factors: "",
-    edema: "", edema_circummetry: "", godet_test: "",
+    edema: "", godet_test: "",
     arom: "", prom: "", kapandji: "",
-    dynamometer_msd: "", dynamometer_msi: "",
-    muscle_strength: "", muscle_strength_median: "",
-    muscle_strength_cubital: "", muscle_strength_radial: "",
+    muscle_strength: "",
     sensitivity_functional: "", sensitivity_protective: "", sensitivity: "",
     trophic_state: "", scar: "", vancouver_score: "", osas_score: "",
     posture: "", emotional_state: "", notes: "",
@@ -78,31 +85,49 @@ export function NewAnalEvalDialog({ open, onClose, patientId, userId, onSaved }:
   const u = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
   const painColor = painScore[0] <= 3 ? "text-emerald-600" : painScore[0] <= 6 ? "text-amber-500" : "text-red-600";
 
+  const buildDyn = (vals: [string, string, string]) => {
+    const nums = vals.map(v => v.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+    if (nums.length === 0) return null;
+    const avg = Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+    return { values: vals.map(v => (v.trim() ? Number(v) : null)), average: avg };
+  };
+  const dynAvg = (vals: [string, string, string]) => {
+    const nums = vals.map(v => v.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+    return nums.length > 0 ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1) : null;
+  };
+
   const handleSave = async () => {
     setSaving(true);
-    const gonioHasValues = Object.values(gonio).some(v => v !== "");
+    const gonioHasValues = Object.values(gonio.MSD).some(v => v !== "") || Object.values(gonio.MSI).some(v => v !== "");
     const testsHasValues = Object.values(tests).some(v => v !== null);
+
+    const edemaCirc = (circRef.trim() || circValueCm.trim())
+      ? { reference: circRef.trim(), side: circSide, value_cm: circValueCm.trim() ? Number(circValueCm) : null, mano_global: circManoGlobal }
+      : null;
 
     const insertData: any = {
       patient_id: patientId, professional_id: userId,
       evaluation_date: form.evaluation_date,
       pain_score: painScore[0],
-      goniometry: gonioHasValues ? gonio : null,
+      goniometry: gonioHasValues ? { MSD: { pre: gonio.MSD, post: null }, MSI: { pre: gonio.MSI, post: null } } : null,
       specific_tests: testsHasValues ? tests : null,
+      edema_circummetry: edemaCirc,
+      dynamometer_msd: buildDyn(dynMsdVals),
+      dynamometer_msi: buildDyn(dynMsiVals),
+      muscle_strength_median: null,
+      muscle_strength_cubital: null,
+      muscle_strength_radial: null,
     };
 
     const textFields = [
       "pain_appearance", "pain_location", "pain_radiation", "pain_characteristics",
-      "pain", "pain_aggravating_factors", "edema", "edema_circummetry", "godet_test",
-      "arom", "prom", "kapandji", "muscle_strength", "muscle_strength_median",
-      "muscle_strength_cubital", "muscle_strength_radial",
+      "pain", "pain_aggravating_factors", "edema", "godet_test",
+      "arom", "prom", "kapandji", "muscle_strength",
       "sensitivity_functional", "sensitivity_protective", "sensitivity",
       "trophic_state", "scar", "posture", "emotional_state", "notes",
     ];
     textFields.forEach(f => { insertData[f] = (form as any)[f] || null; });
 
-    insertData.dynamometer_msd = form.dynamometer_msd ? parseFloat(form.dynamometer_msd) : null;
-    insertData.dynamometer_msi = form.dynamometer_msi ? parseFloat(form.dynamometer_msi) : null;
     insertData.vancouver_score = form.vancouver_score ? parseInt(form.vancouver_score) : null;
     insertData.osas_score = form.osas_score ? parseInt(form.osas_score) : null;
 
