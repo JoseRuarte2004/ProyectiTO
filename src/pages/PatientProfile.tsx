@@ -1123,7 +1123,16 @@ function MeasurementsBlock({ e }: { e: any }) {
       {hasEdema && (
         <SubSection label="Edema">
           <FieldLine label="Observación" value={e.edema} />
-          <FieldLine label="Circometría" value={e.edema_circummetry} />
+          {(() => {
+            const c = e.edema_circummetry;
+            if (!nn(c)) return null;
+            if (typeof c === "object") {
+              if (!nn(c.reference) && !nn(c.value_cm)) return null;
+              const txt = `${c.reference || ""}${c.side ? ` (${c.side})` : ""}${nn(c.value_cm) ? ` — ${c.value_cm} cm` : ""}${c.mano_global ? " · Mano global" : ""}`.trim();
+              return <FieldLine label="Circometría" value={txt} />;
+            }
+            return <FieldLine label="Circometría" value={c} />;
+          })()}
           <FieldLine label="Godet" value={e.godet_test} />
         </SubSection>
       )}
