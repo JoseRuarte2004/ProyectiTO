@@ -606,11 +606,11 @@ export function NewPatientForm() {
   const [gonioPartPost, setGonioPartPost] = useState<GonioPartKey>("wrist");
   const [allPostGonio, setAllPostGonio] = useState(emptyGonio);
 
-  // Circummetry grid
-  const [circWristMsd, setCircWristMsd] = useState("");
-  const [circWristMsi, setCircWristMsi] = useState("");
-  const [circGlobalMsd, setCircGlobalMsd] = useState("");
-  const [circGlobalMsi, setCircGlobalMsi] = useState("");
+  // Circometría (JSONB)
+  const [circReference, setCircReference] = useState("");
+  const [circSide, setCircSide] = useState<"D" | "I">("D");
+  const [circValueCm, setCircValueCm] = useState("");
+  const [circManoGlobal, setCircManoGlobal] = useState(false);
 
   // Specific tests
   const [specificTests, setSpecificTests] = useState<Record<string, TestResult>>(
