@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
+import { EdemaCircometryTable, buildEdemaPayload, normalizeEdemaValue, isNewEdemaFormat, EDEMA_POINTS, type EdemaSide } from "@/components/clinical/EdemaCircometryTable";
 
 // --- Constants ---
 
