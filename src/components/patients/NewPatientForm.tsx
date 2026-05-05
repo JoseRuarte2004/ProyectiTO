@@ -1431,9 +1431,19 @@ export function NewPatientForm() {
 
             {/* Movilidad */}
             <SubSection title="Movilidad" checked={showMovilidad} onChange={setShowMovilidad}>
-              <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE</h4>
+              <Tabs value={gonioSide} onValueChange={(v) => { setGonioSide(v as "MSD" | "MSI"); setGonioSidePost(v as "MSD" | "MSI"); }} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="MSD">MSD</TabsTrigger>
+                  <TabsTrigger value="MSI">MSI</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <h4 className="text-xs font-medium text-muted-foreground">Goniometría PRE — {gonioSide}</h4>
               <GonioPartSelector value={gonioPart} onChange={setGonioPart} />
-              <GonioGrid partKey={gonioPart} values={allPreGonio[gonioPart]} setValues={v => setAllPreGonio(prev => ({ ...prev, [gonioPart]: v }))} />
+              <GonioGrid
+                partKey={gonioPart}
+                values={allPreGonio[gonioSide][gonioPart]}
+                setValues={(v) => setAllPreGonio((prev) => ({ ...prev, [gonioSide]: { ...prev[gonioSide], [gonioPart]: v } }))}
+              />
 
               <div className="flex items-center gap-2 mt-3">
                 <Checkbox checked={showPostGonio} onCheckedChange={v => setShowPostGonio(!!v)} />
@@ -1441,8 +1451,13 @@ export function NewPatientForm() {
               </div>
               {showPostGonio && (
                 <>
+                  <h4 className="text-xs font-medium text-muted-foreground">Goniometría POST — {gonioSide}</h4>
                   <GonioPartSelector value={gonioPartPost} onChange={setGonioPartPost} />
-                  <GonioGrid partKey={gonioPartPost} values={allPostGonio[gonioPartPost]} setValues={v => setAllPostGonio(prev => ({ ...prev, [gonioPartPost]: v }))} />
+                  <GonioGrid
+                    partKey={gonioPartPost}
+                    values={allPostGonio[gonioSide][gonioPartPost]}
+                    setValues={(v) => setAllPostGonio((prev) => ({ ...prev, [gonioSide]: { ...prev[gonioSide], [gonioPartPost]: v } }))}
+                  />
                 </>
               )}
 
